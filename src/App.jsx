@@ -6,7 +6,7 @@ function App() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("https://releaseit-backend.onrender.com/api/products")
+    fetch(`https://releaseit-backend.onrender.com/api/products?shop=${shop}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Products API:", data); // 👈 debug
@@ -53,7 +53,7 @@ function App() {
 
     try {
       const res = await fetch(
-        "https://releaseit-backend.onrender.com/api/create-order",
+        `https://releaseit-backend.onrender.com/api/create-order?shop=${shop}`,
         {
           method: "POST",
           headers: {
@@ -87,7 +87,7 @@ function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const variantId = params.get("variant");
+    const shop = params.get("shop");
 
     if (variantId && products.length > 0) {
       const foundProduct = products.find((p) =>
@@ -95,7 +95,9 @@ function App() {
       );
 
       if (foundProduct) {
-        const variant = foundProduct.variants[0];
+        const variant = foundProduct.variants.find(
+          (v) => String(v.id) === variantId,
+        );
 
         setCart([
           {
