@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 
 function App() {
+  const params = new URLSearchParams(window.location.search);
+  const shop = params.get("shop");
+  const variantId = params.get("variant");
+  if (!shop) {
+    return <h1 className="text-center mt-10">Invalid Access ❌</h1>;
+  }
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [products, setProducts] = useState([]);
@@ -86,9 +93,6 @@ function App() {
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const shop = params.get("shop");
-
     if (variantId && products.length > 0) {
       const foundProduct = products.find((p) =>
         p.variants?.some((v) => String(v.id) === variantId),
