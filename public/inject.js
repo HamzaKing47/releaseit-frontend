@@ -1,28 +1,25 @@
 if (window.releaseItLoaded) return;
 window.releaseItLoaded = true;
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("🔥 ReleaseIt Inject Loaded");
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest("button");
 
-  const buttons = document.querySelectorAll(
-    'form[action*="/cart/add"] button[type="submit"]',
-  );
+  if (!btn) return;
 
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
+  const form = btn.closest("form");
 
-      const form = btn.closest("form");
-      const variantInput = form.querySelector('input[name="id"]');
+  if (!form || !form.action.includes("/cart/add")) return;
 
-      if (!variantInput) return;
+  e.preventDefault();
 
-      const variantId = variantInput.value;
-      const shop = window.Shopify.shop;
+  const variantInput = form.querySelector('input[name="id"]');
 
-      const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+  if (!variantInput) return;
 
-      window.location.href = url;
-    });
-  });
+  const variantId = variantInput.value;
+  const shop = window.Shopify.shop;
+
+  const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+
+  window.location.href = url;
 });
