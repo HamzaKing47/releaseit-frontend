@@ -1,3 +1,6 @@
+if (window.releaseItLoaded) return;
+window.releaseItLoaded = true;
+
 document.addEventListener("DOMContentLoaded", () => {
   console.log("🔥 ReleaseIt Inject Loaded");
 
@@ -10,8 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       const form = btn.closest("form");
-      const variantId = form.querySelector('input[name="id"]').value;
+      const variantInput = form.querySelector('input[name="id"]');
 
+      if (!variantInput) return;
+
+      const variantId = variantInput.value;
       const shop = window.Shopify.shop;
 
       const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
