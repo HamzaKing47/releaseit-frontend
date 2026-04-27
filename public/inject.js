@@ -1,25 +1,38 @@
 if (window.releaseItLoaded) return;
 window.releaseItLoaded = true;
 
-document.addEventListener("click", function (e) {
-  const btn = e.target.closest("button");
+document.addEventListener("DOMContentLoaded", () => {
+  const forms = document.querySelectorAll('form[action*="/cart/add"]');
 
-  if (!btn) return;
+  forms.forEach((form) => {
+    const btn = form.querySelector('button[type="submit"]');
 
-  const form = btn.closest("form");
+    if (!btn) return;
 
-  if (!form || !form.action.includes("/cart/add")) return;
+    // 👉 NEW BUTTON
+    const codBtn = document.createElement("button");
+    codBtn.innerText = "Buy with Cash on Delivery";
+    codBtn.style.background = "black";
+    codBtn.style.color = "white";
+    codBtn.style.padding = "12px";
+    codBtn.style.marginTop = "10px";
+    codBtn.style.width = "100%";
+    codBtn.style.cursor = "pointer";
 
-  e.preventDefault();
+    codBtn.onclick = (e) => {
+      e.preventDefault();
 
-  const variantInput = form.querySelector('input[name="id"]');
+      const variantInput = form.querySelector('input[name="id"]');
+      if (!variantInput) return;
 
-  if (!variantInput) return;
+      const variantId = variantInput.value;
+      const shop = window.Shopify.shop;
 
-  const variantId = variantInput.value;
-  const shop = window.Shopify.shop;
+      const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
 
-  const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+      window.location.href = url;
+    };
 
-  window.location.href = url;
+    form.appendChild(codBtn);
+  });
 });
