@@ -1,15 +1,16 @@
 if (window.releaseItLoaded) return;
 window.releaseItLoaded = true;
 
+const MODE = "both"; // change later dynamically
+
 document.addEventListener("DOMContentLoaded", () => {
   const forms = document.querySelectorAll('form[action*="/cart/add"]');
 
   forms.forEach((form) => {
     const btn = form.querySelector('button[type="submit"]');
-
     if (!btn) return;
 
-    // 👉 NEW BUTTON
+    // 👉 COD button
     const codBtn = document.createElement("button");
     codBtn.innerText = "Buy with Cash on Delivery";
     codBtn.style.background = "black";
@@ -33,6 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = url;
     };
 
-    form.appendChild(codBtn);
+    // 👉 MODE handling
+    if (MODE === "replace") {
+      btn.style.display = "none";
+      form.appendChild(codBtn);
+    }
+
+    if (MODE === "both") {
+      form.appendChild(codBtn);
+    }
   });
 });
