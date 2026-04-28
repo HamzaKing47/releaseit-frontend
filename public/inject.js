@@ -1,47 +1,59 @@
-if (window.releaseItLoaded) return;
-window.releaseItLoaded = true;
+(function () {
+  if (window.releaseItLoaded) return;
+  window.releaseItLoaded = true;
 
-const MODE = "both"; // change later dynamically
+  const MODE = "both"; // "both" | "replace"
 
-document.addEventListener("DOMContentLoaded", () => {
-  const forms = document.querySelectorAll('form[action*="/cart/add"]');
+  function initReleaseIt() {
+    const forms = document.querySelectorAll('form[action*="/cart/add"]');
 
-  forms.forEach((form) => {
-    const btn = form.querySelector('button[type="submit"]');
-    if (!btn) return;
+    forms.forEach((form) => {
+      if (form.dataset.releaseit) return;
+      form.dataset.releaseit = "true";
 
-    // 👉 COD button
-    const codBtn = document.createElement("button");
-    codBtn.innerText = "Buy with Cash on Delivery";
-    codBtn.style.background = "black";
-    codBtn.style.color = "white";
-    codBtn.style.padding = "12px";
-    codBtn.style.marginTop = "10px";
-    codBtn.style.width = "100%";
-    codBtn.style.cursor = "pointer";
+      const btn = form.querySelector('button[type="submit"]');
+      if (!btn) return;
 
-    codBtn.onclick = (e) => {
-      e.preventDefault();
+      // 👉 COD button
+      const codBtn = document.createElement("button");
+      codBtn.innerText = "Buy with Cash on Delivery";
+      codBtn.style.background = "black";
+      codBtn.style.color = "white";
+      codBtn.style.padding = "12px";
+      codBtn.style.marginTop = "10px";
+      codBtn.style.width = "100%";
+      codBtn.style.cursor = "pointer";
 
-      const variantInput = form.querySelector('input[name="id"]');
-      if (!variantInput) return;
+      codBtn.onclick = (e) => {
+        e.preventDefault();
 
-      const variantId = variantInput.value;
-      const shop = window.Shopify.shop;
+        const variantInput = form.querySelector('input[name="id"]');
+        if (!variantInput) return;
 
-      const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+        const variantId = variantInput.value;
+        const shop = window.Shopify?.shop;
 
-      window.location.href = url;
-    };
+        if (!shop) {
+          console.log("❌ Shopify not found");
+          return;
+        }
 
-    // 👉 MODE handling
-    if (MODE === "replace") {
-      btn.style.display = "none";
-      form.appendChild(codBtn);
-    }
+        const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+        window.location.href = url;
+      };
 
-    if (MODE === "both") {
-      form.appendChild(codBtn);
-    }
-  });
-});
+      // 👉 MODE logic
+      if (MODE === "replace") {
+        btn.style.display = "none";
+        form.appendChild(codBtn);
+      }
+
+      if (MODE === "both") {
+        form.appendChild(codBtn);
+      }
+    });
+  }
+
+  // 🔥 Shopify dynamic fix
+  setInterval(initReleaseIt, 1500);
+})();
