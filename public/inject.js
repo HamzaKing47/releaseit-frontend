@@ -1,4 +1,3 @@
-// 🔥 RE-RUN EVERY 2s (Shopify dynamic DOM handle karega)
 setInterval(async () => {
   const shop = window.Shopify?.shop;
   if (!shop) return;
@@ -10,23 +9,19 @@ setInterval(async () => {
       `https://releaseit-backend.onrender.com/api/settings?shop=${shop}`,
     );
     const data = await res.json();
+    if (data.success) MODE = data.mode;
+  } catch (err) {}
 
-    if (data.success) {
-      MODE = data.mode;
-    }
-  } catch (err) {
-    console.log("Mode fetch failed");
-  }
+  // 🔥 GLOBAL REMOVE (sab purane buttons hata do)
+  document.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
 
   const forms = document.querySelectorAll('form[action*="/cart/add"]');
 
   forms.forEach((form) => {
-    // ✅ prevent duplicate
-    if (form.querySelector(".releaseit-btn")) return;
-
     const addToCartBtn = form.querySelector('button[type="submit"]');
     const buyNowBtn = document.querySelector(".shopify-payment-button");
 
+    // 🔥 CREATE BUTTON
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -55,11 +50,11 @@ setInterval(async () => {
       window.location.href = url;
     };
 
-    // 🔥 reset buttons first
+    // 🔥 RESET (important)
     if (addToCartBtn) addToCartBtn.style.display = "";
     if (buyNowBtn) buyNowBtn.style.display = "";
 
-    // 🔥 MODE
+    // 🔥 MODE APPLY
     if (MODE === "both") {
       form.appendChild(codBtn);
     }
