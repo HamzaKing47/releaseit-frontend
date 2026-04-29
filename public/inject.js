@@ -21,13 +21,12 @@ setInterval(async () => {
   const forms = document.querySelectorAll('form[action*="/cart/add"]');
 
   forms.forEach((form) => {
-    // 🔥 remove old COD buttons (duplicate avoid)
-    form.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
+    // ✅ prevent duplicate
+    if (form.querySelector(".releaseit-btn")) return;
 
     const addToCartBtn = form.querySelector('button[type="submit"]');
     const buyNowBtn = document.querySelector(".shopify-payment-button");
 
-    // 🔥 CREATE COD BUTTON
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -56,11 +55,11 @@ setInterval(async () => {
       window.location.href = url;
     };
 
-    // 🔥 RESET BUTTONS (important)
+    // 🔥 reset buttons first
     if (addToCartBtn) addToCartBtn.style.display = "";
     if (buyNowBtn) buyNowBtn.style.display = "";
 
-    // 🔥 MODE LOGIC
+    // 🔥 MODE
     if (MODE === "both") {
       form.appendChild(codBtn);
     }
@@ -73,7 +72,6 @@ setInterval(async () => {
     if (MODE === "cod_only") {
       if (addToCartBtn) addToCartBtn.style.display = "none";
       if (buyNowBtn) buyNowBtn.style.display = "none";
-
       form.appendChild(codBtn);
     }
   });
