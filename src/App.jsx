@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 function App() {
   const params = new URLSearchParams(window.location.search);
@@ -149,14 +151,12 @@ function App() {
             onChange={handleChange}
           />
 
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone Number"
+          <PhoneInput
+            international
+            defaultCountry="PK" // optional (auto bhi ho sakta)
             value={form.phone}
+            onChange={(value) => setForm({ ...form, phone: value })}
             className="w-full border p-3 rounded-lg"
-            onChange={handleChange}
-            required
           />
 
           <input
