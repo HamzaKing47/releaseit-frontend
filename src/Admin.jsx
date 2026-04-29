@@ -38,7 +38,8 @@ function Admin() {
         className="border p-2"
       >
         <option value="both">Both Buttons</option>
-        <option value="replace">Replace Buy Button</option>
+        <option value="replace">Replace Add to Cart</option>
+        <option value="cod_only">Only COD Button</option> {/* 🔥 NEW */}
       </select>
 
       <button onClick={save} className="ml-3 bg-black text-white px-4 py-2">

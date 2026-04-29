@@ -50,12 +50,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = url;
     };
 
-    if (MODE === "replace") {
-      btn.style.display = "none";
+    // 🔥 SELECT ALL BUTTONS
+    const addToCartBtn = form.querySelector('button[type="submit"]');
+    const buyNowBtn = form.querySelector(".shopify-payment-button");
+
+    if (MODE === "both") {
       form.appendChild(codBtn);
     }
 
-    if (MODE === "both") {
+    if (MODE === "replace") {
+      if (addToCartBtn) addToCartBtn.style.display = "none";
+      form.appendChild(codBtn);
+    }
+
+    if (MODE === "cod_only") {
+      if (addToCartBtn) addToCartBtn.style.display = "none";
+      if (buyNowBtn) buyNowBtn.style.display = "none";
+
       form.appendChild(codBtn);
     }
   });
