@@ -1,8 +1,7 @@
-if (window.releaseItLoaded) {
-  console.log("ReleaseIt already loaded");
-} else {
-  window.releaseItLoaded = true;
+// 🔥 allow re-run but prevent duplicate buttons
+document.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
 
+document.addEventListener("DOMContentLoaded", async () => {
   document.addEventListener("DOMContentLoaded", async () => {
     const shop = window.Shopify.shop;
 
@@ -28,6 +27,7 @@ if (window.releaseItLoaded) {
       const buyNowBtn = document.querySelector(".shopify-payment-button");
 
       const codBtn = document.createElement("button");
+      codBtn.className = "releaseit-btn";
       codBtn.innerText = "Buy with Cash on Delivery";
       codBtn.style.background = "black";
       codBtn.style.color = "white";
@@ -70,4 +70,4 @@ if (window.releaseItLoaded) {
       }
     });
   });
-}
+});
