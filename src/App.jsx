@@ -82,7 +82,7 @@ function App() {
 
       if (data.success) {
         // 🔥 redirect after success
-        window.location.href = "/thank-you";
+        window.location.href = `/thank-you?shop=${shop}&variant=${cart[0].variantId}`;
       } else {
         alert("❌ Order Failed");
       }
