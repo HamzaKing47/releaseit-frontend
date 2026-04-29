@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 
 function ThankYou() {
-  const [redirectUrl, setRedirectUrl] = useState("");
+  const [shopUrl, setShopUrl] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
     const shop = params.get("shop");
-    const variant = params.get("variant");
+    const product = params.get("product");
 
-    // 🔥 Shopify product redirect
-    if (shop && variant) {
-      const url = `https://${shop}/cart/${variant}:1`;
-      setRedirectUrl(url);
+    if (shop && product) {
+      setShopUrl(`https://${shop}/products/${product}`);
+    } else if (shop) {
+      setShopUrl(`https://${shop}`);
     }
   }, []);
 
@@ -33,8 +33,8 @@ function ThankYou() {
 
         <button
           onClick={() => {
-            if (redirectUrl) {
-              window.location.href = redirectUrl;
+            if (shopUrl) {
+              window.location.href = shopUrl;
             }
           }}
           className="bg-black text-white px-4 py-2 rounded-lg"

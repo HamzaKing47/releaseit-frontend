@@ -36,8 +36,15 @@
             if (!variantInput) return;
 
             const variantId = variantInput.value;
+            const shop = window.Shopify.shop;
 
-            const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+            // 🔥 ADD THIS
+            const productHandle =
+              window.location.pathname.split("/products/")[1];
+
+            // 🔥 UPDATE THIS
+            const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}&product=${productHandle}`;
+
             window.location.href = url;
           };
 
