@@ -3,7 +3,7 @@ if (window.releaseItLoaded) {
 } else {
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt FINAL FIX Loaded");
+  console.log("🔥 ReleaseIt CLEAN Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
@@ -21,21 +21,15 @@ if (window.releaseItLoaded) {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
+    // 🔥 correct selector
     const addBtn = document.querySelector(".product-form__submit");
     if (!addBtn) return;
 
     const form = addBtn.closest("form");
-    if (!form) return;
-
-    const addBtn =
-      form.querySelector(".product-form__submit") ||
-      form.querySelector('button[name="add"]');
-
-    if (!addBtn) return;
 
     const buyNowBtn = document.querySelector(".shopify-payment-button__button");
 
-    // ❌ already injected? skip
+    // ❌ prevent duplicate
     if (form.querySelector(".releaseit-btn")) return;
 
     // 🔥 create COD
@@ -75,7 +69,7 @@ if (window.releaseItLoaded) {
     // 🔥 insert
     addBtn.insertAdjacentElement("afterend", codBtn);
 
-    // 🔥 modes
+    // 🔥 MODE logic
     if (MODE === "replace") {
       addBtn.style.display = "none";
     }
@@ -85,7 +79,7 @@ if (window.releaseItLoaded) {
       if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
-    console.log("✅ COD Injected");
+    console.log("✅ COD injected");
   };
 
   const start = async () => {
@@ -94,10 +88,10 @@ if (window.releaseItLoaded) {
 
     await fetchMode(shop);
 
-    // 🔥 run first time
+    // first run
     setTimeout(injectButton, 800);
 
-    // 🔥 watch DOM changes (Shopify re-render fix)
+    // watch for Shopify DOM changes
     const observer = new MutationObserver(() => {
       injectButton();
     });
