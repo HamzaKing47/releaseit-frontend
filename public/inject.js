@@ -26,8 +26,11 @@ setInterval(async () => {
 
   const form = visibleForm; // ✅ FIX HERE
 
-  const addToCartBtn = form.querySelector('button[type="submit"]');
-  const buyNowBtn = document.querySelector(".shopify-payment-button");
+  const addToCartBtn =
+    form.querySelector('button[type="submit"]') ||
+    form.querySelector('button[name="add"]') ||
+    form.querySelector(".product-form__submit");
+  const buyNowBtn = form.querySelector(".shopify-payment-button");
 
   // 🔥 CREATE BUTTON
   const codBtn = document.createElement("button");
