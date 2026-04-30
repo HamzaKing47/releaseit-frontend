@@ -3,11 +3,11 @@ if (window.releaseItLoaded) {
 } else {
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt UNIVERSAL Loaded");
+  console.log("🔥 ReleaseIt FINAL Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
-  const initReleaseIt = async () => {
+  const injectButton = async () => {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
@@ -17,31 +17,19 @@ if (window.releaseItLoaded) {
       const res = await fetch(`${BACKEND}/api/settings?shop=${shop}`);
       const data = await res.json();
       if (data.success) MODE = data.mode;
-    } catch (err) {}
+    } catch {}
 
-    // 🔥 UNIVERSAL BUTTON DETECTION (key fix)
-    const addToCartBtn =
-      document.querySelector(".product-form__submit") || // Dawn theme
-      document.querySelector('button[name="add"]') || // fallback
-      document.querySelector('form[action*="/cart/add"] button[type="submit"]');
+    const addToCartBtn = document.querySelector(".product-form__submit");
 
-    if (!addToCartBtn) {
-      console.log("❌ Add to cart button not found yet...");
-      return;
-    }
+    if (!addToCartBtn) return;
 
-    // 🔥 prevent duplicate
+    // ❌ already exists → skip
     if (document.querySelector(".releaseit-btn")) return;
 
-    console.log("✅ Button found, injecting COD");
+    console.log("✅ Injecting COD button");
 
-    const form = addToCartBtn.closest("form") || addToCartBtn.parentNode;
+    const buyNowBtn = document.querySelector(".shopify-payment-button");
 
-    const buyNowBtn =
-      document.querySelector(".shopify-payment-button") ||
-      document.querySelector('[data-shopify="payment-button"]');
-
-    // 🔥 CREATE COD BUTTON
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -59,10 +47,7 @@ if (window.releaseItLoaded) {
     codBtn.onclick = (e) => {
       e.preventDefault();
 
-      const variantInput =
-        document.querySelector('input[name="id"]') ||
-        document.querySelector('[name="id"]');
-
+      const variantInput = document.querySelector('input[name="id"]');
       if (!variantInput) return;
 
       const variantId = variantInput.value;
@@ -76,14 +61,10 @@ if (window.releaseItLoaded) {
       window.location.href = url;
     };
 
-    // 🔥 inject AFTER add to cart
+    // 🔥 inject EXACT position
     addToCartBtn.insertAdjacentElement("afterend", codBtn);
 
-    // 🔥 RESET
-    addToCartBtn.style.display = "";
-    if (buyNowBtn) buyNowBtn.style.display = "";
-
-    // 🔥 MODE HANDLING
+    // 🔥 MODE
     if (MODE === "replace") {
       addToCartBtn.style.setProperty("display", "none", "important");
     }
@@ -95,12 +76,24 @@ if (window.releaseItLoaded) {
     }
   };
 
-  // 🔥 run on load
-  document.addEventListener("DOMContentLoaded", initReleaseIt);
+  // 🔥 retry loop (important)
+  const retryInject = () => {
+    let attempts = 0;
 
-  // 🔥 observe changes (ALL THEMES SUPPORT)
+    const interval = setInterval(() => {
+      injectButton();
+      attempts++;
+
+      if (attempts > 10) clearInterval(interval);
+    }, 500);
+  };
+
+  // 🔥 run on load
+  document.addEventListener("DOMContentLoaded", retryInject);
+
+  // 🔥 Shopify dynamic support
   const observer = new MutationObserver(() => {
-    initReleaseIt();
+    retryInject();
   });
 
   observer.observe(document.body, {
