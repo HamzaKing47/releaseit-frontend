@@ -21,7 +21,10 @@ if (window.releaseItLoaded) {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
-    const form = document.querySelector('form[action*="/cart/add"]');
+    const addBtn = document.querySelector(".product-form__submit");
+    if (!addBtn) return;
+
+    const form = addBtn.closest("form");
     if (!form) return;
 
     const addBtn =
@@ -30,7 +33,7 @@ if (window.releaseItLoaded) {
 
     if (!addBtn) return;
 
-    const buyNowBtn = document.querySelector(".shopify-payment-button");
+    const buyNowBtn = document.querySelector(".shopify-payment-button__button");
 
     // ❌ already injected? skip
     if (form.querySelector(".releaseit-btn")) return;
