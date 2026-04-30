@@ -12,62 +12,69 @@ setInterval(async () => {
     if (data.success) MODE = data.mode;
   } catch (err) {}
 
-  // 🔥 GLOBAL REMOVE (sab purane buttons hata do)
+  // 🔥 REMOVE OLD BUTTONS (ONLY ONCE)
   document.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
 
   const forms = document.querySelectorAll('form[action*="/cart/add"]');
 
-  forms.forEach((form) => {
-    const addToCartBtn = form.querySelector('button[type="submit"]');
-    const buyNowBtn = document.querySelector(".shopify-payment-button");
+  // 🔥 get visible form only
+  const visibleForm = Array.from(forms).find(
+    (form) => form.offsetParent !== null,
+  );
 
-    // 🔥 CREATE BUTTON
-    const codBtn = document.createElement("button");
-    codBtn.className = "releaseit-btn";
-    codBtn.innerText = "Buy with Cash on Delivery";
+  if (!visibleForm) return;
 
-    codBtn.style.background = "black";
-    codBtn.style.color = "white";
-    codBtn.style.padding = "12px";
-    codBtn.style.marginTop = "10px";
-    codBtn.style.width = "100%";
-    codBtn.style.cursor = "pointer";
-    codBtn.style.fontWeight = "bold";
+  const form = visibleForm; // ✅ FIX HERE
 
-    codBtn.onclick = (e) => {
-      e.preventDefault();
+  const addToCartBtn = form.querySelector('button[type="submit"]');
+  const buyNowBtn = document.querySelector(".shopify-payment-button");
 
-      const variantInput = form.querySelector('input[name="id"]');
-      if (!variantInput) return;
+  // 🔥 CREATE BUTTON
+  const codBtn = document.createElement("button");
+  codBtn.className = "releaseit-btn";
+  codBtn.innerText = "Buy with Cash on Delivery";
 
-      const variantId = variantInput.value;
-      const productHandle = window.location.pathname
-        .split("/products/")[1]
-        ?.split("?")[0];
+  codBtn.style.background = "black";
+  codBtn.style.color = "white";
+  codBtn.style.padding = "12px";
+  codBtn.style.marginTop = "10px";
+  codBtn.style.width = "100%";
+  codBtn.style.cursor = "pointer";
+  codBtn.style.fontWeight = "bold";
 
-      const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}&product=${productHandle}`;
+  codBtn.onclick = (e) => {
+    e.preventDefault();
 
-      window.location.href = url;
-    };
+    const variantInput = form.querySelector('input[name="id"]');
+    if (!variantInput) return;
 
-    // 🔥 RESET (important)
-    if (addToCartBtn) addToCartBtn.style.display = "";
-    if (buyNowBtn) buyNowBtn.style.display = "";
+    const variantId = variantInput.value;
+    const productHandle = window.location.pathname
+      .split("/products/")[1]
+      ?.split("?")[0];
 
-    // 🔥 MODE APPLY
-    if (MODE === "both") {
-      form.appendChild(codBtn);
-    }
+    const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}&product=${productHandle}`;
 
-    if (MODE === "replace") {
-      if (addToCartBtn) addToCartBtn.style.display = "none";
-      form.appendChild(codBtn);
-    }
+    window.location.href = url;
+  };
 
-    if (MODE === "cod_only") {
-      if (addToCartBtn) addToCartBtn.style.display = "none";
-      if (buyNowBtn) buyNowBtn.style.display = "none";
-      form.appendChild(codBtn);
-    }
-  });
+  // 🔥 RESET
+  if (addToCartBtn) addToCartBtn.style.display = "";
+  if (buyNowBtn) buyNowBtn.style.display = "";
+
+  // 🔥 MODE
+  if (MODE === "both") {
+    form.appendChild(codBtn);
+  }
+
+  if (MODE === "replace") {
+    if (addToCartBtn) addToCartBtn.style.display = "none";
+    form.appendChild(codBtn);
+  }
+
+  if (MODE === "cod_only") {
+    if (addToCartBtn) addToCartBtn.style.display = "none";
+    if (buyNowBtn) buyNowBtn.style.display = "none";
+    form.appendChild(codBtn);
+  }
 }, 2000);
