@@ -20,17 +20,10 @@ if (window.releaseItLoaded) {
     } catch (err) {}
 
     // 🔥 UNIVERSAL BUTTON DETECTION (key fix)
-    const buttons = Array.from(document.querySelectorAll("button"));
-
-    const addToCartBtn = buttons.find((btn) => {
-      const text = btn.innerText.toLowerCase();
-
-      return (
-        text.includes("add to cart") ||
-        text.includes("add to bag") ||
-        text.includes("add to basket")
-      );
-    });
+    const addToCartBtn =
+      document.querySelector(".product-form__submit") || // Dawn theme
+      document.querySelector('button[name="add"]') || // fallback
+      document.querySelector('form[action*="/cart/add"] button[type="submit"]');
 
     if (!addToCartBtn) {
       console.log("❌ Add to cart button not found yet...");
@@ -84,7 +77,7 @@ if (window.releaseItLoaded) {
     };
 
     // 🔥 inject AFTER add to cart
-    addToCartBtn.parentNode.appendChild(codBtn);
+    addToCartBtn.insertAdjacentElement("afterend", codBtn);
 
     // 🔥 RESET
     addToCartBtn.style.display = "";
