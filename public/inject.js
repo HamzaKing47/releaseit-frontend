@@ -19,15 +19,23 @@ if (window.releaseItLoaded) {
       const res = await fetch(`${BACKEND}/api/settings?shop=${shop}`);
       const data = await res.json();
       if (data.success) MODE = data.mode;
-    } catch (err) {
-      console.log("Mode fetch failed");
+    } catch (err) {}
+
+    // 🔥 BETTER FORM SELECTOR (important)
+    const form =
+      document.querySelector('form[action*="/cart/add"]') ||
+      document.querySelector("product-form form") ||
+      document.querySelector(".product-form");
+
+    if (!form) {
+      console.log("❌ Form not found yet...");
+      return;
     }
 
-    const form = document.querySelector('form[action*="/cart/add"]');
-    if (!form) return;
+    // 🔥 prevent duplicate
+    if (document.querySelector(".releaseit-btn")) return;
 
-    // 🔥 prevent duplicate button
-    if (form.querySelector(".releaseit-btn")) return;
+    console.log("✅ Form found, injecting button");
 
     const addToCartBtn =
       form.querySelector('button[type="submit"]') ||
@@ -36,7 +44,6 @@ if (window.releaseItLoaded) {
 
     const buyNowBtn = document.querySelector(".shopify-payment-button");
 
-    // 🔥 create button
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -54,7 +61,7 @@ if (window.releaseItLoaded) {
     codBtn.onclick = (e) => {
       e.preventDefault();
 
-      const variantInput = form.querySelector('input[name="id"]');
+      const variantInput = document.querySelector('input[name="id"]');
       if (!variantInput) return;
 
       const variantId = variantInput.value;
@@ -68,14 +75,12 @@ if (window.releaseItLoaded) {
       window.location.href = url;
     };
 
-    // 🔥 reset buttons first
+    // 🔥 reset
     if (addToCartBtn) addToCartBtn.style.display = "";
     if (buyNowBtn) buyNowBtn.style.display = "";
 
-    // 🔥 add COD button
     form.appendChild(codBtn);
 
-    // 🔥 mode handling
     if (MODE === "replace") {
       if (addToCartBtn)
         addToCartBtn.style.setProperty("display", "none", "important");
