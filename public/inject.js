@@ -1,43 +1,59 @@
-if (window.releaseItLoaded) {
-  console.log("ReleaseIt already loaded");
-} else {
-  window.releaseItLoaded = true;
+(function () {
+  if (window.releaseItLoaded) {
+    console.log("ReleaseIt already loaded");
+    return;
+  }
 
-  console.log("🔥 ReleaseIt PRO Loaded");
+  window.releaseItLoaded = true;
+  console.log("🔥 ReleaseIt FINAL PRO Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
-  let MODE = "both";
+  let settings = {
+    mode: "both",
+    buttonText: "Buy with Cash on Delivery",
+    bgColor: "#000000",
+    textColor: "#ffffff",
+    borderRadius: 10,
+    position: "below",
+  };
 
   // 🔥 Hide buttons instantly (no flicker)
   const style = document.createElement("style");
   style.innerHTML = `
-    .product-form__submit,
+    form[action*="/cart/add"] button,
     .shopify-payment-button {
       opacity: 0 !important;
     }
   `;
   document.head.appendChild(style);
 
-  const fetchMode = async (shop) => {
+  // 🔥 Fetch settings
+  const fetchSettings = async (shop) => {
     try {
       const res = await fetch(`${BACKEND}/api/settings?shop=${shop}`);
       const data = await res.json();
-      if (data.success) MODE = data.mode;
+
+      if (data.success) {
+        settings = { ...settings, ...data };
+      }
     } catch {}
   };
 
-  // 🔥 Wait until button exists (Shopify fix)
+  // 🔥 Wait for Add to Cart button (theme-safe)
   const waitForButton = () => {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
-        const btn = document.querySelector(".product-form__submit");
+        const btn =
+          document.querySelector('button[name="add"]') ||
+          document.querySelector(".product-form__submit") ||
+          document.querySelector('button[type="submit"]');
 
         if (btn) {
           clearInterval(interval);
           resolve(btn);
         }
-      }, 200);
+      }, 150);
     });
   };
 
@@ -45,38 +61,41 @@ if (window.releaseItLoaded) {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
-    await fetchMode(shop);
+    await fetchSettings(shop);
 
     const addBtn = await waitForButton();
     const form = addBtn.closest("form");
 
-    const buyNowBtn = document.querySelector(".shopify-payment-button__button");
+    if (!form) return;
 
-    // ❌ prevent duplicate
+    // 🔥 prevent duplicate
     if (form.querySelector(".releaseit-btn")) {
       style.remove();
       return;
     }
 
+    const buyNowBtn =
+      document.querySelector(".shopify-payment-button") ||
+      document.querySelector(".shopify-payment-button__button");
+
     // 🔥 CREATE COD BUTTON
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
-    codBtn.innerHTML = "💰 Buy with Cash on Delivery";
+    codBtn.type = "button";
+    codBtn.innerText = settings.buttonText;
 
     codBtn.style.cssText = `
-      background: linear-gradient(135deg, #000000, #1a1a1a);
-      color: #fff;
+      background: ${settings.bgColor};
+      color: ${settings.textColor};
       padding: 14px;
       margin-top: 12px;
       width: 100%;
       font-weight: 600;
       border: none;
-      border-radius: 10px;
+      border-radius: ${settings.borderRadius}px;
       cursor: pointer;
       font-size: 16px;
-      letter-spacing: 0.3px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       opacity: 0;
       transform: translateY(10px);
     `;
@@ -84,12 +103,10 @@ if (window.releaseItLoaded) {
     // ✨ hover animation
     codBtn.onmouseenter = () => {
       codBtn.style.transform = "translateY(-2px)";
-      codBtn.style.boxShadow = "0 6px 18px rgba(0,0,0,0.3)";
     };
 
     codBtn.onmouseleave = () => {
       codBtn.style.transform = "translateY(0)";
-      codBtn.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
     };
 
     // 🔥 click
@@ -110,31 +127,33 @@ if (window.releaseItLoaded) {
         `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 insert button
-    addBtn.insertAdjacentElement("afterend", codBtn);
+    // 🔥 POSITION CONTROL
+    if (settings.position === "above") {
+      addBtn.parentNode.insertBefore(codBtn, addBtn);
+    } else {
+      addBtn.insertAdjacentElement("afterend", codBtn);
+    }
 
-    // 🔥 mode handling
-    if (MODE === "replace") {
+    // 🔥 MODE CONTROL
+    if (settings.mode === "replace") {
       addBtn.style.display = "none";
     }
 
-    if (MODE === "cod_only") {
+    if (settings.mode === "cod_only") {
       addBtn.style.display = "none";
       if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
-    // 🔥 show buttons after ready (no flicker)
+    // 🔥 show smooth
     setTimeout(() => {
       style.remove();
 
-      // smooth appear
-      codBtn.style.transition = "all 0.4s ease";
       codBtn.style.opacity = "1";
       codBtn.style.transform = "translateY(0)";
-    }, 100);
+    }, 120);
 
-    console.log("✅ COD Button Perfectly Loaded");
+    console.log("✅ ReleaseIt Working Perfectly");
   };
 
   start();
-}
+})();
