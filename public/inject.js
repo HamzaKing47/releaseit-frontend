@@ -26,11 +26,10 @@ setInterval(async () => {
 
   const form = visibleForm; // ✅ FIX HERE
 
-  const addToCartBtn =
-    form.querySelector('button[type="submit"]') ||
-    form.querySelector('button[name="add"]') ||
-    form.querySelector(".product-form__submit");
-  const buyNowBtn = form.querySelector(".shopify-payment-button");
+  const addToCartBtn = document.querySelector(
+    'button[type="submit"], button[name="add"], .product-form__submit',
+  );
+  const buyNowBtn = document.querySelector(".shopify-payment-button");
 
   // 🔥 CREATE BUTTON
   const codBtn = document.createElement("button");
@@ -76,8 +75,9 @@ setInterval(async () => {
   }
 
   if (MODE === "cod_only") {
-    if (addToCartBtn) addToCartBtn.style.display = "none";
-    if (buyNowBtn) buyNowBtn.style.display = "none";
-    form.appendChild(codBtn);
+    if (addToCartBtn)
+      addToCartBtn.style.setProperty("display", "none", "important");
+
+    if (buyNowBtn) buyNowBtn.style.setProperty("display", "none", "important");
   }
 }, 2000);
