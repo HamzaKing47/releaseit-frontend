@@ -20,13 +20,17 @@ if (window.releaseItLoaded) {
     } catch (err) {}
 
     // 🔥 UNIVERSAL BUTTON DETECTION (key fix)
-    const addToCartBtn =
-      document.querySelector(
-        'form[action*="/cart/add"] button[type="submit"]',
-      ) ||
-      document.querySelector('button[name="add"]') ||
-      document.querySelector(".product-form__submit") ||
-      document.querySelector("[data-add-to-cart]");
+    const buttons = Array.from(document.querySelectorAll("button"));
+
+    const addToCartBtn = buttons.find((btn) => {
+      const text = btn.innerText.toLowerCase();
+
+      return (
+        text.includes("add to cart") ||
+        text.includes("add to bag") ||
+        text.includes("add to basket")
+      );
+    });
 
     if (!addToCartBtn) {
       console.log("❌ Add to cart button not found yet...");
@@ -38,7 +42,7 @@ if (window.releaseItLoaded) {
 
     console.log("✅ Button found, injecting COD");
 
-    const form = addToCartBtn.closest("form") || document.body;
+    const form = addToCartBtn.closest("form") || addToCartBtn.parentNode;
 
     const buyNowBtn =
       document.querySelector(".shopify-payment-button") ||
