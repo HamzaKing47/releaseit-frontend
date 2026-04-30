@@ -12,26 +12,22 @@ setInterval(async () => {
     if (data.success) MODE = data.mode;
   } catch (err) {}
 
-  // 🔥 REMOVE OLD BUTTONS (ONLY ONCE)
+  // 🔥 remove old COD buttons only
   document.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
 
-  const forms = document.querySelectorAll('form[action*="/cart/add"]');
+  // 🔥 get main product form
+  const form = document.querySelector('form[action*="/cart/add"]');
+  if (!form) return;
 
-  // 🔥 get visible form only
-  const visibleForm = Array.from(forms).find(
-    (form) => form.offsetParent !== null,
-  );
+  // 🔥 buttons
+  const addToCartBtn =
+    form.querySelector('button[type="submit"]') ||
+    form.querySelector('button[name="add"]') ||
+    document.querySelector(".product-form__submit");
 
-  if (!visibleForm) return;
-
-  const form = visibleForm; // ✅ FIX HERE
-
-  const addToCartBtn = document.querySelector(
-    'button[type="submit"], button[name="add"], .product-form__submit',
-  );
   const buyNowBtn = document.querySelector(".shopify-payment-button");
 
-  // 🔥 CREATE BUTTON
+  // 🔥 CREATE COD BUTTON
   const codBtn = document.createElement("button");
   codBtn.className = "releaseit-btn";
   codBtn.innerText = "Buy with Cash on Delivery";
@@ -51,6 +47,7 @@ setInterval(async () => {
     if (!variantInput) return;
 
     const variantId = variantInput.value;
+
     const productHandle = window.location.pathname
       .split("/products/")[1]
       ?.split("?")[0];
@@ -60,18 +57,17 @@ setInterval(async () => {
     window.location.href = url;
   };
 
-  // 🔥 RESET
+  // 🔥 RESET first
   if (addToCartBtn) addToCartBtn.style.display = "";
   if (buyNowBtn) buyNowBtn.style.display = "";
 
-  // 🔥 MODE
-  if (MODE === "both") {
-    form.appendChild(codBtn);
-  }
+  // 🔥 ALWAYS add COD button
+  form.appendChild(codBtn);
 
+  // 🔥 MODE LOGIC
   if (MODE === "replace") {
-    if (addToCartBtn) addToCartBtn.style.display = "none";
-    form.appendChild(codBtn);
+    if (addToCartBtn)
+      addToCartBtn.style.setProperty("display", "none", "important");
   }
 
   if (MODE === "cod_only") {
