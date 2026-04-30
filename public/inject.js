@@ -3,11 +3,33 @@ if (window.releaseItLoaded) {
 } else {
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt FINAL Loaded");
+  console.log("🔥 ReleaseIt STABLE Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
-  const injectButton = async () => {
+  const waitForElement = (selector, timeout = 5000) => {
+    return new Promise((resolve) => {
+      const element = document.querySelector(selector);
+      if (element) return resolve(element);
+
+      const observer = new MutationObserver(() => {
+        const el = document.querySelector(selector);
+        if (el) {
+          observer.disconnect();
+          resolve(el);
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      setTimeout(() => {
+        observer.disconnect();
+        resolve(null);
+      }, timeout);
+    });
+  };
+
+  const init = async () => {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
@@ -19,17 +41,20 @@ if (window.releaseItLoaded) {
       if (data.success) MODE = data.mode;
     } catch {}
 
-    const addToCartBtn = document.querySelector(".product-form__submit");
+    // 🔥 WAIT for Shopify buttons
+    const addToCartBtn = await waitForElement(".product-form__submit");
 
-    if (!addToCartBtn) return;
-
-    // ❌ already exists → skip
-    if (document.querySelector(".releaseit-btn")) return;
-
-    console.log("✅ Injecting COD button");
+    if (!addToCartBtn) {
+      console.log("❌ Button not found");
+      return;
+    }
 
     const buyNowBtn = document.querySelector(".shopify-payment-button");
 
+    // 🔥 REMOVE old COD (just in case)
+    document.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
+
+    // 🔥 CREATE COD
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -39,10 +64,10 @@ if (window.releaseItLoaded) {
     codBtn.style.padding = "14px";
     codBtn.style.marginTop = "10px";
     codBtn.style.width = "100%";
-    codBtn.style.cursor = "pointer";
     codBtn.style.fontWeight = "bold";
     codBtn.style.border = "none";
     codBtn.style.borderRadius = "6px";
+    codBtn.style.cursor = "pointer";
 
     codBtn.onclick = (e) => {
       e.preventDefault();
@@ -56,48 +81,29 @@ if (window.releaseItLoaded) {
         .split("/products/")[1]
         ?.split("?")[0];
 
-      const url = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}&product=${productHandle}`;
-
-      window.location.href = url;
+      window.location.href =
+        `https://releaseitnow.vercel.app/?shop=${shop}` +
+        `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 inject EXACT position
+    // 🔥 INSERT AFTER ADD TO CART
     addToCartBtn.insertAdjacentElement("afterend", codBtn);
 
-    // 🔥 MODE
+    // 🔥 MODE HANDLING
     if (MODE === "replace") {
-      addToCartBtn.style.setProperty("display", "none", "important");
+      addToCartBtn.style.display = "none";
     }
 
     if (MODE === "cod_only") {
-      addToCartBtn.style.setProperty("display", "none", "important");
-      if (buyNowBtn)
-        buyNowBtn.style.setProperty("display", "none", "important");
+      addToCartBtn.style.display = "none";
+      if (buyNowBtn) buyNowBtn.style.display = "none";
     }
+
+    console.log("✅ COD Button injected successfully");
   };
 
-  // 🔥 retry loop (important)
-  const retryInject = () => {
-    let attempts = 0;
-
-    const interval = setInterval(() => {
-      injectButton();
-      attempts++;
-
-      if (attempts > 10) clearInterval(interval);
-    }, 500);
-  };
-
-  // 🔥 run on load
-  document.addEventListener("DOMContentLoaded", retryInject);
-
-  // 🔥 Shopify dynamic support
-  const observer = new MutationObserver(() => {
-    retryInject();
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
+  // 🔥 RUN AFTER LOAD
+  window.addEventListener("load", () => {
+    setTimeout(init, 500); // 👈 small delay (controlled, not random)
   });
 }
