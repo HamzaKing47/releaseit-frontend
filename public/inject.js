@@ -3,7 +3,7 @@ if (window.releaseItLoaded) {
 } else {
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt CLEAN Loaded");
+  console.log("🔥 ReleaseIt REAL FINAL Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
@@ -17,13 +17,27 @@ if (window.releaseItLoaded) {
     } catch {}
   };
 
-  const injectButton = () => {
+  // 🔥 WAIT UNTIL BUTTON EXISTS
+  const waitForButton = () => {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        const btn = document.querySelector(".product-form__submit");
+
+        if (btn) {
+          clearInterval(interval);
+          resolve(btn);
+        }
+      }, 300);
+    });
+  };
+
+  const start = async () => {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
-    // 🔥 correct selector
-    const addBtn = document.querySelector(".product-form__submit");
-    if (!addBtn) return;
+    await fetchMode(shop);
+
+    const addBtn = await waitForButton();
 
     const form = addBtn.closest("form");
 
@@ -32,7 +46,7 @@ if (window.releaseItLoaded) {
     // ❌ prevent duplicate
     if (form.querySelector(".releaseit-btn")) return;
 
-    // 🔥 create COD
+    // 🔥 CREATE COD
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -66,10 +80,10 @@ if (window.releaseItLoaded) {
         `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 insert
+    // 🔥 INSERT
     addBtn.insertAdjacentElement("afterend", codBtn);
 
-    // 🔥 MODE logic
+    // 🔥 MODES
     if (MODE === "replace") {
       addBtn.style.display = "none";
     }
@@ -79,28 +93,8 @@ if (window.releaseItLoaded) {
       if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
-    console.log("✅ COD injected");
+    console.log("✅ COD BUTTON SUCCESSFULLY ADDED");
   };
 
-  const start = async () => {
-    const shop = window.Shopify?.shop;
-    if (!shop) return;
-
-    await fetchMode(shop);
-
-    // first run
-    setTimeout(injectButton, 800);
-
-    // watch for Shopify DOM changes
-    const observer = new MutationObserver(() => {
-      injectButton();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-  };
-
-  window.addEventListener("load", start);
+  start();
 }
