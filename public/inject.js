@@ -3,76 +3,59 @@ if (window.releaseItLoaded) {
 } else {
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt STABLE Loaded");
+  console.log("🔥 ReleaseIt FINAL FIX Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
-  const waitForElement = (selector, timeout = 5000) => {
-    return new Promise((resolve) => {
-      const element = document.querySelector(selector);
-      if (element) return resolve(element);
+  let MODE = "both";
 
-      const observer = new MutationObserver(() => {
-        const el = document.querySelector(selector);
-        if (el) {
-          observer.disconnect();
-          resolve(el);
-        }
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
-
-      setTimeout(() => {
-        observer.disconnect();
-        resolve(null);
-      }, timeout);
-    });
-  };
-
-  const init = async () => {
-    const shop = window.Shopify?.shop;
-    if (!shop) return;
-
-    let MODE = "both";
-
+  const fetchMode = async (shop) => {
     try {
       const res = await fetch(`${BACKEND}/api/settings?shop=${shop}`);
       const data = await res.json();
       if (data.success) MODE = data.mode;
     } catch {}
+  };
 
-    // 🔥 WAIT for Shopify buttons
-    const addToCartBtn = await waitForElement(".product-form__submit");
+  const injectButton = () => {
+    const shop = window.Shopify?.shop;
+    if (!shop) return;
 
-    if (!addToCartBtn) {
-      console.log("❌ Button not found");
-      return;
-    }
+    const form = document.querySelector('form[action*="/cart/add"]');
+    if (!form) return;
+
+    const addBtn =
+      form.querySelector(".product-form__submit") ||
+      form.querySelector('button[name="add"]');
+
+    if (!addBtn) return;
 
     const buyNowBtn = document.querySelector(".shopify-payment-button");
 
-    // 🔥 REMOVE old COD (just in case)
-    document.querySelectorAll(".releaseit-btn").forEach((el) => el.remove());
+    // ❌ already injected? skip
+    if (form.querySelector(".releaseit-btn")) return;
 
-    // 🔥 CREATE COD
+    // 🔥 create COD
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
 
-    codBtn.style.background = "black";
-    codBtn.style.color = "white";
-    codBtn.style.padding = "14px";
-    codBtn.style.marginTop = "10px";
-    codBtn.style.width = "100%";
-    codBtn.style.fontWeight = "bold";
-    codBtn.style.border = "none";
-    codBtn.style.borderRadius = "6px";
-    codBtn.style.cursor = "pointer";
+    codBtn.style.cssText = `
+      background:black;
+      color:white;
+      padding:14px;
+      margin-top:10px;
+      width:100%;
+      font-weight:bold;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+    `;
 
     codBtn.onclick = (e) => {
       e.preventDefault();
 
-      const variantInput = document.querySelector('input[name="id"]');
+      const variantInput = form.querySelector('input[name="id"]');
       if (!variantInput) return;
 
       const variantId = variantInput.value;
@@ -86,24 +69,41 @@ if (window.releaseItLoaded) {
         `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 INSERT AFTER ADD TO CART
-    addToCartBtn.insertAdjacentElement("afterend", codBtn);
+    // 🔥 insert
+    addBtn.insertAdjacentElement("afterend", codBtn);
 
-    // 🔥 MODE HANDLING
+    // 🔥 modes
     if (MODE === "replace") {
-      addToCartBtn.style.display = "none";
+      addBtn.style.display = "none";
     }
 
     if (MODE === "cod_only") {
-      addToCartBtn.style.display = "none";
+      addBtn.style.display = "none";
       if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
-    console.log("✅ COD Button injected successfully");
+    console.log("✅ COD Injected");
   };
 
-  // 🔥 RUN AFTER LOAD
-  window.addEventListener("load", () => {
-    setTimeout(init, 500); // 👈 small delay (controlled, not random)
-  });
+  const start = async () => {
+    const shop = window.Shopify?.shop;
+    if (!shop) return;
+
+    await fetchMode(shop);
+
+    // 🔥 run first time
+    setTimeout(injectButton, 800);
+
+    // 🔥 watch DOM changes (Shopify re-render fix)
+    const observer = new MutationObserver(() => {
+      injectButton();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  };
+
+  window.addEventListener("load", start);
 }
