@@ -1,14 +1,12 @@
-// 🔥 prevent multiple load
 if (window.releaseItLoaded) {
   console.log("ReleaseIt already loaded");
 } else {
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt PRO Loaded");
+  console.log("🔥 ReleaseIt UNIVERSAL Loaded");
 
   const BACKEND = "https://releaseit-backend.onrender.com";
 
-  // 🔥 MAIN FUNCTION
   const initReleaseIt = async () => {
     const shop = window.Shopify?.shop;
     if (!shop) return;
@@ -21,29 +19,32 @@ if (window.releaseItLoaded) {
       if (data.success) MODE = data.mode;
     } catch (err) {}
 
-    // 🔥 BETTER FORM SELECTOR (important)
-    const form =
-      document.querySelector('form[action*="/cart/add"]') ||
-      document.querySelector("product-form form") ||
-      document.querySelector(".product-form");
+    // 🔥 UNIVERSAL BUTTON DETECTION (key fix)
+    const addToCartBtn =
+      document.querySelector(
+        'form[action*="/cart/add"] button[type="submit"]',
+      ) ||
+      document.querySelector('button[name="add"]') ||
+      document.querySelector(".product-form__submit") ||
+      document.querySelector("[data-add-to-cart]");
 
-    if (!form) {
-      console.log("❌ Form not found yet...");
+    if (!addToCartBtn) {
+      console.log("❌ Add to cart button not found yet...");
       return;
     }
 
     // 🔥 prevent duplicate
     if (document.querySelector(".releaseit-btn")) return;
 
-    console.log("✅ Form found, injecting button");
+    console.log("✅ Button found, injecting COD");
 
-    const addToCartBtn =
-      form.querySelector('button[type="submit"]') ||
-      form.querySelector('button[name="add"]') ||
-      document.querySelector(".product-form__submit");
+    const form = addToCartBtn.closest("form") || document.body;
 
-    const buyNowBtn = document.querySelector(".shopify-payment-button");
+    const buyNowBtn =
+      document.querySelector(".shopify-payment-button") ||
+      document.querySelector('[data-shopify="payment-button"]');
 
+    // 🔥 CREATE COD BUTTON
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.innerText = "Buy with Cash on Delivery";
@@ -61,7 +62,10 @@ if (window.releaseItLoaded) {
     codBtn.onclick = (e) => {
       e.preventDefault();
 
-      const variantInput = document.querySelector('input[name="id"]');
+      const variantInput =
+        document.querySelector('input[name="id"]') ||
+        document.querySelector('[name="id"]');
+
       if (!variantInput) return;
 
       const variantId = variantInput.value;
@@ -75,30 +79,29 @@ if (window.releaseItLoaded) {
       window.location.href = url;
     };
 
-    // 🔥 reset
-    if (addToCartBtn) addToCartBtn.style.display = "";
+    // 🔥 inject AFTER add to cart
+    addToCartBtn.parentNode.appendChild(codBtn);
+
+    // 🔥 RESET
+    addToCartBtn.style.display = "";
     if (buyNowBtn) buyNowBtn.style.display = "";
 
-    form.appendChild(codBtn);
-
+    // 🔥 MODE HANDLING
     if (MODE === "replace") {
-      if (addToCartBtn)
-        addToCartBtn.style.setProperty("display", "none", "important");
+      addToCartBtn.style.setProperty("display", "none", "important");
     }
 
     if (MODE === "cod_only") {
-      if (addToCartBtn)
-        addToCartBtn.style.setProperty("display", "none", "important");
-
+      addToCartBtn.style.setProperty("display", "none", "important");
       if (buyNowBtn)
         buyNowBtn.style.setProperty("display", "none", "important");
     }
   };
 
-  // 🔥 run on page load
+  // 🔥 run on load
   document.addEventListener("DOMContentLoaded", initReleaseIt);
 
-  // 🔥 Shopify dynamic page support (IMPORTANT)
+  // 🔥 observe changes (ALL THEMES SUPPORT)
   const observer = new MutationObserver(() => {
     initReleaseIt();
   });
