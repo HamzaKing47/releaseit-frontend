@@ -85,20 +85,18 @@
     codBtn.innerText = settings.buttonText;
 
     codBtn.style.cssText = `
-      background: ${settings.bgColor};
-      color: ${settings.textColor};
-      padding: 14px;
-      margin-top: 12px;
-      width: 100%;
-      font-weight: 600;
-      border: none;
-      border-radius: ${settings.borderRadius}px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateY(10px);
-    `;
+  background: ${settings.bgColor};
+  color: ${settings.textColor};
+  padding: 14px;
+  margin-top: 10px;
+  width: 100%;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: ${settings.borderRadius || 6}px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s ease;
+`;
 
     // ✨ hover animation
     codBtn.onmouseenter = () => {
@@ -134,9 +132,17 @@
       addBtn.insertAdjacentElement("afterend", codBtn);
     }
 
+    if (settings.position === "below_buy_now" && buyNowBtn) {
+      buyNowBtn.insertAdjacentElement("afterend", codBtn);
+    }
+
     // 🔥 MODE CONTROL
     if (settings.mode === "replace") {
       addBtn.style.display = "none";
+    }
+
+    if (settings.mode === "replace_buy_now") {
+      if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
     if (settings.mode === "cod_only") {
