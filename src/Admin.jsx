@@ -152,36 +152,43 @@ export default function Admin() {
           <p className="text-sm mb-3 text-gray-500">Live Preview</p>
 
           {/* ABOVE */}
-          {settings.position === "above" && (
-            <div className="mb-2">
-              <CODPreview settings={settings} />
-            </div>
-          )}
+          {settings.position === "above" && <CODPreview settings={settings} />}
 
           {/* ADD TO CART */}
-          {settings.mode !== "replace" && settings.mode !== "cod_only" && (
+          {settings.mode !== "cod_only" && settings.mode !== "replace" && (
             <button className="w-full border p-3 mb-2 rounded-lg bg-white">
               Add to cart
             </button>
           )}
 
+          {/* 🔥 REPLACE ADD TO CART */}
+          {settings.mode === "replace" && (
+            <div className="mb-2">
+              <CODPreview settings={settings} />
+            </div>
+          )}
+
           {/* BUY NOW */}
-          {settings.mode !== "replace_buy_now" &&
-            settings.mode !== "cod_only" && (
+          {settings.mode !== "cod_only" &&
+            settings.mode !== "replace_buy_now" && (
               <button className="w-full bg-black text-white p-3 mb-2 rounded-lg">
                 Buy it now
               </button>
             )}
 
+          {/* 🔥 REPLACE BUY NOW */}
+          {settings.mode === "replace_buy_now" && (
+            <CODPreview settings={settings} />
+          )}
+
           {/* BELOW ADD */}
-          {settings.position === "below" && <CODPreview settings={settings} />}
+          {settings.position === "below" && settings.mode === "both" && (
+            <CODPreview settings={settings} />
+          )}
 
           {/* BELOW BUY NOW */}
-          {settings.position === "below_buy_now" && (
-            <div className="mt-2">
-              <CODPreview settings={settings} />
-            </div>
-          )}
+          {settings.position === "below_buy_now" &&
+            settings.mode === "both" && <CODPreview settings={settings} />}
         </div>
 
         {/* SAVE */}
