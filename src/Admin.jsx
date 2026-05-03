@@ -1,25 +1,29 @@
 import { useEffect, useState } from "react";
 
+/* =========================
+   COD BUTTON (PREVIEW)
+========================= */
 function CODPreview({ settings }) {
   return (
     <button
       style={{
+        width: "100%",
+        padding: "14px",
         background: settings.bgColor,
         color: settings.textColor,
         borderRadius: settings.borderRadius,
-        padding: "12px",
-        width: "100%",
-        transition: "all 0.25s ease",
-        border: "1px solid transparent",
-        fontWeight: "600",
+        border: `1px solid ${settings.bgColor}`,
+        fontWeight: 600,
+        marginBottom: "8px",
+        transition: "all 0.2s ease",
       }}
       onMouseEnter={(e) => {
-        e.target.style.transform = "translateY(-2px)";
-        e.target.style.border = "1px solid rgba(0,0,0,0.2)";
+        e.target.style.background = "transparent";
+        e.target.style.color = settings.bgColor;
       }}
       onMouseLeave={(e) => {
-        e.target.style.transform = "translateY(0)";
-        e.target.style.border = "1px solid transparent";
+        e.target.style.background = settings.bgColor;
+        e.target.style.color = settings.textColor;
       }}
     >
       {settings.buttonText}
@@ -27,6 +31,9 @@ function CODPreview({ settings }) {
   );
 }
 
+/* =========================
+   MAIN COMPONENT
+========================= */
 export default function Admin() {
   const params = new URLSearchParams(window.location.search);
   const shop = params.get("shop");
@@ -34,18 +41,14 @@ export default function Admin() {
   const [settings, setSettings] = useState({
     mode: "both",
     buttonText: "Buy with Cash on Delivery",
-    bgColor: "#000000",
+    bgColor: "#ff0000",
     textColor: "#ffffff",
     borderRadius: 6,
     position: "below",
   });
 
-  // 🔥 universal update
   const update = (key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   useEffect(() => {
@@ -53,10 +56,7 @@ export default function Admin() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setSettings((prev) => ({
-            ...prev,
-            ...data,
-          }));
+          setSettings((prev) => ({ ...prev, ...data }));
         }
       });
   }, []);
@@ -87,7 +87,7 @@ export default function Admin() {
         <select
           value={settings.mode}
           onChange={(e) => update("mode", e.target.value)}
-          className="w-full p-3 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full p-3 mb-5 border border-gray-200 rounded-xl"
         >
           <option value="both">Show All Buttons</option>
           <option value="replace">Replace Add to Cart</option>
@@ -100,7 +100,7 @@ export default function Admin() {
         <input
           value={settings.buttonText}
           onChange={(e) => update("buttonText", e.target.value)}
-          className="w-full p-3 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full p-3 mb-5 border border-gray-200 rounded-xl"
         />
 
         {/* COLORS */}
@@ -140,61 +140,72 @@ export default function Admin() {
         <select
           value={settings.position}
           onChange={(e) => update("position", e.target.value)}
-          className="w-full p-3 mb-6 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+          className="w-full p-3 mb-6 border border-gray-200 rounded-xl"
         >
           <option value="below">Below Add to Cart</option>
           <option value="above">Above Add to Cart</option>
           <option value="below_buy_now">Below Buy Now</option>
         </select>
 
-        {/* 🔥 LIVE PREVIEW */}
-        <div className="bg-gray-100 p-5 rounded-xl mb-6 transition-all hover:shadow-md">
+        {/* 🔥 LIVE PREVIEW (FIXED LOGIC) */}
+        <div className="bg-gray-100 p-5 rounded-xl mb-6">
           <p className="text-sm mb-3 text-gray-500">Live Preview</p>
 
-          {/* ABOVE */}
-          {settings.position === "above" &&
-            settings.mode !== "replace" &&
-            settings.mode !== "replace_buy_now" && (
+          {/* ===== MODE HANDLING ===== */}
+
+          {/* COD ONLY */}
+          {settings.mode === "cod_only" && <CODPreview settings={settings} />}
+
+          {/* REPLACE ADD TO CART */}
+          {settings.mode === "replace" && (
+            <>
               <CODPreview settings={settings} />
-            )}
-
-          {/* ADD TO CART */}
-          {settings.mode !== "cod_only" && settings.mode !== "replace" && (
-            <button className="w-full border p-3 mb-2 rounded-lg bg-white">
-              Add to cart
-            </button>
-          )}
-
-          {/* 🔥 REPLACE ADD TO CART */}
-          {settings.mode === "replace" && <CODPreview settings={settings} />}
-
-          {/* BUY NOW */}
-          {settings.mode !== "cod_only" &&
-            settings.mode !== "replace_buy_now" && (
-              <button className="w-full bg-black text-white p-3 mb-2 rounded-lg">
+              <button className="w-full bg-black text-white p-3 rounded-lg">
                 Buy it now
               </button>
-            )}
+            </>
+          )}
 
-          {/* 🔥 REPLACE BUY NOW */}
+          {/* REPLACE BUY NOW */}
           {settings.mode === "replace_buy_now" && (
-            <CODPreview settings={settings} />
+            <>
+              <button className="w-full border p-3 rounded-lg mb-2 bg-white">
+                Add to cart
+              </button>
+              <CODPreview settings={settings} />
+            </>
           )}
 
-          {/* BELOW ADD */}
-          {settings.position === "below" && settings.mode === "both" && (
-            <CODPreview settings={settings} />
-          )}
+          {/* BOTH (CORRECT ORDER LOGIC) */}
+          {settings.mode === "both" && (
+            <>
+              {settings.position === "above" && (
+                <CODPreview settings={settings} />
+              )}
 
-          {/* BELOW BUY NOW */}
-          {settings.position === "below_buy_now" &&
-            settings.mode === "both" && <CODPreview settings={settings} />}
+              <button className="w-full border p-3 rounded-lg mb-2 bg-white">
+                Add to cart
+              </button>
+
+              {settings.position === "below" && (
+                <CODPreview settings={settings} />
+              )}
+
+              <button className="w-full bg-black text-white p-3 rounded-lg mb-2">
+                Buy it now
+              </button>
+
+              {settings.position === "below_buy_now" && (
+                <CODPreview settings={settings} />
+              )}
+            </>
+          )}
         </div>
 
         {/* SAVE */}
         <button
           onClick={save}
-          className="w-full bg-black text-white p-4 rounded-xl hover:opacity-90 transition-all duration-200 shadow-md"
+          className="w-full bg-black text-white p-4 rounded-xl hover:opacity-90"
         >
           Save Settings
         </button>
