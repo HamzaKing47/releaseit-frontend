@@ -25,9 +25,10 @@
   `;
   document.head.appendChild(hideStyle);
 
-  // 🔥 dynamic button style (CSS hover)
+  // 🔥 dynamic CSS (FINAL PRO)
   const injectButtonStyle = () => {
     const style = document.createElement("style");
+
     style.innerHTML = `
     .releaseit-btn {
       background: ${settings.bgColor};
@@ -35,21 +36,28 @@
       padding: 14px;
       width: 100%;
       font-weight: 600;
-      border: 2px solid ${settings.bgColor}; /* 👈 FIX */
+      border: 2px solid ${settings.bgColor};
       border-radius: ${settings.borderRadius || 6}px;
       cursor: pointer;
       font-size: 15px;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       display: block;
-      margin: 0; /* 👈 REMOVE GAP */
+
+      /* ✅ FIXED SPACING */
+      margin-top: 12px;
+
+      /* smooth feel */
+      transform: translateY(0);
     }
 
     .releaseit-btn:hover {
-      background: transparent; /* 👈 MAGIC */
+      background: transparent;
       color: ${settings.bgColor};
       border: 2px solid ${settings.bgColor};
+      transform: translateY(-2px);
     }
-  `;
+    `;
+
     document.head.appendChild(style);
   };
 
@@ -82,7 +90,6 @@
 
     await fetchSettings(shop);
 
-    // 🔥 inject CSS AFTER settings
     injectButtonStyle();
 
     const addBtn = await waitForButton();
@@ -122,18 +129,16 @@
         `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 POSITION
+    // 🔥 POSITION (clean + no duplication)
     if (settings.position === "above") {
       addBtn.parentNode.insertBefore(codBtn, addBtn);
-    } else if (settings.position === "below") {
-      addBtn.insertAdjacentElement("afterend", codBtn);
     } else if (settings.position === "below_buy_now" && buyNowBtn) {
       buyNowBtn.insertAdjacentElement("afterend", codBtn);
     } else {
       addBtn.insertAdjacentElement("afterend", codBtn);
     }
 
-    // 🔥 MODE
+    // 🔥 MODE CONTROL
     if (settings.mode === "replace") {
       addBtn.style.display = "none";
     }
@@ -147,7 +152,7 @@
       if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
-    // 🔥 smooth show
+    // 🔥 smooth reveal
     setTimeout(() => {
       hideStyle.remove();
       codBtn.style.opacity = "1";
