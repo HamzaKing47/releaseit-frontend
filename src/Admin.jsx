@@ -150,55 +150,39 @@ export default function Admin() {
         {/* 🔥 LIVE PREVIEW (FIXED LOGIC) */}
         <div className="bg-gray-100 p-5 rounded-xl mb-6">
           <p className="text-sm mb-3 text-gray-500">Live Preview</p>
-
-          {/* ===== MODE HANDLING ===== */}
-
-          {/* COD ONLY */}
-          {settings.mode === "cod_only" && <CODPreview settings={settings} />}
-
-          {/* REPLACE ADD TO CART */}
-          {settings.mode === "replace" && (
-            <>
-              <CODPreview settings={settings} />
-              <button className="w-full bg-black text-white p-3 rounded-lg">
-                Buy it now
-              </button>
-            </>
+          {/* ===== ADD TO CART ===== */}
+          const showAddToCart = settings.mode !== "cod_only" && settings.mode
+          !== "replace";
+          {/* ===== BUY NOW ===== */}
+          const showBuyNow = settings.mode !== "cod_only" && settings.mode !==
+          "replace_buy_now";
+          {/* ===== COD ===== */}
+          const showCOD = settings.mode === "both" || settings.mode ===
+          "replace" || settings.mode === "replace_buy_now" || settings.mode ===
+          "cod_only";
+          {/* ABOVE */}
+          {settings.position === "above" && showCOD && (
+            <CODPreview settings={settings} />
           )}
-
-          {/* REPLACE BUY NOW */}
-          {settings.mode === "replace_buy_now" && (
-            <>
-              <button className="w-full border p-3 rounded-lg mb-2 bg-white">
-                Add to cart
-              </button>
-              <CODPreview settings={settings} />
-            </>
+          {/* ADD TO CART */}
+          {showAddToCart && (
+            <button className="w-full border p-3 rounded-lg mb-2 bg-white">
+              Add to cart
+            </button>
           )}
-
-          {/* BOTH (CORRECT ORDER LOGIC) */}
-          {settings.mode === "both" && (
-            <>
-              {settings.position === "above" && (
-                <CODPreview settings={settings} />
-              )}
-
-              <button className="w-full border p-3 rounded-lg mb-2 bg-white">
-                Add to cart
-              </button>
-
-              {settings.position === "below" && (
-                <CODPreview settings={settings} />
-              )}
-
-              <button className="w-full bg-black text-white p-3 rounded-lg mb-2">
-                Buy it now
-              </button>
-
-              {settings.position === "below_buy_now" && (
-                <CODPreview settings={settings} />
-              )}
-            </>
+          {/* BELOW ADD */}
+          {settings.position === "below" && showCOD && (
+            <CODPreview settings={settings} />
+          )}
+          {/* BUY NOW */}
+          {showBuyNow && (
+            <button className="w-full bg-black text-white p-3 rounded-lg mb-2">
+              Buy it now
+            </button>
+          )}
+          {/* BELOW BUY NOW */}
+          {settings.position === "below_buy_now" && showCOD && (
+            <CODPreview settings={settings} />
           )}
         </div>
 
