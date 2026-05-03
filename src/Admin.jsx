@@ -74,10 +74,22 @@ export default function Admin() {
     alert("Saved ✅");
   };
 
+  /* ✅ FIX: variables OUTSIDE JSX */
+  const showAddToCart =
+    settings.mode !== "cod_only" && settings.mode !== "replace";
+
+  const showBuyNow =
+    settings.mode !== "cod_only" && settings.mode !== "replace_buy_now";
+
+  const showCOD =
+    settings.mode === "both" ||
+    settings.mode === "replace" ||
+    settings.mode === "replace_buy_now" ||
+    settings.mode === "cod_only";
+
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-6">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-8 border border-gray-100">
-        {/* HEADER */}
         <h1 className="text-3xl font-semibold mb-6 flex items-center gap-2">
           ⚙️ <span>ReleaseIt Pro</span>
         </h1>
@@ -105,27 +117,19 @@ export default function Admin() {
 
         {/* COLORS */}
         <div className="flex gap-6 mb-5">
-          <div>
-            <label className="block text-sm mb-1">Background</label>
-            <input
-              type="color"
-              value={settings.bgColor}
-              onChange={(e) => update("bgColor", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Text</label>
-            <input
-              type="color"
-              value={settings.textColor}
-              onChange={(e) => update("textColor", e.target.value)}
-            />
-          </div>
+          <input
+            type="color"
+            value={settings.bgColor}
+            onChange={(e) => update("bgColor", e.target.value)}
+          />
+          <input
+            type="color"
+            value={settings.textColor}
+            onChange={(e) => update("textColor", e.target.value)}
+          />
         </div>
 
         {/* RADIUS */}
-        <label className="text-sm font-semibold">Border Radius</label>
         <input
           type="range"
           min="0"
@@ -136,7 +140,6 @@ export default function Admin() {
         />
 
         {/* POSITION */}
-        <label className="text-sm font-semibold">Position</label>
         <select
           value={settings.position}
           onChange={(e) => update("position", e.target.value)}
@@ -147,39 +150,34 @@ export default function Admin() {
           <option value="below_buy_now">Below Buy Now</option>
         </select>
 
-        {/* 🔥 LIVE PREVIEW (FIXED LOGIC) */}
+        {/* 🔥 LIVE PREVIEW */}
         <div className="bg-gray-100 p-5 rounded-xl mb-6">
           <p className="text-sm mb-3 text-gray-500">Live Preview</p>
-          {/* ===== ADD TO CART ===== */}
-          const showAddToCart = settings.mode !== "cod_only" && settings.mode
-          !== "replace";
-          {/* ===== BUY NOW ===== */}
-          const showBuyNow = settings.mode !== "cod_only" && settings.mode !==
-          "replace_buy_now";
-          {/* ===== COD ===== */}
-          const showCOD = settings.mode === "both" || settings.mode ===
-          "replace" || settings.mode === "replace_buy_now" || settings.mode ===
-          "cod_only";
+
           {/* ABOVE */}
           {settings.position === "above" && showCOD && (
             <CODPreview settings={settings} />
           )}
+
           {/* ADD TO CART */}
           {showAddToCart && (
             <button className="w-full border p-3 rounded-lg mb-2 bg-white">
               Add to cart
             </button>
           )}
+
           {/* BELOW ADD */}
           {settings.position === "below" && showCOD && (
             <CODPreview settings={settings} />
           )}
+
           {/* BUY NOW */}
           {showBuyNow && (
             <button className="w-full bg-black text-white p-3 rounded-lg mb-2">
               Buy it now
             </button>
           )}
+
           {/* BELOW BUY NOW */}
           {settings.position === "below_buy_now" && showCOD && (
             <CODPreview settings={settings} />
@@ -189,7 +187,7 @@ export default function Admin() {
         {/* SAVE */}
         <button
           onClick={save}
-          className="w-full bg-black text-white p-4 rounded-xl hover:opacity-90"
+          className="w-full bg-black text-white p-4 rounded-xl"
         >
           Save Settings
         </button>
