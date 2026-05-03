@@ -16,14 +16,39 @@
   };
 
   // 🔥 hide buttons (no flicker)
-  const style = document.createElement("style");
-  style.innerHTML = `
+  const hideStyle = document.createElement("style");
+  hideStyle.innerHTML = `
     .product-form__submit,
     .shopify-payment-button {
       opacity: 0 !important;
     }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(hideStyle);
+
+  // 🔥 dynamic button style (CSS hover)
+  const injectButtonStyle = () => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .releaseit-btn {
+        background: ${settings.bgColor};
+        color: ${settings.textColor};
+        padding: 14px;
+        width: 100%;
+        font-weight: 600;
+        border: 2px solid transparent;
+        border-radius: ${settings.borderRadius || 6}px;
+        cursor: pointer;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        display: block;
+      }
+
+      .releaseit-btn:hover {
+        border: 2px solid ${settings.bgColor};
+      }
+    `;
+    document.head.appendChild(style);
+  };
 
   const fetchSettings = async (shop) => {
     try {
@@ -54,12 +79,15 @@
 
     await fetchSettings(shop);
 
+    // 🔥 inject CSS AFTER settings
+    injectButtonStyle();
+
     const addBtn = await waitForButton();
     const form = addBtn.closest("form");
     if (!form) return;
 
     if (form.querySelector(".releaseit-btn")) {
-      style.remove();
+      hideStyle.remove();
       return;
     }
 
@@ -73,33 +101,10 @@
     codBtn.type = "button";
     codBtn.innerText = settings.buttonText;
 
-    codBtn.style.cssText = `
-      background: ${settings.bgColor};
-      color: ${settings.textColor};
-      padding: 14px;
-      margin-top: 10px;
-      width: 100%;
-      font-weight: 600;
-      border: 1px solid transparent;
-      border-radius: ${settings.borderRadius}px;
-      cursor: pointer;
-      font-size: 15px;
-      transition: all 0.25s ease;
-      display: none;
-    `;
+    // 🔥 spacing fix (no weird gap)
+    codBtn.style.marginTop = "10px";
 
-    // hover
-    codBtn.onmouseenter = () => {
-      codBtn.style.transform = "translateY(-2px)";
-      codBtn.style.border = "1px solid rgba(255,255,255,0.3)";
-    };
-
-    codBtn.onmouseleave = () => {
-      codBtn.style.transform = "translateY(0)";
-      codBtn.style.border = "1px solid transparent";
-    };
-
-    // click
+    // 🔥 click
     codBtn.onclick = (e) => {
       e.preventDefault();
 
@@ -117,7 +122,7 @@
         `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 POSITION FIX
+    // 🔥 POSITION
     if (settings.position === "above") {
       addBtn.parentNode.insertBefore(codBtn, addBtn);
     } else if (settings.position === "below") {
@@ -142,10 +147,9 @@
       if (buyNowBtn) buyNowBtn.style.display = "none";
     }
 
-    // show smoothly
+    // 🔥 smooth show
     setTimeout(() => {
-      style.remove();
-      codBtn.style.display = "block";
+      hideStyle.remove();
       codBtn.style.opacity = "1";
     }, 120);
 
