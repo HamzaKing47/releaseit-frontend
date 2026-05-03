@@ -41,7 +41,7 @@
       font-size: 15px;
       transition: all 0.2s ease;
       display: block;
-      margin: 5; /* 👈 REMOVE GAP */
+      margin: 0; /* 👈 REMOVE GAP */
     }
 
     .releaseit-btn:hover {

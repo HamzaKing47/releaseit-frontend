@@ -152,7 +152,11 @@ export default function Admin() {
           <p className="text-sm mb-3 text-gray-500">Live Preview</p>
 
           {/* ABOVE */}
-          {settings.position === "above" && <CODPreview settings={settings} />}
+          {settings.position === "above" &&
+            settings.mode !== "replace" &&
+            settings.mode !== "replace_buy_now" && (
+              <CODPreview settings={settings} />
+            )}
 
           {/* ADD TO CART */}
           {settings.mode !== "cod_only" && settings.mode !== "replace" && (
@@ -162,11 +166,7 @@ export default function Admin() {
           )}
 
           {/* 🔥 REPLACE ADD TO CART */}
-          {settings.mode === "replace" && (
-            <div className="mb-2">
-              <CODPreview settings={settings} />
-            </div>
-          )}
+          {settings.mode === "replace" && <CODPreview settings={settings} />}
 
           {/* BUY NOW */}
           {settings.mode !== "cod_only" &&
