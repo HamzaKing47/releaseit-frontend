@@ -1,63 +1,23 @@
 import { useEffect, useState } from "react";
 
-function CODPreview({ settings }) {
-  return (
-    <button
-      style={{
-        background: settings.bgColor,
-        color: settings.textColor,
-        borderRadius: settings.borderRadius,
-        padding: "12px",
-        width: "100%",
-        transition: "all 0.25s ease",
-        border: "1px solid transparent",
-        fontWeight: "600",
-      }}
-      onMouseEnter={(e) => {
-        e.target.style.transform = "translateY(-2px)";
-        e.target.style.border = "1px solid rgba(0,0,0,0.2)";
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.transform = "translateY(0)";
-        e.target.style.border = "1px solid transparent";
-      }}
-    >
-      {settings.buttonText}
-    </button>
-  );
-}
-
-export default function Admin() {
+function Admin() {
   const params = new URLSearchParams(window.location.search);
   const shop = params.get("shop");
 
   const [settings, setSettings] = useState({
     mode: "both",
     buttonText: "Buy with Cash on Delivery",
-    bgColor: "#000000",
+    bgColor: "#ff0000",
     textColor: "#ffffff",
     borderRadius: 6,
     position: "below",
   });
 
-  // 🔥 universal update
-  const update = (key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
   useEffect(() => {
     fetch(`https://releaseit-backend.onrender.com/api/settings?shop=${shop}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) {
-          setSettings((prev) => ({
-            ...prev,
-            ...data,
-          }));
-        }
+        if (data.success) setSettings((prev) => ({ ...prev, ...data }));
       });
   }, []);
 
@@ -74,20 +34,76 @@ export default function Admin() {
     alert("Saved ✅");
   };
 
+  // 🔥 COD BUTTON PREVIEW COMPONENT
+  const CODPreview = ({ settings }) => {
+    return (
+      <button
+        style={{
+          width: "100%",
+          padding: "14px",
+          background: settings.bgColor,
+          color: settings.textColor,
+          borderRadius: settings.borderRadius,
+          border: `1px solid ${settings.bgColor}`,
+          fontWeight: 600,
+          marginBottom: "8px",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.background = "transparent";
+          e.target.style.color = settings.bgColor;
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = settings.bgColor;
+          e.target.style.color = settings.textColor;
+        }}
+      >
+        {settings.buttonText}
+      </button>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-6">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-8 border border-gray-100">
-        {/* HEADER */}
-        <h1 className="text-3xl font-semibold mb-6 flex items-center gap-2">
-          ⚙️ <span>ReleaseIt Pro</span>
-        </h1>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6">
+        {/* 🔥 SHOPIFY STYLE BUTTON CSS */}
+        <style>{`
+          .shopify-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+          }
+
+          .shopify-btn.primary {
+            background: white;
+            border: 1px solid #ccc;
+          }
+
+          .shopify-btn.primary:hover {
+            border-color: black;
+          }
+
+          .shopify-btn.secondary {
+            background: black;
+            color: white;
+          }
+
+          .shopify-btn.secondary:hover {
+            opacity: 0.9;
+          }
+        `}</style>
+
+        <h1 className="text-2xl font-bold mb-6">⚙️ ReleaseIt Pro</h1>
 
         {/* MODE */}
-        <label className="text-sm font-semibold">Button Mode</label>
         <select
           value={settings.mode}
-          onChange={(e) => update("mode", e.target.value)}
-          className="w-full p-3 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+          onChange={(e) => setSettings({ ...settings, mode: e.target.value })}
+          className="w-full p-3 mb-4 border rounded-lg"
         >
           <option value="both">Show All Buttons</option>
           <option value="replace">Replace Add to Cart</option>
@@ -96,51 +112,51 @@ export default function Admin() {
         </select>
 
         {/* TEXT */}
-        <label className="text-sm font-semibold">Button Text</label>
         <input
           value={settings.buttonText}
-          onChange={(e) => update("buttonText", e.target.value)}
-          className="w-full p-3 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+          onChange={(e) =>
+            setSettings({ ...settings, buttonText: e.target.value })
+          }
+          className="w-full p-3 mb-4 border rounded-lg"
         />
 
         {/* COLORS */}
-        <div className="flex gap-6 mb-5">
-          <div>
-            <label className="block text-sm mb-1">Background</label>
-            <input
-              type="color"
-              value={settings.bgColor}
-              onChange={(e) => update("bgColor", e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Text</label>
-            <input
-              type="color"
-              value={settings.textColor}
-              onChange={(e) => update("textColor", e.target.value)}
-            />
-          </div>
+        <div className="flex gap-4 mb-4">
+          <input
+            type="color"
+            value={settings.bgColor}
+            onChange={(e) =>
+              setSettings({ ...settings, bgColor: e.target.value })
+            }
+          />
+          <input
+            type="color"
+            value={settings.textColor}
+            onChange={(e) =>
+              setSettings({ ...settings, textColor: e.target.value })
+            }
+          />
         </div>
 
         {/* RADIUS */}
-        <label className="text-sm font-semibold">Border Radius</label>
         <input
           type="range"
           min="0"
-          max="20"
+          max="30"
           value={settings.borderRadius}
-          onChange={(e) => update("borderRadius", Number(e.target.value))}
-          className="w-full mb-6"
+          onChange={(e) =>
+            setSettings({ ...settings, borderRadius: e.target.value })
+          }
+          className="w-full mb-4"
         />
 
         {/* POSITION */}
-        <label className="text-sm font-semibold">Position</label>
         <select
           value={settings.position}
-          onChange={(e) => update("position", e.target.value)}
-          className="w-full p-3 mb-6 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+          onChange={(e) =>
+            setSettings({ ...settings, position: e.target.value })
+          }
+          className="w-full p-3 mb-4 border rounded-lg"
         >
           <option value="below">Below Add to Cart</option>
           <option value="above">Above Add to Cart</option>
@@ -148,53 +164,53 @@ export default function Admin() {
         </select>
 
         {/* 🔥 LIVE PREVIEW */}
-        <div className="bg-gray-100 p-5 rounded-xl mb-6 transition-all hover:shadow-md">
+        <div className="bg-gray-100 p-5 rounded-xl mb-6">
           <p className="text-sm mb-3 text-gray-500">Live Preview</p>
 
-          {/* ABOVE */}
-          {settings.position === "above" &&
-            settings.mode !== "replace" &&
-            settings.mode !== "replace_buy_now" && (
+          {/* REPLACE ADD TO CART */}
+          {settings.mode === "replace" && (
+            <>
               <CODPreview settings={settings} />
-            )}
-
-          {/* ADD TO CART */}
-          {settings.mode !== "cod_only" && settings.mode !== "replace" && (
-            <button className="w-full border p-3 mb-2 rounded-lg bg-white">
-              Add to cart
-            </button>
+              <button className="shopify-btn secondary">Buy it now</button>
+            </>
           )}
 
-          {/* 🔥 REPLACE ADD TO CART */}
-          {settings.mode === "replace" && <CODPreview settings={settings} />}
-
-          {/* BUY NOW */}
-          {settings.mode !== "cod_only" &&
-            settings.mode !== "replace_buy_now" && (
-              <button className="w-full bg-black text-white p-3 mb-2 rounded-lg">
-                Buy it now
-              </button>
-            )}
-
-          {/* 🔥 REPLACE BUY NOW */}
+          {/* REPLACE BUY NOW */}
           {settings.mode === "replace_buy_now" && (
-            <CODPreview settings={settings} />
+            <>
+              <button className="shopify-btn primary">Add to cart</button>
+              <CODPreview settings={settings} />
+            </>
           )}
 
-          {/* BELOW ADD */}
-          {settings.position === "below" && settings.mode === "both" && (
-            <CODPreview settings={settings} />
-          )}
+          {/* COD ONLY */}
+          {settings.mode === "cod_only" && <CODPreview settings={settings} />}
 
-          {/* BELOW BUY NOW */}
-          {settings.position === "below_buy_now" &&
-            settings.mode === "both" && <CODPreview settings={settings} />}
+          {/* BOTH */}
+          {settings.mode === "both" && (
+            <>
+              {settings.position === "above" && (
+                <CODPreview settings={settings} />
+              )}
+
+              <button className="shopify-btn primary">Add to cart</button>
+
+              {settings.position === "below" && (
+                <CODPreview settings={settings} />
+              )}
+
+              <button className="shopify-btn secondary">Buy it now</button>
+
+              {settings.position === "below_buy_now" && (
+                <CODPreview settings={settings} />
+              )}
+            </>
+          )}
         </div>
 
-        {/* SAVE */}
         <button
           onClick={save}
-          className="w-full bg-black text-white p-4 rounded-xl hover:opacity-90 transition-all duration-200 shadow-md"
+          className="mt-4 w-full bg-black text-white p-3 rounded-xl"
         >
           Save Settings
         </button>
@@ -202,3 +218,5 @@ export default function Admin() {
     </div>
   );
 }
+
+export default Admin;
