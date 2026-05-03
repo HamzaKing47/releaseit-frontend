@@ -1,5 +1,32 @@
 import { useEffect, useState } from "react";
 
+function CODPreview({ settings }) {
+  return (
+    <button
+      style={{
+        background: settings.bgColor,
+        color: settings.textColor,
+        borderRadius: settings.borderRadius,
+        padding: "12px",
+        width: "100%",
+        transition: "all 0.25s ease",
+        border: "1px solid transparent",
+        fontWeight: "600",
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = "translateY(-2px)";
+        e.target.style.border = "1px solid rgba(0,0,0,0.2)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = "translateY(0)";
+        e.target.style.border = "1px solid transparent";
+      }}
+    >
+      {settings.buttonText}
+    </button>
+  );
+}
+
 export default function Admin() {
   const params = new URLSearchParams(window.location.search);
   const shop = params.get("shop");
@@ -13,7 +40,7 @@ export default function Admin() {
     position: "below",
   });
 
-  // 🔥 UNIVERSAL STATE UPDATE FIX
+  // 🔥 universal update
   const update = (key, value) => {
     setSettings((prev) => ({
       ...prev,
@@ -49,20 +76,23 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-6">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6">
-        <h1 className="text-2xl font-bold mb-6">⚙️ ReleaseIt Pro Settings</h1>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-8 border border-gray-100">
+        {/* HEADER */}
+        <h1 className="text-3xl font-semibold mb-6 flex items-center gap-2">
+          ⚙️ <span>ReleaseIt Pro</span>
+        </h1>
 
         {/* MODE */}
         <label className="text-sm font-semibold">Button Mode</label>
         <select
           value={settings.mode}
           onChange={(e) => update("mode", e.target.value)}
-          className="w-full p-3 mb-4 border rounded-lg"
+          className="w-full p-3 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
         >
-          <option value="both">Show All</option>
+          <option value="both">Show All Buttons</option>
           <option value="replace">Replace Add to Cart</option>
           <option value="replace_buy_now">Replace Buy Now</option>
-          <option value="cod_only">Only COD</option>
+          <option value="cod_only">Only COD Button</option>
         </select>
 
         {/* TEXT */}
@@ -70,11 +100,11 @@ export default function Admin() {
         <input
           value={settings.buttonText}
           onChange={(e) => update("buttonText", e.target.value)}
-          className="w-full p-3 mb-4 border rounded-lg"
+          className="w-full p-3 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
         />
 
         {/* COLORS */}
-        <div className="flex gap-6 mb-4">
+        <div className="flex gap-6 mb-5">
           <div>
             <label className="block text-sm mb-1">Background</label>
             <input
@@ -101,10 +131,8 @@ export default function Admin() {
           min="0"
           max="20"
           value={settings.borderRadius}
-          onChange={
-            (e) => update("borderRadius", Number(e.target.value)) // 🔥 FIX
-          }
-          className="w-full mb-4"
+          onChange={(e) => update("borderRadius", Number(e.target.value))}
+          className="w-full mb-6"
         />
 
         {/* POSITION */}
@@ -112,44 +140,54 @@ export default function Admin() {
         <select
           value={settings.position}
           onChange={(e) => update("position", e.target.value)}
-          className="w-full p-3 mb-6 border rounded-lg"
+          className="w-full p-3 mb-6 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
         >
           <option value="below">Below Add to Cart</option>
           <option value="above">Above Add to Cart</option>
           <option value="below_buy_now">Below Buy Now</option>
         </select>
 
-        {/* 🔥 LIVE PREVIEW (UPGRADED) */}
-        <div className="bg-gray-100 p-4 rounded-xl mb-6">
-          <p className="text-sm mb-2 text-gray-500">Preview</p>
+        {/* 🔥 LIVE PREVIEW */}
+        <div className="bg-gray-100 p-5 rounded-xl mb-6 transition-all hover:shadow-md">
+          <p className="text-sm mb-3 text-gray-500">Live Preview</p>
 
-          <button className="w-full border p-3 mb-2 rounded-lg">
-            Add to cart
-          </button>
+          {/* ABOVE */}
+          {settings.position === "above" && (
+            <div className="mb-2">
+              <CODPreview settings={settings} />
+            </div>
+          )}
 
-          <button className="w-full bg-black text-white p-3 mb-2 rounded-lg">
-            Buy it now
-          </button>
+          {/* ADD TO CART */}
+          {settings.mode !== "replace" && settings.mode !== "cod_only" && (
+            <button className="w-full border p-3 mb-2 rounded-lg bg-white">
+              Add to cart
+            </button>
+          )}
 
-          <button
-            key={JSON.stringify(settings)} // 🔥 FORCE RE-RENDER
-            style={{
-              background: settings.bgColor,
-              color: settings.textColor,
-              borderRadius: settings.borderRadius,
-              padding: "12px",
-              width: "100%",
-              transition: "all 0.25s ease",
-            }}
-          >
-            {settings.buttonText}
-          </button>
+          {/* BUY NOW */}
+          {settings.mode !== "replace_buy_now" &&
+            settings.mode !== "cod_only" && (
+              <button className="w-full bg-black text-white p-3 mb-2 rounded-lg">
+                Buy it now
+              </button>
+            )}
+
+          {/* BELOW ADD */}
+          {settings.position === "below" && <CODPreview settings={settings} />}
+
+          {/* BELOW BUY NOW */}
+          {settings.position === "below_buy_now" && (
+            <div className="mt-2">
+              <CODPreview settings={settings} />
+            </div>
+          )}
         </div>
 
         {/* SAVE */}
         <button
           onClick={save}
-          className="w-full bg-black text-white p-3 rounded-xl hover:opacity-90 transition"
+          className="w-full bg-black text-white p-4 rounded-xl hover:opacity-90 transition-all duration-200 shadow-md"
         >
           Save Settings
         </button>
