@@ -29,24 +29,27 @@
   const injectButtonStyle = () => {
     const style = document.createElement("style");
     style.innerHTML = `
-      .releaseit-btn {
-        background: ${settings.bgColor};
-        color: ${settings.textColor};
-        padding: 14px;
-        width: 100%;
-        font-weight: 600;
-        border: 2px solid transparent;
-        border-radius: ${settings.borderRadius || 6}px;
-        cursor: pointer;
-        font-size: 15px;
-        transition: all 0.2s ease;
-        display: block;
-      }
+    .releaseit-btn {
+      background: ${settings.bgColor};
+      color: ${settings.textColor};
+      padding: 14px;
+      width: 100%;
+      font-weight: 600;
+      border: 2px solid ${settings.bgColor}; /* 👈 FIX */
+      border-radius: ${settings.borderRadius || 6}px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      display: block;
+      margin: 0; /* 👈 REMOVE GAP */
+    }
 
-      .releaseit-btn:hover {
-        border: 2px solid ${settings.bgColor};
-      }
-    `;
+    .releaseit-btn:hover {
+      background: transparent; /* 👈 MAGIC */
+      color: ${settings.bgColor};
+      border: 2px solid ${settings.bgColor};
+    }
+  `;
     document.head.appendChild(style);
   };
 
@@ -100,9 +103,6 @@
     codBtn.className = "releaseit-btn";
     codBtn.type = "button";
     codBtn.innerText = settings.buttonText;
-
-    // 🔥 spacing fix (no weird gap)
-    codBtn.style.marginTop = "10px";
 
     // 🔥 click
     codBtn.onclick = (e) => {
