@@ -13,11 +13,24 @@ export default function Admin() {
     position: "below",
   });
 
+  // 🔥 UNIVERSAL STATE UPDATE FIX
+  const update = (key, value) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   useEffect(() => {
     fetch(`https://releaseit-backend.onrender.com/api/settings?shop=${shop}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setSettings((prev) => ({ ...prev, ...data }));
+        if (data.success) {
+          setSettings((prev) => ({
+            ...prev,
+            ...data,
+          }));
+        }
       });
   }, []);
 
@@ -43,7 +56,7 @@ export default function Admin() {
         <label className="text-sm font-semibold">Button Mode</label>
         <select
           value={settings.mode}
-          onChange={(e) => setSettings({ ...settings, mode: e.target.value })}
+          onChange={(e) => update("mode", e.target.value)}
           className="w-full p-3 mb-4 border rounded-lg"
         >
           <option value="both">Show All</option>
@@ -56,60 +69,49 @@ export default function Admin() {
         <label className="text-sm font-semibold">Button Text</label>
         <input
           value={settings.buttonText}
-          onChange={(e) =>
-            setSettings({ ...settings, buttonText: e.target.value })
-          }
+          onChange={(e) => update("buttonText", e.target.value)}
           className="w-full p-3 mb-4 border rounded-lg"
         />
 
         {/* COLORS */}
-        <div className="flex gap-4 mb-4">
+        <div className="flex gap-6 mb-4">
           <div>
-            <label>Background</label>
+            <label className="block text-sm mb-1">Background</label>
             <input
               type="color"
               value={settings.bgColor}
-              onChange={(e) =>
-                setSettings({ ...settings, bgColor: e.target.value })
-              }
+              onChange={(e) => update("bgColor", e.target.value)}
             />
           </div>
 
           <div>
-            <label>Text</label>
+            <label className="block text-sm mb-1">Text</label>
             <input
               type="color"
               value={settings.textColor}
-              onChange={(e) =>
-                setSettings({ ...settings, textColor: e.target.value })
-              }
+              onChange={(e) => update("textColor", e.target.value)}
             />
           </div>
         </div>
 
         {/* RADIUS */}
-        <label>Border Radius</label>
+        <label className="text-sm font-semibold">Border Radius</label>
         <input
           type="range"
           min="0"
           max="20"
           value={settings.borderRadius}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              borderRadius: Number(e.target.value),
-            })
+          onChange={
+            (e) => update("borderRadius", Number(e.target.value)) // 🔥 FIX
           }
           className="w-full mb-4"
         />
 
         {/* POSITION */}
-        <label>Position</label>
+        <label className="text-sm font-semibold">Position</label>
         <select
           value={settings.position}
-          onChange={(e) =>
-            setSettings({ ...settings, position: e.target.value })
-          }
+          onChange={(e) => update("position", e.target.value)}
           className="w-full p-3 mb-6 border rounded-lg"
         >
           <option value="below">Below Add to Cart</option>
@@ -117,8 +119,10 @@ export default function Admin() {
           <option value="below_buy_now">Below Buy Now</option>
         </select>
 
-        {/* LIVE PREVIEW */}
+        {/* 🔥 LIVE PREVIEW (UPGRADED) */}
         <div className="bg-gray-100 p-4 rounded-xl mb-6">
+          <p className="text-sm mb-2 text-gray-500">Preview</p>
+
           <button className="w-full border p-3 mb-2 rounded-lg">
             Add to cart
           </button>
@@ -128,21 +132,24 @@ export default function Admin() {
           </button>
 
           <button
+            key={JSON.stringify(settings)} // 🔥 FORCE RE-RENDER
             style={{
               background: settings.bgColor,
               color: settings.textColor,
               borderRadius: settings.borderRadius,
               padding: "12px",
               width: "100%",
+              transition: "all 0.25s ease",
             }}
           >
             {settings.buttonText}
           </button>
         </div>
 
+        {/* SAVE */}
         <button
           onClick={save}
-          className="w-full bg-black text-white p-3 rounded-xl"
+          className="w-full bg-black text-white p-3 rounded-xl hover:opacity-90 transition"
         >
           Save Settings
         </button>
