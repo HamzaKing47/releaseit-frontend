@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+/* =========================
+   COD PREVIEW
+========================= */
 function CODPreview({ settings }) {
   return (
     <button
@@ -11,8 +14,8 @@ function CODPreview({ settings }) {
         borderRadius: settings.borderRadius,
         border: `2px solid ${settings.bgColor}`,
         fontWeight: 600,
-        marginBottom: "10px",
         transition: "all 0.2s ease",
+        cursor: "pointer",
       }}
       onMouseEnter={(e) => {
         e.target.style.background = "transparent";
@@ -28,8 +31,13 @@ function CODPreview({ settings }) {
   );
 }
 
+/* =========================
+   MAIN
+========================= */
 export default function Admin() {
   const shop = new URLSearchParams(window.location.search).get("shop");
+
+  const [activeTab, setActiveTab] = useState("button");
 
   const [settings, setSettings] = useState({
     mode: "both",
@@ -44,6 +52,9 @@ export default function Admin() {
 
   const update = (k, v) => setSettings((p) => ({ ...p, [k]: v }));
 
+  /* =========================
+     LOAD
+  ========================= */
   useEffect(() => {
     fetch(`https://releaseit-backend.onrender.com/api/settings?shop=${shop}`)
       .then((r) => r.json())
@@ -54,6 +65,9 @@ export default function Admin() {
       .then((d) => d.success && setPixels(d.pixels || []));
   }, []);
 
+  /* =========================
+     SAVE
+  ========================= */
   const save = async () => {
     await fetch(
       `https://releaseit-backend.onrender.com/api/settings?shop=${shop}`,
@@ -63,7 +77,7 @@ export default function Admin() {
         body: JSON.stringify(settings),
       },
     );
-    alert("Saved ✅");
+    alert("Settings Saved ✅");
   };
 
   const savePixels = async () => {
@@ -92,70 +106,129 @@ export default function Admin() {
     setPixels(arr);
   };
 
-  const showAdd = settings.mode !== "cod_only" && settings.mode !== "replace";
-  const showBuy =
-    settings.mode !== "cod_only" && settings.mode !== "replace_buy_now";
-  const showCOD = ["both", "replace", "replace_buy_now", "cod_only"].includes(
-    settings.mode,
-  );
-
+  /* =========================
+     UI
+  ========================= */
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center p-6">
-      <div className="bg-white rounded-3xl shadow-xl w-full max-w-3xl p-8">
-        <h1 className="text-2xl font-bold mb-6">ReleaseIt Pro</h1>
+    <div className="min-h-screen bg-gray-100 flex">
+      {/* SIDEBAR */}
+      <div className="w-64 bg-white shadow-md p-5">
+        <h2 className="text-xl font-bold mb-6">ReleaseIt</h2>
 
-        {/* SETTINGS */}
-        <input
-          value={settings.buttonText}
-          onChange={(e) => update("buttonText", e.target.value)}
-          className="w-full border p-3 mb-4"
-        />
-
-        {/* PREVIEW */}
-        <div className="bg-gray-100 p-5 rounded mb-6">
-          {settings.position === "above" && showCOD && (
-            <CODPreview settings={settings} />
-          )}
-
-          {showAdd && (
-            <button className="w-full border p-3 mb-2">Add to cart</button>
-          )}
-
-          {settings.position === "below" && showCOD && (
-            <CODPreview settings={settings} />
-          )}
-
-          {showBuy && (
-            <button className="w-full bg-black text-white p-3 mb-2">
-              Buy it now
-            </button>
-          )}
-
-          {settings.position === "below_buy_now" && showCOD && (
-            <CODPreview settings={settings} />
-          )}
-        </div>
-
-        {/* PIXELS */}
-        <h2 className="font-semibold mb-2">Pixels</h2>
-
-        {pixels.map((p, i) => (
-          <div key={i} className="border p-3 mb-2">
-            <input
-              placeholder="Pixel ID"
-              value={p.pixelId}
-              onChange={(e) => updatePixel(i, "pixelId", e.target.value)}
-            />
-            <button onClick={() => removePixel(i)}>X</button>
-          </div>
-        ))}
-
-        <button onClick={addPixel}>Add Pixel</button>
-        <button onClick={savePixels}>Save Pixels</button>
-
-        <button onClick={save} className="w-full bg-black text-white p-4 mt-6">
-          Save Settings
+        <button
+          onClick={() => setActiveTab("button")}
+          className={`block w-full text-left mb-3 ${
+            activeTab === "button" ? "font-bold" : ""
+          }`}
+        >
+          ⚙️ COD Button
         </button>
+
+        <button
+          onClick={() => setActiveTab("pixels")}
+          className={`block w-full text-left ${
+            activeTab === "pixels" ? "font-bold" : ""
+          }`}
+        >
+          📊 Pixels
+        </button>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-8">
+        {/* ================= BUTTON SECTION ================= */}
+        {activeTab === "button" && (
+          <div className="bg-white p-6 rounded-2xl shadow-md max-w-2xl">
+            <h2 className="text-xl font-semibold mb-4">COD Button Settings</h2>
+
+            <input
+              value={settings.buttonText}
+              onChange={(e) => update("buttonText", e.target.value)}
+              className="w-full border p-3 mb-4 rounded"
+            />
+
+            <div className="flex gap-4 mb-4">
+              <input
+                type="color"
+                value={settings.bgColor}
+                onChange={(e) => update("bgColor", e.target.value)}
+              />
+              <input
+                type="color"
+                value={settings.textColor}
+                onChange={(e) => update("textColor", e.target.value)}
+              />
+            </div>
+
+            <input
+              type="range"
+              min="0"
+              max="20"
+              value={settings.borderRadius}
+              onChange={(e) => update("borderRadius", Number(e.target.value))}
+              className="w-full mb-4"
+            />
+
+            {/* PREVIEW */}
+            <div className="bg-gray-100 p-4 rounded mb-4">
+              <button className="w-full border p-3 mb-2 bg-white">
+                Add to cart
+              </button>
+
+              <button className="w-full bg-black text-white p-3 mb-2">
+                Buy it now
+              </button>
+
+              <CODPreview settings={settings} />
+            </div>
+
+            <button
+              onClick={save}
+              className="bg-black text-white px-6 py-3 rounded-lg"
+            >
+              Save Settings
+            </button>
+          </div>
+        )}
+
+        {/* ================= PIXEL SECTION ================= */}
+        {activeTab === "pixels" && (
+          <div className="bg-white p-6 rounded-2xl shadow-md max-w-2xl">
+            <h2 className="text-xl font-semibold mb-4">Pixels</h2>
+
+            {pixels.map((p, i) => (
+              <div key={i} className="border p-3 mb-3 rounded">
+                <input
+                  placeholder="Pixel ID"
+                  value={p.pixelId}
+                  onChange={(e) => updatePixel(i, "pixelId", e.target.value)}
+                  className="w-full p-2 mb-2 border rounded"
+                />
+
+                <button
+                  onClick={() => removePixel(i)}
+                  className="text-red-500 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <button
+              onClick={addPixel}
+              className="bg-gray-200 px-4 py-2 rounded mr-2"
+            >
+              Add Pixel
+            </button>
+
+            <button
+              onClick={savePixels}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Save Pixels
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
