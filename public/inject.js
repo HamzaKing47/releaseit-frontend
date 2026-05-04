@@ -59,14 +59,20 @@
   const loadPixels = async (shop) => {
     try {
       const res = await fetch(`${BACKEND}/api/pixels?shop=${shop}`);
+
+      if (!res.ok) return; // 👈 FIX
+
       const data = await res.json();
-      if (!data.success) return;
+
+      if (!data.success || !Array.isArray(data.pixels)) return;
 
       data.pixels.forEach((p) => {
         if (p.type === "facebook") loadFacebook(p.pixelId);
         if (p.type === "tiktok") loadTikTok(p.pixelId);
       });
-    } catch {}
+    } catch (err) {
+      console.log("Pixel load failed");
+    }
   };
 
   const loadFacebook = (id) => {
