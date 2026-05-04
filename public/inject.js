@@ -25,7 +25,7 @@
   `;
   document.head.appendChild(hideStyle);
 
-  // 🔥 dynamic CSS (FINAL PRO)
+  // 🔥 dynamic button CSS (NO margin here ❌)
   const injectButtonStyle = () => {
     const style = document.createElement("style");
 
@@ -42,12 +42,6 @@
       font-size: 15px;
       transition: all 0.25s ease;
       display: block;
-
-      /* ✅ FIXED SPACING */
-      margin-top: 12px;
-
-      /* smooth feel */
-      transform: translateY(0);
     }
 
     .releaseit-btn:hover {
@@ -67,6 +61,13 @@
       const data = await res.json();
       if (data.success) settings = { ...settings, ...data };
     } catch {}
+  };
+
+  // 🔥 AUTO SPACING FUNCTION
+  const getSpacing = (el) => {
+    if (!el) return 10;
+    const styles = window.getComputedStyle(el);
+    return parseInt(styles.marginTop) || 10;
   };
 
   const waitForButton = () => {
@@ -105,11 +106,15 @@
       document.querySelector(".shopify-payment-button") ||
       document.querySelector(".shopify-payment-button__button");
 
-    // 🔥 create button
+    // 🔥 create COD button
     const codBtn = document.createElement("button");
     codBtn.className = "releaseit-btn";
     codBtn.type = "button";
     codBtn.innerText = settings.buttonText;
+
+    // 🔥 AUTO SPACING APPLY (KEY FIX)
+    const spacing = getSpacing(buyNowBtn || addBtn);
+    codBtn.style.marginTop = spacing + "px";
 
     // 🔥 click
     codBtn.onclick = (e) => {
@@ -129,7 +134,7 @@
         `&variant=${variantId}&product=${productHandle}`;
     };
 
-    // 🔥 POSITION (clean + no duplication)
+    // 🔥 POSITION CONTROL (clean logic)
     if (settings.position === "above") {
       addBtn.parentNode.insertBefore(codBtn, addBtn);
     } else if (settings.position === "below_buy_now" && buyNowBtn) {
@@ -158,7 +163,7 @@
       codBtn.style.opacity = "1";
     }, 120);
 
-    console.log("✅ ReleaseIt Working Perfectly");
+    console.log("✅ ReleaseIt Working Perfectly (Auto Spacing Enabled)");
   };
 
   start();
