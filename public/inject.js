@@ -13,7 +13,9 @@
     position: "below",
   };
 
-  // hide flicker
+  /* =========================
+     HIDE FLICKER
+  ========================= */
   const hideStyle = document.createElement("style");
   hideStyle.innerHTML = `
     .product-form__submit,
@@ -23,22 +25,51 @@
   `;
   document.head.appendChild(hideStyle);
 
-  // 🔥 LOAD PIXELS
+  /* =========================
+     BUTTON STYLE
+  ========================= */
+  const injectStyle = () => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .releaseit-btn {
+        width: 100%;
+        padding: 14px;
+        font-weight: 600;
+        border-radius: ${settings.borderRadius}px;
+        border: 2px solid ${settings.bgColor};
+        background: ${settings.bgColor};
+        color: ${settings.textColor};
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 10px;
+        display:block;
+      }
+
+      .releaseit-btn:hover {
+        background: transparent;
+        color: ${settings.bgColor};
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  /* =========================
+     PIXELS
+  ========================= */
   const loadPixels = async (shop) => {
     try {
       const res = await fetch(`${BACKEND}/api/pixels?shop=${shop}`);
       const data = await res.json();
-
       if (!data.success) return;
 
       data.pixels.forEach((p) => {
-        if (p.type === "facebook") loadFacebookPixel(p.pixelId);
-        if (p.type === "tiktok") loadTikTokPixel(p.pixelId);
+        if (p.type === "facebook") loadFacebook(p.pixelId);
+        if (p.type === "tiktok") loadTikTok(p.pixelId);
       });
     } catch {}
   };
 
-  const loadFacebookPixel = (id) => {
+  const loadFacebook = (id) => {
     if (window.fbq) return;
 
     !(function (f, b, e, v, n, t, s) {
@@ -49,9 +80,6 @@
           : n.queue.push(arguments);
       };
       if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = true;
-      n.version = "2.0";
       n.queue = [];
       t = b.createElement(e);
       t.async = true;
@@ -64,7 +92,9 @@
     fbq("track", "PageView");
   };
 
-  const loadTikTokPixel = (id) => {
+  const loadTikTok = (id) => {
+    if (window.ttq) return;
+
     !(function (w, d, t) {
       w.TiktokAnalyticsObject = t;
       var ttq = (w[t] = w[t] || []);
@@ -78,18 +108,19 @@
         ttq.setAndDefer(ttq, ttq.methods[i]);
       }
       ttq.load = function (e) {
-        var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
-        var a = d.createElement("script");
-        a.async = true;
-        a.src = i + "?sdkid=" + e;
-        var s = d.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(a, s);
+        var s = d.createElement("script");
+        s.async = true;
+        s.src = "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" + e;
+        d.getElementsByTagName("script")[0].parentNode.insertBefore(s, null);
       };
       ttq.load(id);
       ttq.page();
     })(window, document, "ttq");
   };
 
+  /* =========================
+     FETCH SETTINGS
+  ========================= */
   const fetchSettings = async (shop) => {
     try {
       const res = await fetch(`${BACKEND}/api/settings?shop=${shop}`);
@@ -98,27 +129,30 @@
     } catch {}
   };
 
-  const waitForButton = () => {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
+  const waitForButton = () =>
+    new Promise((resolve) => {
+      const i = setInterval(() => {
         const btn =
           document.querySelector('button[name="add"]') ||
           document.querySelector(".product-form__submit");
 
         if (btn) {
-          clearInterval(interval);
+          clearInterval(i);
           resolve(btn);
         }
-      }, 150);
+      }, 120);
     });
-  };
 
+  /* =========================
+     START
+  ========================= */
   const start = async () => {
     const shop = window.Shopify?.shop;
     if (!shop) return;
 
     await fetchSettings(shop);
-    await loadPixels(shop); // 🔥 important
+    await loadPixels(shop);
+    injectStyle();
 
     const addBtn = await waitForButton();
     const form = addBtn.closest("form");
@@ -129,39 +163,48 @@
       document.querySelector(".shopify-payment-button__button");
 
     const codBtn = document.createElement("button");
+    codBtn.className = "releaseit-btn";
     codBtn.innerText = settings.buttonText;
-
-    codBtn.style.cssText = `
-      background: ${settings.bgColor};
-      color: ${settings.textColor};
-      padding: 14px;
-      width: 100%;
-      font-weight: 600;
-      border-radius: ${settings.borderRadius}px;
-      cursor: pointer;
-      margin-top: 12px;
-    `;
 
     codBtn.onclick = (e) => {
       e.preventDefault();
 
-      // 🔥 EVENT FIRE
       if (window.fbq) fbq("track", "InitiateCheckout");
       if (window.ttq) ttq.track("InitiateCheckout");
 
-      const variantInput = form.querySelector('input[name="id"]');
-      if (!variantInput) return;
+      const variantId = form.querySelector('input[name="id"]')?.value;
+      if (!variantId) return;
 
-      const variantId = variantInput.value;
+      const productHandle = window.location.pathname
+        .split("/products/")[1]
+        ?.split("?")[0];
 
-      window.location.href = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
+      window.location.href =
+        `https://releaseitnow.vercel.app/?shop=${shop}` +
+        `&variant=${variantId}&product=${productHandle}`;
     };
 
-    addBtn.insertAdjacentElement("afterend", codBtn);
+    /* POSITION FIX */
+    if (settings.position === "above") {
+      addBtn.parentNode.insertBefore(codBtn, addBtn);
+    } else if (settings.position === "below_buy_now" && buyNowBtn) {
+      buyNowBtn.insertAdjacentElement("afterend", codBtn);
+    } else {
+      addBtn.insertAdjacentElement("afterend", codBtn);
+    }
+
+    /* MODE */
+    if (settings.mode === "replace") addBtn.style.display = "none";
+    if (settings.mode === "replace_buy_now" && buyNowBtn)
+      buyNowBtn.style.display = "none";
+    if (settings.mode === "cod_only") {
+      addBtn.style.display = "none";
+      if (buyNowBtn) buyNowBtn.style.display = "none";
+    }
 
     setTimeout(() => {
       hideStyle.remove();
-    }, 100);
+    }, 120);
   };
 
   start();

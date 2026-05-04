@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 
-/* =========================
-   COD BUTTON (PREVIEW)
-========================= */
 function CODPreview({ settings }) {
   return (
     <button
@@ -16,7 +13,6 @@ function CODPreview({ settings }) {
         fontWeight: 600,
         marginBottom: "10px",
         transition: "all 0.2s ease",
-        cursor: "pointer",
       }}
       onMouseEnter={(e) => {
         e.target.style.background = "transparent";
@@ -32,12 +28,8 @@ function CODPreview({ settings }) {
   );
 }
 
-/* =========================
-   MAIN COMPONENT
-========================= */
 export default function Admin() {
-  const params = new URLSearchParams(window.location.search);
-  const shop = params.get("shop");
+  const shop = new URLSearchParams(window.location.search).get("shop");
 
   const [settings, setSettings] = useState({
     mode: "both",
@@ -50,35 +42,18 @@ export default function Admin() {
 
   const [pixels, setPixels] = useState([]);
 
-  const update = (key, value) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
+  const update = (k, v) => setSettings((p) => ({ ...p, [k]: v }));
 
-  /* =========================
-     LOAD SETTINGS
-  ========================= */
   useEffect(() => {
     fetch(`https://releaseit-backend.onrender.com/api/settings?shop=${shop}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setSettings((prev) => ({ ...prev, ...data }));
-        }
-      });
+      .then((r) => r.json())
+      .then((d) => d.success && setSettings((p) => ({ ...p, ...d })));
 
-    /* 🔥 LOAD PIXELS */
     fetch(`https://releaseit-backend.onrender.com/api/pixels?shop=${shop}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setPixels(data.pixels || []);
-        }
-      });
+      .then((r) => r.json())
+      .then((d) => d.success && setPixels(d.pixels || []));
   }, []);
 
-  /* =========================
-     SAVE SETTINGS
-  ========================= */
   const save = async () => {
     await fetch(
       `https://releaseit-backend.onrender.com/api/settings?shop=${shop}`,
@@ -88,143 +63,70 @@ export default function Admin() {
         body: JSON.stringify(settings),
       },
     );
-
-    alert("Settings Saved ✅");
+    alert("Saved ✅");
   };
 
-  /* =========================
-     SAVE PIXELS
-  ========================= */
   const savePixels = async () => {
     await fetch(`https://releaseit-backend.onrender.com/api/pixels`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        shop,
-        pixels,
-      }),
+      body: JSON.stringify({ shop, pixels }),
     });
-
     alert("Pixels Saved ✅");
   };
 
-  /* =========================
-     BUTTON LOGIC
-  ========================= */
-  const showAddToCart =
-    settings.mode !== "cod_only" && settings.mode !== "replace";
-
-  const showBuyNow =
-    settings.mode !== "cod_only" && settings.mode !== "replace_buy_now";
-
-  const showCOD =
-    settings.mode === "both" ||
-    settings.mode === "replace" ||
-    settings.mode === "replace_buy_now" ||
-    settings.mode === "cod_only";
-
-  /* =========================
-     PIXEL HANDLER
-  ========================= */
-  const addPixel = () => {
+  const addPixel = () =>
     setPixels([...pixels, { type: "facebook", pixelId: "", label: "" }]);
+
+  const updatePixel = (i, k, v) => {
+    const arr = [...pixels];
+    arr[i][k] = v;
+    setPixels(arr);
   };
 
-  const updatePixel = (index, key, value) => {
-    const updated = [...pixels];
-    updated[index][key] = value;
-    setPixels(updated);
+  const removePixel = (i) => {
+    const arr = [...pixels];
+    arr.splice(i, 1);
+    setPixels(arr);
   };
 
-  const removePixel = (index) => {
-    const updated = [...pixels];
-    updated.splice(index, 1);
-    setPixels(updated);
-  };
+  const showAdd = settings.mode !== "cod_only" && settings.mode !== "replace";
+  const showBuy =
+    settings.mode !== "cod_only" && settings.mode !== "replace_buy_now";
+  const showCOD = ["both", "replace", "replace_buy_now", "cod_only"].includes(
+    settings.mode,
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center p-6">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl p-8 border border-gray-100">
-        <h1 className="text-3xl font-semibold mb-6 flex items-center gap-2">
-          ⚙️ <span>ReleaseIt Pro</span>
-        </h1>
+      <div className="bg-white rounded-3xl shadow-xl w-full max-w-3xl p-8">
+        <h1 className="text-2xl font-bold mb-6">ReleaseIt Pro</h1>
 
-        {/* ================= SETTINGS ================= */}
-
-        <label className="text-sm font-semibold">Button Mode</label>
-        <select
-          value={settings.mode}
-          onChange={(e) => update("mode", e.target.value)}
-          className="w-full p-3 mb-5 border rounded-xl"
-        >
-          <option value="both">Show All Buttons</option>
-          <option value="replace">Replace Add to Cart</option>
-          <option value="replace_buy_now">Replace Buy Now</option>
-          <option value="cod_only">Only COD Button</option>
-        </select>
-
-        <label className="text-sm font-semibold">Button Text</label>
+        {/* SETTINGS */}
         <input
           value={settings.buttonText}
           onChange={(e) => update("buttonText", e.target.value)}
-          className="w-full p-3 mb-5 border rounded-xl"
+          className="w-full border p-3 mb-4"
         />
 
-        <div className="flex gap-6 mb-5">
-          <input
-            type="color"
-            value={settings.bgColor}
-            onChange={(e) => update("bgColor", e.target.value)}
-          />
-          <input
-            type="color"
-            value={settings.textColor}
-            onChange={(e) => update("textColor", e.target.value)}
-          />
-        </div>
-
-        <input
-          type="range"
-          min="0"
-          max="20"
-          value={settings.borderRadius}
-          onChange={(e) => update("borderRadius", Number(e.target.value))}
-          className="w-full mb-6"
-        />
-
-        <select
-          value={settings.position}
-          onChange={(e) => update("position", e.target.value)}
-          className="w-full p-3 mb-6 border rounded-xl"
-        >
-          <option value="below">Below Add to Cart</option>
-          <option value="above">Above Add to Cart</option>
-          <option value="below_buy_now">Below Buy Now</option>
-        </select>
-
-        {/* ================= LIVE PREVIEW ================= */}
-
-        <div className="bg-gray-100 p-5 rounded-xl mb-6">
-          <p className="text-sm mb-3 text-gray-500">Live Preview</p>
-
+        {/* PREVIEW */}
+        <div className="bg-gray-100 p-5 rounded mb-6">
           {settings.position === "above" && showCOD && (
             <CODPreview settings={settings} />
           )}
 
-          {showAddToCart && (
-            <button className="w-full border p-3 rounded-lg mb-2 bg-white">
-              Add to cart
-            </button>
+          {showAdd && (
+            <button className="w-full border p-3 mb-2">Add to cart</button>
           )}
 
           {settings.position === "below" && showCOD && (
             <CODPreview settings={settings} />
           )}
 
-          {showBuyNow && (
-            <button className="w-full bg-black text-white p-3 rounded-lg mb-2">
+          {showBuy && (
+            <button className="w-full bg-black text-white p-3 mb-2">
               Buy it now
             </button>
           )}
@@ -234,57 +136,24 @@ export default function Admin() {
           )}
         </div>
 
-        {/* ================= PIXELS MODULE ================= */}
+        {/* PIXELS */}
+        <h2 className="font-semibold mb-2">Pixels</h2>
 
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-3">Pixels</h2>
+        {pixels.map((p, i) => (
+          <div key={i} className="border p-3 mb-2">
+            <input
+              placeholder="Pixel ID"
+              value={p.pixelId}
+              onChange={(e) => updatePixel(i, "pixelId", e.target.value)}
+            />
+            <button onClick={() => removePixel(i)}>X</button>
+          </div>
+        ))}
 
-          {pixels.map((p, i) => (
-            <div key={i} className="border p-3 mb-3 rounded-xl">
-              <input
-                placeholder="Pixel ID"
-                value={p.pixelId}
-                onChange={(e) => updatePixel(i, "pixelId", e.target.value)}
-                className="w-full p-2 mb-2 border rounded"
-              />
+        <button onClick={addPixel}>Add Pixel</button>
+        <button onClick={savePixels}>Save Pixels</button>
 
-              <input
-                placeholder="Label"
-                value={p.label}
-                onChange={(e) => updatePixel(i, "label", e.target.value)}
-                className="w-full p-2 mb-2 border rounded"
-              />
-
-              <button
-                onClick={() => removePixel(i)}
-                className="text-red-500 text-sm"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-
-          <button
-            onClick={addPixel}
-            className="bg-gray-200 px-4 py-2 rounded-lg mr-2"
-          >
-            Add Pixel
-          </button>
-
-          <button
-            onClick={savePixels}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-          >
-            Save Pixels
-          </button>
-        </div>
-
-        {/* ================= SAVE ================= */}
-
-        <button
-          onClick={save}
-          className="w-full bg-black text-white p-4 rounded-xl"
-        >
+        <button onClick={save} className="w-full bg-black text-white p-4 mt-6">
           Save Settings
         </button>
       </div>
