@@ -2,8 +2,6 @@
   if (window.releaseItLoaded) return;
   window.releaseItLoaded = true;
 
-  console.log("🔥 ReleaseIt FINAL PRO Loaded");
-
   const BACKEND = "https://releaseit-backend.onrender.com";
 
   let settings = {
@@ -15,7 +13,7 @@
     position: "below",
   };
 
-  // 🔥 hide buttons (no flicker)
+  // hide flicker
   const hideStyle = document.createElement("style");
   hideStyle.innerHTML = `
     .product-form__submit,
@@ -25,34 +23,71 @@
   `;
   document.head.appendChild(hideStyle);
 
-  // 🔥 dynamic button CSS (NO margin here ❌)
-  const injectButtonStyle = () => {
-    const style = document.createElement("style");
+  // 🔥 LOAD PIXELS
+  const loadPixels = async (shop) => {
+    try {
+      const res = await fetch(`${BACKEND}/api/pixels?shop=${shop}`);
+      const data = await res.json();
 
-    style.innerHTML = `
-    .releaseit-btn {
-      background: ${settings.bgColor};
-      color: ${settings.textColor};
-      padding: 14px;
-      width: 100%;
-      font-weight: 600;
-      border: 2px solid ${settings.bgColor};
-      border-radius: ${settings.borderRadius || 6}px;
-      cursor: pointer;
-      font-size: 15px;
-      transition: all 0.25s ease;
-      display: block;
-    }
+      if (!data.success) return;
 
-    .releaseit-btn:hover {
-      background: transparent;
-      color: ${settings.bgColor};
-      border: 2px solid ${settings.bgColor};
-      transform: translateY(-2px);
-    }
-    `;
+      data.pixels.forEach((p) => {
+        if (p.type === "facebook") loadFacebookPixel(p.pixelId);
+        if (p.type === "tiktok") loadTikTokPixel(p.pixelId);
+      });
+    } catch {}
+  };
 
-    document.head.appendChild(style);
+  const loadFacebookPixel = (id) => {
+    if (window.fbq) return;
+
+    !(function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod
+          ? n.callMethod.apply(n, arguments)
+          : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = true;
+      n.version = "2.0";
+      n.queue = [];
+      t = b.createElement(e);
+      t.async = true;
+      t.src = "https://connect.facebook.net/en_US/fbevents.js";
+      s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(window, document, "script");
+
+    fbq("init", id);
+    fbq("track", "PageView");
+  };
+
+  const loadTikTokPixel = (id) => {
+    !(function (w, d, t) {
+      w.TiktokAnalyticsObject = t;
+      var ttq = (w[t] = w[t] || []);
+      ttq.methods = ["page", "track"];
+      ttq.setAndDefer = function (t, e) {
+        t[e] = function () {
+          t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+        };
+      };
+      for (var i = 0; i < ttq.methods.length; i++) {
+        ttq.setAndDefer(ttq, ttq.methods[i]);
+      }
+      ttq.load = function (e) {
+        var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
+        var a = d.createElement("script");
+        a.async = true;
+        a.src = i + "?sdkid=" + e;
+        var s = d.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(a, s);
+      };
+      ttq.load(id);
+      ttq.page();
+    })(window, document, "ttq");
   };
 
   const fetchSettings = async (shop) => {
@@ -61,13 +96,6 @@
       const data = await res.json();
       if (data.success) settings = { ...settings, ...data };
     } catch {}
-  };
-
-  // 🔥 AUTO SPACING FUNCTION
-  const getSpacing = (el) => {
-    if (!el) return 10;
-    const styles = window.getComputedStyle(el);
-    return parseInt(styles.marginTop) || 10;
   };
 
   const waitForButton = () => {
@@ -90,80 +118,50 @@
     if (!shop) return;
 
     await fetchSettings(shop);
-
-    injectButtonStyle();
+    await loadPixels(shop); // 🔥 important
 
     const addBtn = await waitForButton();
     const form = addBtn.closest("form");
     if (!form) return;
 
-    if (form.querySelector(".releaseit-btn")) {
-      hideStyle.remove();
-      return;
-    }
-
     const buyNowBtn =
       document.querySelector(".shopify-payment-button") ||
       document.querySelector(".shopify-payment-button__button");
 
-    // 🔥 create COD button
     const codBtn = document.createElement("button");
-    codBtn.className = "releaseit-btn";
-    codBtn.type = "button";
     codBtn.innerText = settings.buttonText;
 
-    // 🔥 AUTO SPACING APPLY (KEY FIX)
-    const spacing = getSpacing(buyNowBtn || addBtn);
-    codBtn.style.marginTop = spacing + "px";
+    codBtn.style.cssText = `
+      background: ${settings.bgColor};
+      color: ${settings.textColor};
+      padding: 14px;
+      width: 100%;
+      font-weight: 600;
+      border-radius: ${settings.borderRadius}px;
+      cursor: pointer;
+      margin-top: 12px;
+    `;
 
-    // 🔥 click
     codBtn.onclick = (e) => {
       e.preventDefault();
+
+      // 🔥 EVENT FIRE
+      if (window.fbq) fbq("track", "InitiateCheckout");
+      if (window.ttq) ttq.track("InitiateCheckout");
 
       const variantInput = form.querySelector('input[name="id"]');
       if (!variantInput) return;
 
       const variantId = variantInput.value;
 
-      const productHandle = window.location.pathname
-        .split("/products/")[1]
-        ?.split("?")[0];
-
-      window.location.href =
-        `https://releaseitnow.vercel.app/?shop=${shop}` +
-        `&variant=${variantId}&product=${productHandle}`;
+      window.location.href = `https://releaseitnow.vercel.app/?shop=${shop}&variant=${variantId}`;
     };
 
-    // 🔥 POSITION CONTROL (clean logic)
-    if (settings.position === "above") {
-      addBtn.parentNode.insertBefore(codBtn, addBtn);
-    } else if (settings.position === "below_buy_now" && buyNowBtn) {
-      buyNowBtn.insertAdjacentElement("afterend", codBtn);
-    } else {
-      addBtn.insertAdjacentElement("afterend", codBtn);
-    }
+    addBtn.insertAdjacentElement("afterend", codBtn);
 
-    // 🔥 MODE CONTROL
-    if (settings.mode === "replace") {
-      addBtn.style.display = "none";
-    }
-
-    if (settings.mode === "replace_buy_now") {
-      if (buyNowBtn) buyNowBtn.style.display = "none";
-    }
-
-    if (settings.mode === "cod_only") {
-      addBtn.style.display = "none";
-      if (buyNowBtn) buyNowBtn.style.display = "none";
-    }
-
-    // 🔥 smooth reveal
     setTimeout(() => {
       hideStyle.remove();
-      codBtn.style.opacity = "1";
-    }, 120);
-
-    console.log("✅ ReleaseIt Working Perfectly (Auto Spacing Enabled)");
+    }, 100);
   };
 
   start();
