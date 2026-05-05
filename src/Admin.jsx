@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import CodSettings from "../components/CodSettings";
 import PixelSettings from "../components/PixelSettings";
+import CodBuilder from "../components/cod/CodBuilder";
 
 export default function Admin() {
   const shop = new URLSearchParams(window.location.search).get("shop");
@@ -58,9 +59,11 @@ export default function Admin() {
       <Sidebar active={active} setActive={setActive} />
 
       <div className="flex-1 p-8">
-        {active === "cod" && (
+        {/* {active === "cod" && (
           <CodSettings settings={settings} update={update} save={save} />
-        )}
+        )} */}
+
+        {active === "cod" && <CodBuilder save={save} />}
 
         {active === "pixels" && (
           <PixelSettings
