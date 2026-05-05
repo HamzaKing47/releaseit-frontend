@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import CodSettings from "../components/CodSettings";
+import CodSettings from "../components/cod/CodSettings";
 import PixelSettings from "../components/PixelSettings";
 import CodBuilder from "../components/cod/CodBuilder";
 
@@ -18,39 +18,53 @@ export default function Admin() {
   });
 
   const [pixels, setPixels] = useState([]);
+  const [formSchema, setFormSchema] = useState([]); // 🔥 NEW
 
   const update = (k, v) => setSettings((p) => ({ ...p, [k]: v }));
 
+  /* ================= LOAD ================= */
   useEffect(() => {
+    if (!shop) return;
+
     fetch(`https://releaseit-backend.onrender.com/api/settings?shop=${shop}`)
       .then((r) => r.json())
-      .then((d) => d.success && setSettings(d));
+      .then((d) => {
+        if (d.success) {
+          setSettings(d);
+          setFormSchema(d.formSchema || []); // 🔥 load builder
+        }
+      });
 
     fetch(`https://releaseit-backend.onrender.com/api/pixels?shop=${shop}`)
       .then((r) => r.json())
       .then((d) => d.success && setPixels(d.pixels));
-  }, []);
+  }, [shop]);
 
-  const save = async () => {
+  /* ================= SAVE SETTINGS ================= */
+  const saveSettings = async () => {
     await fetch(
       `https://releaseit-backend.onrender.com/api/settings?shop=${shop}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          ...settings,
+          formSchema, // 🔥 include builder
+        }),
       },
     );
-    alert("Saved ✅");
+
+    alert("Settings Saved ✅");
   };
 
+  /* ================= SAVE PIXELS ================= */
   const savePixels = async () => {
     await fetch(`https://releaseit-backend.onrender.com/api/pixels`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ shop, pixels }),
     });
+
     alert("Pixels Saved ✅");
   };
 
@@ -58,13 +72,21 @@ export default function Admin() {
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar active={active} setActive={setActive} />
 
-      <div className="flex-1 p-8">
-        {/* {active === "cod" && (
-          <CodSettings settings={settings} update={update} save={save} />
-        )} */}
+      <div className="flex-1 p-8 space-y-6">
+        {/* 🔥 COD SETTINGS */}
+        {active === "cod" && (
+          <>
+            <CodSettings
+              settings={settings}
+              update={update}
+              save={saveSettings}
+            />
 
-        {active === "cod" && <CodBuilder save={save} />}
+            <CodBuilder fields={formSchema} setFields={setFormSchema} />
+          </>
+        )}
 
+        {/* 🔥 PIXELS */}
         {active === "pixels" && (
           <PixelSettings
             pixels={pixels}
