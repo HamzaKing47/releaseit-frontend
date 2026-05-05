@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
-import CodSettings from "../components/cod/CodSettings";
-import PixelSettings from "../components/PixelSettings";
-import CodBuilder from "../components/cod/CodBuilder";
+import Sidebar from "./components/Sidebar";
+import CodSettings from "./components/CodSettings";
+import PixelSettings from "./components/PixelSettings";
+import CodBuilder from "./components/cod/CodBuilder";
 
 export default function Admin() {
   const shop = new URLSearchParams(window.location.search).get("shop");
@@ -11,14 +11,14 @@ export default function Admin() {
 
   const [settings, setSettings] = useState({
     mode: "both",
-    buttonText: "",
-    bgColor: "#ff0000",
+    buttonText: "Buy with Cash on Delivery",
+    bgColor: "#000000",
     textColor: "#ffffff",
     borderRadius: 6,
   });
 
   const [pixels, setPixels] = useState([]);
-  const [formSchema, setFormSchema] = useState([]); // 🔥 NEW
+  const [formSchema, setFormSchema] = useState([]);
 
   const update = (k, v) => setSettings((p) => ({ ...p, [k]: v }));
 
@@ -31,7 +31,7 @@ export default function Admin() {
       .then((d) => {
         if (d.success) {
           setSettings(d);
-          setFormSchema(d.formSchema || []); // 🔥 load builder
+          setFormSchema(d.formSchema || []);
         }
       });
 
@@ -47,13 +47,9 @@ export default function Admin() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...settings,
-          formSchema, // 🔥 include builder
-        }),
-      },
+        body: JSON.stringify({ ...settings, formSchema }),
+      }
     );
-
     alert("Settings Saved ✅");
   };
 
@@ -64,7 +60,6 @@ export default function Admin() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ shop, pixels }),
     });
-
     alert("Pixels Saved ✅");
   };
 
@@ -73,25 +68,24 @@ export default function Admin() {
       <Sidebar active={active} setActive={setActive} />
 
       <div className="flex-1 p-8 space-y-6">
-        {/* 🔥 COD SETTINGS */}
+        {/* COD SETTINGS */}
         {active === "cod" && (
           <>
-            <CodSettings
-              settings={settings}
-              update={update}
-              save={saveSettings}
-            />
-
+            <CodSettings settings={settings} update={update} save={saveSettings} />
             <CodBuilder fields={formSchema} setFields={setFormSchema} />
           </>
         )}
 
-        {/* 🔥 PIXELS */}
+        {/* PIXELS */}
         {active === "pixels" && (
           <PixelSettings
             pixels={pixels}
-            addPixel={() =>
-              setPixels([...pixels, { type: "facebook", pixelId: "" }])
+            // 🔥 FIX: newPixel object accept karta hai
+            addPixel={(newPixel) =>
+              setPixels([
+                ...pixels,
+                newPixel || { type: "facebook", pixelId: "", label: "" },
+              ])
             }
             updatePixel={(i, k, v) => {
               const arr = [...pixels];
