@@ -6,29 +6,22 @@ function App() {
   const params = new URLSearchParams(window.location.search);
   const shop = params.get("shop");
   const variantId = params.get("variant");
+
   if (!shop) {
     return <h1 className="text-center mt-10">Invalid Access ❌</h1>;
   }
 
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     fetch(`https://releaseit-backend.onrender.com/api/products?shop=${shop}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Products API:", data); // 👈 debug
-
-        if (data.success && data.products) {
-          setProducts(data.products);
-        } else {
-          setProducts([]);
-        }
+        if (data.success && data.products) setProducts(data.products);
+        else setProducts([]);
       })
-      .catch(() => {
-        setProducts([]);
-      });
+      .catch(() => setProducts([]));
   }, []);
 
   const [form, setForm] = useState({
@@ -40,10 +33,6 @@ function App() {
   });
 
   const [cart, setCart] = useState([]);
-
-  const addProduct = () => {
-    setCart([...cart, { variantId: "", quantity: 1 }]);
-  };
 
   const handleCartChange = (index, field, value) => {
     const updatedCart = [...cart];
@@ -58,16 +47,13 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
 
     try {
       const res = await fetch(
         `https://releaseit-backend.onrender.com/api/create-order?shop=${shop}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: form.firstName + " " + form.lastName,
             phone: form.phone,
@@ -75,14 +61,23 @@ function App() {
             city: form.city,
             items: cart,
           }),
-        },
+        }
       );
 
       const data = await res.json();
 
       if (data.success) {
-        // 🔥 redirect after success
-        window.location.href = `/thank-you?shop=${shop}&variant=${cart[0].variantId}`;
+        // 🔥 orderId aur orderValue bhi pass karo
+        const orderId = data.order?.id || "";
+        const orderValue = data.order?.total_price || "";
+        const product = cart[0]?.title || "";
+
+        window.location.href =
+          `/thank-you?shop=${shop}` +
+          `&variant=${cart[0]?.variantId || ""}` +
+          `&orderId=${orderId}` +
+          `&value=${orderValue}` +
+          `&product=${encodeURIComponent(product)}`;
       } else {
         alert("❌ Order Failed");
       }
@@ -97,20 +92,20 @@ function App() {
   useEffect(() => {
     if (variantId && products.length > 0) {
       const foundProduct = products.find((p) =>
-        p.variants?.some((v) => String(v.id) === variantId),
+        p.variants?.some((v) => String(v.id) === variantId)
       );
 
       if (foundProduct) {
         const variant = foundProduct.variants.find(
-          (v) => String(v.id) === variantId,
+          (v) => String(v.id) === variantId
         );
-
         setCart([
           {
             variantId: variant.id,
             quantity: 1,
             title: foundProduct.title,
             image: foundProduct.image?.src,
+            price: variant.price,
           },
         ]);
       }
@@ -119,17 +114,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
-      {/* FORM */}
       <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6">
         <h1 className="text-2xl font-bold mb-4 text-center">
           Cash on Delivery
         </h1>
-
-        {success && (
-          <p className="text-green-600 text-center mb-3 font-semibold">
-            ✅ Order Placed Successfully!
-          </p>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -141,7 +129,6 @@ function App() {
             onChange={handleChange}
             required
           />
-
           <input
             type="text"
             name="lastName"
@@ -150,15 +137,13 @@ function App() {
             className="w-full border p-3 rounded-lg"
             onChange={handleChange}
           />
-
           <PhoneInput
             international
-            defaultCountry="PK" // optional (auto bhi ho sakta)
+            defaultCountry="PK"
             value={form.phone}
             onChange={(value) => setForm({ ...form, phone: value })}
             className="w-full border p-3 rounded-lg"
           />
-
           <input
             type="text"
             name="address"
@@ -168,7 +153,6 @@ function App() {
             onChange={handleChange}
             required
           />
-
           <input
             type="text"
             name="city"
@@ -190,23 +174,22 @@ function App() {
                   key={index}
                   className="flex items-center gap-3 border p-3 rounded-lg"
                 >
-                  <img
-                    src={item.image}
-                    className="w-20 h-20 object-cover rounded"
-                  />
-
+                  {item.image && (
+                    <img
+                      src={item.image}
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                  )}
                   <div className="flex-1">
                     <p className="text-sm font-semibold">{item.title}</p>
-
+                    {item.price && (
+                      <p className="text-sm text-gray-500">Rs. {item.price}</p>
+                    )}
                     <input
                       type="number"
                       value={item.quantity}
                       onChange={(e) =>
-                        handleCartChange(
-                          index,
-                          "quantity",
-                          Number(e.target.value),
-                        )
+                        handleCartChange(index, "quantity", Number(e.target.value))
                       }
                       className="w-20 border p-1 rounded mt-1"
                       min="1"
