@@ -4,54 +4,68 @@ const S = {
   card: {
     background: "#fff",
     borderRadius: "16px",
-    boxShadow: "0 1px 8px rgba(0,0,0,0.08)",
+    boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
     padding: "28px",
     maxWidth: "860px",
   },
   label: {
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: 700,
     color: "#6b7280",
     display: "block",
     marginBottom: "6px",
     textTransform: "uppercase",
-    letterSpacing: "0.04em",
+    letterSpacing: "0.05em",
   },
   input: {
     width: "100%",
     padding: "10px 14px",
     border: "1.5px solid #e5e7eb",
-    borderRadius: "9px",
+    borderRadius: "8px",
     fontSize: "14px",
+    color: "#111",
     boxSizing: "border-box",
-    outline: "none",
-    transition: "border 0.15s",
-    fontFamily: "inherit",
     background: "#fafafa",
   },
   select: {
     width: "100%",
     padding: "10px 14px",
     border: "1.5px solid #e5e7eb",
-    borderRadius: "9px",
+    borderRadius: "8px",
     fontSize: "14px",
+    color: "#111",
     boxSizing: "border-box",
     background: "#fafafa",
     cursor: "pointer",
-    fontFamily: "inherit",
   },
-  divider: {
-    borderTop: "1px solid #f3f4f6",
-    margin: "22px 0",
-  },
-  row: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "18px",
-    marginBottom: "18px",
-  },
-  group: { marginBottom: "18px" },
+  row: { marginBottom: "20px" },
+  divider: { borderTop: "1px solid #f3f4f6", margin: "24px 0" },
 };
+
+const MODE_OPTIONS = [
+  {
+    value: "both",
+    label: "Show All Buttons",
+    desc: "Add to Cart + Buy Now + COD",
+  },
+  {
+    value: "replace",
+    label: "Replace Add to Cart",
+    desc: "Hide Add to Cart, show COD",
+  },
+  {
+    value: "replace_buy_now",
+    label: "Replace Buy Now",
+    desc: "Hide Buy Now, show COD",
+  },
+  { value: "cod_only", label: "COD Only", desc: "Hide all, show only COD" },
+];
+
+const POSITION_OPTIONS = [
+  { value: "below", label: "Below Add to Cart" },
+  { value: "above", label: "Above Add to Cart" },
+  { value: "below_buy_now", label: "Below Buy Now" },
+];
 
 export default function CodSettings({ settings, update, save }) {
   const [saved, setSaved] = useState(false);
@@ -61,35 +75,6 @@ export default function CodSettings({ settings, update, save }) {
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
-
-  const MODE_OPTIONS = [
-    {
-      value: "both",
-      label: "Show All Buttons",
-      desc: "Add to cart + Buy Now + COD",
-    },
-    {
-      value: "replace",
-      label: "Replace Add to Cart",
-      desc: "Hide Add to Cart, show COD",
-    },
-    {
-      value: "replace_buy_now",
-      label: "Replace Buy Now",
-      desc: "Hide Buy Now, show COD",
-    },
-    {
-      value: "cod_only",
-      label: "COD Button Only",
-      desc: "Hide all other buttons",
-    },
-  ];
-
-  const POSITION_OPTIONS = [
-    { value: "below", label: "Below Add to Cart" },
-    { value: "above", label: "Above Add to Cart" },
-    { value: "below_buy_now", label: "Below Buy Now" },
-  ];
 
   return (
     <div style={S.card}>
@@ -106,185 +91,147 @@ export default function CodSettings({ settings, update, save }) {
           ⚙️ COD Button Settings
         </h2>
         <p style={{ fontSize: "13px", color: "#9ca3af" }}>
-          Customize how the Cash on Delivery button appears on your store.
+          Customize your Cash on Delivery button appearance and behavior.
         </p>
       </div>
 
       <div style={S.divider} />
 
-      {/* TWO COLUMN LAYOUT */}
       <div
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}
       >
-        {/* LEFT — CONTROLS */}
+        {/* ── LEFT: CONTROLS ── */}
         <div>
-          {/* BUTTON MODE */}
-          <div style={S.group}>
+          {/* MODE — radio cards */}
+          <div style={S.row}>
             <label style={S.label}>Button Mode</label>
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              style={{ display: "flex", flexDirection: "column", gap: "7px" }}
             >
-              {MODE_OPTIONS.map((opt) => (
-                <label
-                  key={opt.value}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "10px 14px",
-                    border: `1.5px solid ${settings.mode === opt.value ? "#111" : "#e5e7eb"}`,
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    background:
-                      settings.mode === opt.value ? "#f9fafb" : "#fff",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="mode"
-                    value={opt.value}
-                    checked={settings.mode === opt.value}
-                    onChange={() => update("mode", opt.value)}
-                    style={{ accentColor: "#111" }}
-                  />
-                  <div>
-                    <p
+              {MODE_OPTIONS.map((opt) => {
+                const active = settings.mode === opt.value;
+                return (
+                  <div
+                    key={opt.value}
+                    onClick={() => update("mode", opt.value)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      border: `1.5px solid ${active ? "#111" : "#e5e7eb"}`,
+                      background: active ? "#fafafa" : "#fff",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <div
                       style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#111",
-                        margin: 0,
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        border: `2px solid ${active ? "#111" : "#d1d5db"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      {opt.label}
-                    </p>
-                    <p
-                      style={{ fontSize: "11px", color: "#9ca3af", margin: 0 }}
-                    >
-                      {opt.desc}
-                    </p>
+                      {active && (
+                        <div
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            borderRadius: "50%",
+                            background: "#111",
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#111",
+                          margin: 0,
+                        }}
+                      >
+                        {opt.label}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "11px",
+                          color: "#9ca3af",
+                          margin: 0,
+                        }}
+                      >
+                        {opt.desc}
+                      </p>
+                    </div>
                   </div>
-                </label>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* BUTTON POSITION */}
-          <div style={S.group}>
+          {/* POSITION */}
+          <div style={S.row}>
             <label style={S.label}>Button Position</label>
             <select
               value={settings.position || "below"}
               onChange={(e) => update("position", e.target.value)}
               style={S.select}
             >
-              {POSITION_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
+              {POSITION_OPTIONS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* BUTTON TEXT */}
-          <div style={S.group}>
+          {/* TEXT */}
+          <div style={S.row}>
             <label style={S.label}>Button Text</label>
             <input
-              style={S.input}
               value={settings.buttonText}
-              placeholder="e.g. Buy with Cash on Delivery"
               onChange={(e) => update("buttonText", e.target.value)}
+              placeholder="Buy with Cash on Delivery"
+              style={S.input}
             />
           </div>
 
           {/* COLORS */}
-          <div style={{ ...S.row, marginBottom: "18px" }}>
-            <div>
-              <label style={S.label}>Background Color</label>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "8px 12px",
-                  border: "1.5px solid #e5e7eb",
-                  borderRadius: "9px",
-                  background: "#fafafa",
-                }}
-              >
-                <input
-                  type="color"
-                  value={settings.bgColor}
-                  onChange={(e) => update("bgColor", e.target.value)}
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    border: "none",
-                    cursor: "pointer",
-                    background: "none",
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "13px",
-                    color: "#374151",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  {settings.bgColor}
-                </span>
-              </div>
-            </div>
-            <div>
-              <label style={S.label}>Text Color</label>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "8px 12px",
-                  border: "1.5px solid #e5e7eb",
-                  borderRadius: "9px",
-                  background: "#fafafa",
-                }}
-              >
-                <input
-                  type="color"
-                  value={settings.textColor}
-                  onChange={(e) => update("textColor", e.target.value)}
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    border: "none",
-                    cursor: "pointer",
-                    background: "none",
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "13px",
-                    color: "#374151",
-                    fontFamily: "monospace",
-                  }}
-                >
-                  {settings.textColor}
-                </span>
-              </div>
+          <div style={S.row}>
+            <label style={S.label}>Colors</label>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+              }}
+            >
+              <ColorSwatch
+                label="Background"
+                value={settings.bgColor}
+                onChange={(v) => update("bgColor", v)}
+              />
+              <ColorSwatch
+                label="Text"
+                value={settings.textColor}
+                onChange={(v) => update("textColor", v)}
+              />
             </div>
           </div>
 
           {/* BORDER RADIUS */}
-          <div style={S.group}>
+          <div style={S.row}>
             <label style={S.label}>
-              Border Radius
+              Border Radius &nbsp;
               <span
-                style={{
-                  fontWeight: 400,
-                  color: "#9ca3af",
-                  marginLeft: "6px",
-                  textTransform: "none",
-                  letterSpacing: 0,
-                }}
+                style={{ color: "#111", fontWeight: 800, fontSize: "13px" }}
               >
                 {settings.borderRadius}px
               </span>
@@ -313,132 +260,149 @@ export default function CodSettings({ settings, update, save }) {
           </div>
         </div>
 
-        {/* RIGHT — LIVE PREVIEW */}
+        {/* ── RIGHT: PREVIEW ── */}
         <div>
           <label style={S.label}>Live Preview</label>
+
+          {/* PHONE MOCKUP */}
           <div
             style={{
-              background: "#f3f4f6",
-              borderRadius: "14px",
-              padding: "28px 20px",
-              border: "1px solid #e5e7eb",
+              background: "#1a1a1a",
+              borderRadius: "28px",
+              padding: "16px 12px 20px",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
+              maxWidth: "260px",
+              margin: "0 auto",
             }}
           >
-            {/* Simulated product image */}
+            {/* notch */}
             <div
               style={{
-                width: "100%",
-                height: "120px",
-                background: "#e5e7eb",
-                borderRadius: "10px",
-                marginBottom: "16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                width: "60px",
+                height: "6px",
+                background: "#333",
+                borderRadius: "3px",
+                margin: "0 auto 14px",
+              }}
+            />
+
+            {/* product mock */}
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: "16px",
+                padding: "14px 12px",
               }}
             >
-              <span style={{ fontSize: "28px" }}>🛍️</span>
-            </div>
-
-            {/* Add to Cart */}
-            {settings.mode !== "replace" && settings.mode !== "cod_only" && (
-              <button
+              {/* product image placeholder */}
+              <div
                 style={{
-                  width: "100%",
-                  padding: "13px",
-                  marginBottom: "8px",
-                  border: "1.5px solid #d1d5db",
-                  borderRadius: "8px",
-                  background: "#fff",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  cursor: "default",
+                  background: "#f3f4f6",
+                  borderRadius: "10px",
+                  height: "100px",
+                  marginBottom: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                Add to cart
-              </button>
-            )}
+                <span style={{ fontSize: "28px" }}>👟</span>
+              </div>
+              <p
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  color: "#111",
+                  marginBottom: "4px",
+                }}
+              >
+                Product Name
+              </p>
+              <p
+                style={{
+                  fontSize: "11px",
+                  color: "#9ca3af",
+                  marginBottom: "12px",
+                }}
+              >
+                Rs. 2,500
+              </p>
 
-            {/* Buy Now */}
-            {settings.mode !== "replace_buy_now" &&
-              settings.mode !== "cod_only" && (
+              {/* BUTTONS */}
+              {settings.mode !== "replace" && settings.mode !== "cod_only" && (
                 <button
                   style={{
                     width: "100%",
-                    padding: "13px",
-                    marginBottom: "8px",
-                    border: "none",
-                    borderRadius: "8px",
-                    background: "#111",
-                    color: "#fff",
-                    fontSize: "14px",
+                    padding: "9px",
+                    background: "#fff",
+                    border: "1.5px solid #d1d5db",
+                    borderRadius: `${settings.borderRadius}px`,
+                    fontSize: "11px",
                     fontWeight: 500,
+                    color: "#374151",
+                    marginBottom: "6px",
                     cursor: "default",
                   }}
                 >
-                  Buy it now
+                  Add to cart
                 </button>
               )}
 
-            {/* COD Button — position preview simplified */}
-            <button
-              style={{
-                width: "100%",
-                padding: "14px",
-                background: settings.bgColor,
-                color: settings.textColor,
-                borderRadius: `${settings.borderRadius}px`,
-                border: `2px solid ${settings.bgColor}`,
-                fontWeight: 700,
-                fontSize: "14px",
-                cursor: "default",
-                transition: "all 0.2s",
-              }}
-            >
-              {settings.buttonText || "Buy with Cash on Delivery"}
-            </button>
+              {settings.mode !== "replace_buy_now" &&
+                settings.mode !== "cod_only" && (
+                  <button
+                    style={{
+                      width: "100%",
+                      padding: "9px",
+                      background: "#111",
+                      border: "none",
+                      borderRadius: `${settings.borderRadius}px`,
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      color: "#fff",
+                      marginBottom: "6px",
+                      cursor: "default",
+                    }}
+                  >
+                    Buy it now
+                  </button>
+                )}
+
+              <button
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  background: settings.bgColor,
+                  color: settings.textColor,
+                  borderRadius: `${settings.borderRadius}px`,
+                  border: "none",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  cursor: "default",
+                }}
+              >
+                {settings.buttonText || "Buy with Cash on Delivery"}
+              </button>
+            </div>
           </div>
 
-          {/* Color swatches quick pick */}
-          <div style={{ marginTop: "14px" }}>
-            <label style={{ ...S.label, marginBottom: "8px" }}>
-              Quick Colors
-            </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-              {[
-                ["#000000", "#ffffff"],
-                ["#e53e3e", "#ffffff"],
-                ["#2563eb", "#ffffff"],
-                ["#16a34a", "#ffffff"],
-                ["#7c3aed", "#ffffff"],
-                ["#ea580c", "#ffffff"],
-                ["#ffffff", "#000000"],
-              ].map(([bg, text]) => (
-                <button
-                  key={bg}
-                  onClick={() => {
-                    update("bgColor", bg);
-                    update("textColor", text);
-                  }}
-                  title={bg}
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    background: bg,
-                    border:
-                      settings.bgColor === bg
-                        ? "2px solid #111"
-                        : "1.5px solid #e5e7eb",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    boxShadow:
-                      settings.bgColor === bg
-                        ? "0 0 0 2px #fff, 0 0 0 4px #111"
-                        : "none",
-                  }}
-                />
-              ))}
-            </div>
+          {/* mode badge */}
+          <div
+            style={{
+              marginTop: "14px",
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: "8px",
+              padding: "9px 14px",
+              fontSize: "12px",
+              color: "#15803d",
+              fontWeight: 600,
+              maxWidth: "260px",
+              margin: "14px auto 0",
+              textAlign: "center",
+            }}
+          >
+            ✅ {MODE_OPTIONS.find((m) => m.value === settings.mode)?.label}
           </div>
         </div>
       </div>
@@ -446,15 +410,15 @@ export default function CodSettings({ settings, update, save }) {
       <div style={S.divider} />
 
       {/* SAVE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
         <button
           onClick={handleSave}
           style={{
             background: saved ? "#16a34a" : "#111",
             color: "#fff",
             border: "none",
-            borderRadius: "9px",
-            padding: "11px 26px",
+            borderRadius: "10px",
+            padding: "12px 28px",
             fontSize: "14px",
             fontWeight: 700,
             cursor: "pointer",
@@ -464,11 +428,76 @@ export default function CodSettings({ settings, update, save }) {
           {saved ? "✅ Saved!" : "Save Settings"}
         </button>
         {saved && (
-          <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 500 }}>
-            Changes applied to your store.
+          <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 600 }}>
+            COD settings updated!
           </span>
         )}
       </div>
     </div>
+  );
+}
+
+function ColorSwatch({ label, value, onChange }) {
+  return (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "9px 12px",
+        border: "1.5px solid #e5e7eb",
+        borderRadius: "8px",
+        cursor: "pointer",
+        background: "#fafafa",
+      }}
+    >
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <div
+          style={{
+            width: "28px",
+            height: "28px",
+            borderRadius: "6px",
+            background: value,
+            border: "2px solid #e5e7eb",
+          }}
+        />
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0,
+            cursor: "pointer",
+            width: "100%",
+            height: "100%",
+          }}
+        />
+      </div>
+      <div>
+        <p
+          style={{
+            fontSize: "10px",
+            fontWeight: 700,
+            color: "#6b7280",
+            margin: 0,
+            textTransform: "uppercase",
+          }}
+        >
+          {label}
+        </p>
+        <p
+          style={{
+            fontSize: "12px",
+            color: "#111",
+            margin: 0,
+            fontFamily: "monospace",
+          }}
+        >
+          {value}
+        </p>
+      </div>
+    </label>
   );
 }
