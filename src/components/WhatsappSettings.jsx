@@ -32,7 +32,18 @@ export default function WhatsappSettings({ shop }) {
   const [saved, setSaved] = useState(false);
   const [testPhone, setTestPhone] = useState("");
   const [testMsg, setTestMsg] = useState("");
+  const [connectMsg, setConnectMsg] = useState("");
+
   const pollRef = useRef(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      clearInterval(pollRef.current);
+    };
+  }, []);
 
   /* ── LOAD ── */
   useEffect(() => {
@@ -40,37 +51,67 @@ export default function WhatsappSettings({ shop }) {
     fetch(`${BACKEND}/api/whatsapp/settings?shop=${shop}`)
       .then((r) => r.json())
       .then((d) => {
-        if (d.success) {
-          setSettings({
-            whatsappNumber: d.whatsappNumber || "",
-            enabled: d.enabled ?? true,
-            sendOnOrderCreate: d.sendOnOrderCreate ?? true,
-            sendOnFulfillment: d.sendOnFulfillment ?? true,
-            sendOnCancellation: d.sendOnCancellation ?? false,
-            messageTemplate: d.messageTemplate || DEFAULT_TEMPLATE,
-          });
-          setStatus(d.status || "disconnected");
-        }
-      });
+        if (!d.success || !isMounted.current) return;
+        setSettings({
+          whatsappNumber: d.whatsappNumber || "",
+          enabled: d.enabled ?? true,
+          sendOnOrderCreate: d.sendOnOrderCreate ?? true,
+          sendOnFulfillment: d.sendOnFulfillment ?? true,
+          sendOnCancellation: d.sendOnCancellation ?? false,
+          messageTemplate: d.messageTemplate || DEFAULT_TEMPLATE,
+        });
+        setStatus(d.status || "disconnected");
+      })
+      .catch(console.error);
   }, [shop]);
 
-  /* ── POLL ── */
-  useEffect(() => {
-    if (status !== "waiting_qr") {
-      clearInterval(pollRef.current);
-      return;
-    }
+  /* ── POLL FOR QR ── */
+  const startPolling = () => {
+    clearInterval(pollRef.current);
+    let attempts = 0;
+    const MAX_ATTEMPTS = 40; // 40 x 3s = 2 minutes
+
     pollRef.current = setInterval(async () => {
-      const r = await fetch(`${BACKEND}/api/whatsapp/status?shop=${shop}`);
-      const d = await r.json();
-      if (d.status === "connected") {
-        setStatus("connected");
-        setQrCode(null);
+      if (!isMounted.current) {
         clearInterval(pollRef.current);
+        return;
+      }
+
+      attempts++;
+      if (attempts > MAX_ATTEMPTS) {
+        clearInterval(pollRef.current);
+        if (isMounted.current) {
+          setStatus("disconnected");
+          setLoading(false);
+          setConnectMsg("❌ Connection timed out. Please try again.");
+        }
+        return;
+      }
+
+      try {
+        const r = await fetch(`${BACKEND}/api/whatsapp/qr?shop=${shop}`);
+        const d = await r.json();
+        if (!isMounted.current) return;
+
+        if (d.status === "connected") {
+          clearInterval(pollRef.current);
+          setStatus("connected");
+          setQrCode(null);
+          setLoading(false);
+          setConnectMsg("");
+        } else if (d.status === "waiting_qr" && d.qrCode) {
+          setQrCode(d.qrCode);
+          setStatus("waiting_qr");
+          setLoading(false);
+          setConnectMsg("");
+        } else if (d.status === "starting") {
+          setConnectMsg(`⏳ Starting Baileys... (${attempts * 3}s)`);
+        }
+      } catch (err) {
+        console.error("[WA Poll]", err.message);
       }
     }, 3000);
-    return () => clearInterval(pollRef.current);
-  }, [status]);
+  };
 
   const upd = (k, v) => setSettings((p) => ({ ...p, [k]: v }));
 
@@ -87,29 +128,55 @@ export default function WhatsappSettings({ shop }) {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  /* ── CONNECT ── */
+  /* ── CONNECT — saves first, then starts async connection ── */
   const handleConnect = async () => {
+    if (!settings.whatsappNumber) return;
     setLoading(true);
     setQrCode(null);
+    setConnectMsg("⏳ Saving settings...");
+
+    // Save first
     await fetch(`${BACKEND}/api/whatsapp/settings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ shop, ...settings }),
     });
+
+    setConnectMsg("⏳ Starting WhatsApp connection...");
+
+    // Start connection — backend immediately returns "starting"
     const r = await fetch(`${BACKEND}/api/whatsapp/connect?shop=${shop}`);
     const d = await r.json();
-    setLoading(false);
+
     if (d.status === "connected") {
       setStatus("connected");
-    } else if (d.qrCode) {
+      setLoading(false);
+      setConnectMsg("");
+      return;
+    }
+
+    if (d.status === "waiting_qr" && d.qrCode) {
       setQrCode(d.qrCode);
       setStatus("waiting_qr");
-    } else alert(d.message || "Connection failed.");
+      setLoading(false);
+      setConnectMsg("");
+      return;
+    }
+
+    // "starting" — poll karo
+    if (d.status === "starting" || d.success) {
+      setConnectMsg("⏳ Initializing Baileys, please wait...");
+      startPolling();
+    } else {
+      setLoading(false);
+      setConnectMsg(`❌ ${d.message || "Connection failed."}`);
+    }
   };
 
   /* ── DISCONNECT ── */
   const handleDisconnect = async () => {
-    if (!confirm("Disconnect WhatsApp?")) return;
+    if (!confirm("Disconnect WhatsApp? Session will be cleared.")) return;
+    clearInterval(pollRef.current);
     await fetch(`${BACKEND}/api/whatsapp/disconnect`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -117,6 +184,7 @@ export default function WhatsappSettings({ shop }) {
     });
     setStatus("disconnected");
     setQrCode(null);
+    setConnectMsg("");
   };
 
   /* ── TEST ── */
@@ -133,11 +201,11 @@ export default function WhatsappSettings({ shop }) {
     setTimeout(() => setTestMsg(""), 3000);
   };
 
-  // wa.me link preview
   const formatWaNum = (n) =>
     n.replace(/\D/g, "").replace(/^0(\d{10})$/, "92$1");
-  const waNum = formatWaNum(settings.whatsappNumber);
-  const sampleLink = waNum ? `https://wa.me/${waNum}?text=CONFIRM-1001` : null;
+  const waNum = formatWaNum(settings.whatsappNumber || "");
+  const sampleLink =
+    waNum.length >= 10 ? `https://wa.me/${waNum}?text=CONFIRM-1001` : null;
 
   const SC = {
     connected: {
@@ -148,12 +216,17 @@ export default function WhatsappSettings({ shop }) {
     waiting_qr: {
       dot: "bg-yellow-400",
       badge: "bg-yellow-50 text-yellow-700 border-yellow-200",
-      label: "Scan QR",
+      label: "Scan QR Code",
     },
     connecting: {
       dot: "bg-blue-400",
       badge: "bg-blue-50 text-blue-700 border-blue-200",
       label: "Connecting...",
+    },
+    starting: {
+      dot: "bg-blue-400",
+      badge: "bg-blue-50 text-blue-700 border-blue-200",
+      label: "Starting...",
     },
     disconnected: {
       dot: "bg-gray-300",
@@ -178,7 +251,9 @@ export default function WhatsappSettings({ shop }) {
         <span
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold border ${sc.badge}`}
         >
-          <span className={`w-2 h-2 rounded-full ${sc.dot}`} />
+          <span
+            className={`w-2 h-2 rounded-full ${sc.dot} ${status === "connecting" || status === "starting" ? "animate-pulse" : ""}`}
+          />
           {sc.label}
         </span>
       </div>
@@ -197,28 +272,25 @@ export default function WhatsappSettings({ shop }) {
       <div
         className={`mt-6 transition-all ${!settings.enabled ? "opacity-40 pointer-events-none" : ""}`}
       >
-        {/* ── STEP 1: WhatsApp NUMBER ── */}
+        {/* ── STEP 1: NUMBER ── */}
         <div className="mb-7">
           <StepLabel n="1" title="Your Store WhatsApp Number" />
           <p className="text-[12px] text-gray-400 mt-1 mb-3 ml-8">
-            This number receives customer replies. Must match the connected
-            WhatsApp.
+            This is the number customers will send replies to. Must match the
+            connected WhatsApp.
           </p>
-
           <input
             value={settings.whatsappNumber}
             onChange={(e) => upd("whatsappNumber", e.target.value)}
             placeholder="e.g. 03001234567 or 923001234567"
             className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition"
           />
-
-          {/* Link Preview */}
           {sampleLink && (
             <div className="mt-3 bg-green-50 border border-green-100 rounded-xl p-3">
               <p className="text-[11px] font-bold text-green-700 mb-1.5">
-                ✅ Sample link that will be sent to customers:
+                ✅ Sample link for customers:
               </p>
-              <code className="text-[11px] text-green-800 bg-white px-2 py-1 rounded-md border border-green-100 break-all">
+              <code className="text-[11px] text-green-800 bg-white px-2 py-1 rounded-md border border-green-100 break-all block">
                 {sampleLink}
               </code>
               <p className="text-[11px] text-green-600 mt-1.5">
@@ -266,18 +338,20 @@ export default function WhatsappSettings({ shop }) {
                 alt="QR"
                 className="w-52 h-52 mx-auto rounded-xl border-2 border-gray-100 shadow-sm mb-4"
               />
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
                 <p className="text-[12px] text-yellow-700 font-semibold">
-                  Waiting for scan...
+                  Waiting for scan... auto-detects
                 </p>
               </div>
               <button
                 onClick={() => {
+                  clearInterval(pollRef.current);
                   setQrCode(null);
                   setStatus("disconnected");
+                  setConnectMsg("");
                 }}
-                className="mt-4 text-[11px] text-gray-400 hover:text-gray-600"
+                className="text-[11px] text-gray-400 hover:text-gray-600"
               >
                 Cancel
               </button>
@@ -287,15 +361,35 @@ export default function WhatsappSettings({ shop }) {
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-4 text-[12px] text-amber-800">
                 <p className="font-bold mb-1">⚠️ Use a Dedicated Number</p>
                 <p className="text-amber-700">
-                  Use a separate SIM — not your personal number.
+                  Use a separate SIM card — not your personal or main business
+                  number.
                 </p>
               </div>
+
+              {connectMsg && (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-[12px] text-blue-700 font-semibold">
+                    {connectMsg}
+                  </p>
+                  <p className="text-[11px] text-blue-500 mt-1">
+                    This may take 30-60 seconds on first run. Please wait...
+                  </p>
+                </div>
+              )}
+
               <button
                 onClick={handleConnect}
                 disabled={loading || !settings.whatsappNumber}
                 className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl text-[14px] transition shadow-sm"
               >
-                {loading ? "⏳ Connecting..." : "📱 Connect WhatsApp"}
+                {loading ? (
+                  <>
+                    <span className="animate-spin inline-block">⏳</span>{" "}
+                    Connecting...
+                  </>
+                ) : (
+                  <>📱 Connect WhatsApp</>
+                )}
               </button>
               {!settings.whatsappNumber && (
                 <p className="text-[11px] text-red-400 mt-2">
@@ -306,14 +400,14 @@ export default function WhatsappSettings({ shop }) {
           )}
         </div>
 
-        {/* ── STEP 3: MESSAGE TEMPLATE ── */}
+        {/* ── STEP 3: TEMPLATE ── */}
         <div className="mb-7">
           <StepLabel n="3" title="Order Confirmation Message" />
           <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
               Variables
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 mb-2">
               {[
                 "{{name}}",
                 "{{orderName}}",
@@ -329,31 +423,21 @@ export default function WhatsappSettings({ shop }) {
                 </code>
               ))}
             </div>
-            <p className="text-[11px] text-gray-400 mt-2">
+            <p className="text-[11px] text-gray-400">
               Keep{" "}
-              <code className="bg-white px-1 rounded text-gray-600">
-                1️⃣ - Confirm Order
-              </code>
-              ,{" "}
-              <code className="bg-white px-1 rounded text-gray-600">
-                2️⃣ - Update Address
-              </code>
-              ,{" "}
-              <code className="bg-white px-1 rounded text-gray-600">
-                3️⃣ - Cancel Order
-              </code>{" "}
-              exactly as-is — links auto-inject honge.
+              <code className="bg-white px-1 rounded">1️⃣ - Confirm Order</code>,{" "}
+              <code className="bg-white px-1 rounded">2️⃣ - Update Address</code>
+              , <code className="bg-white px-1 rounded">3️⃣ - Cancel Order</code>{" "}
+              exactly — links auto-inject honge.
             </p>
           </div>
-
           <textarea
             rows={12}
             value={settings.messageTemplate}
             onChange={(e) => upd("messageTemplate", e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition font-mono resize-y"
           />
-
-          {/* Live Preview */}
+          {/* Preview */}
           <div className="mt-3 bg-[#e9fbe5] border border-[#c3f0b0] rounded-xl p-4">
             <p className="text-[11px] font-bold text-green-700 uppercase tracking-wider mb-2">
               📱 Customer Will See
@@ -367,19 +451,19 @@ export default function WhatsappSettings({ shop }) {
                 .replace(/{{address}}/g, "House 12, Lahore")
                 .replace(
                   "1️⃣ - Confirm Order",
-                  waNum
+                  waNum.length >= 10
                     ? `✅ *Confirm Order:*\nhttps://wa.me/${waNum}?text=CONFIRM-1001`
                     : "1️⃣ - Confirm Order",
                 )
                 .replace(
                   "2️⃣ - Update Address",
-                  waNum
+                  waNum.length >= 10
                     ? `📍 *Update Address:*\nhttps://wa.me/${waNum}?text=ADDRESS-1001`
                     : "2️⃣ - Update Address",
                 )
                 .replace(
                   "3️⃣ - Cancel Order",
-                  waNum
+                  waNum.length >= 10
                     ? `❌ *Cancel Order:*\nhttps://wa.me/${waNum}?text=CANCEL-1001`
                     : "3️⃣ - Cancel Order",
                 )}
