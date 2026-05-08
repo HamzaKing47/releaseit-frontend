@@ -12,14 +12,13 @@ Your order has been placed successfully.
 💰 *Amount:* {{currency}} {{total}}
 📍 *Address:* {{address}}
 
-Please reply:
-
 1️⃣ - Confirm Order
 2️⃣ - Update Address
 3️⃣ - Cancel Order`;
 
 export default function WhatsappSettings({ shop }) {
   const [settings, setSettings] = useState({
+    whatsappNumber: "",
     enabled: true,
     sendOnOrderCreate: true,
     sendOnFulfillment: true,
@@ -43,6 +42,7 @@ export default function WhatsappSettings({ shop }) {
       .then((d) => {
         if (d.success) {
           setSettings({
+            whatsappNumber: d.whatsappNumber || "",
             enabled: d.enabled ?? true,
             sendOnOrderCreate: d.sendOnOrderCreate ?? true,
             sendOnFulfillment: d.sendOnFulfillment ?? true,
@@ -54,7 +54,7 @@ export default function WhatsappSettings({ shop }) {
       });
   }, [shop]);
 
-  /* ── POLL after QR shown ── */
+  /* ── POLL ── */
   useEffect(() => {
     if (status !== "waiting_qr") {
       clearInterval(pollRef.current);
@@ -91,7 +91,6 @@ export default function WhatsappSettings({ shop }) {
   const handleConnect = async () => {
     setLoading(true);
     setQrCode(null);
-    // Save first
     await fetch(`${BACKEND}/api/whatsapp/settings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -105,14 +104,12 @@ export default function WhatsappSettings({ shop }) {
     } else if (d.qrCode) {
       setQrCode(d.qrCode);
       setStatus("waiting_qr");
-    } else {
-      alert(d.message || "Connection failed. Please try again.");
-    }
+    } else alert(d.message || "Connection failed.");
   };
 
   /* ── DISCONNECT ── */
   const handleDisconnect = async () => {
-    if (!confirm("Disconnect WhatsApp? Session will be cleared.")) return;
+    if (!confirm("Disconnect WhatsApp?")) return;
     await fetch(`${BACKEND}/api/whatsapp/disconnect`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -136,7 +133,12 @@ export default function WhatsappSettings({ shop }) {
     setTimeout(() => setTestMsg(""), 3000);
   };
 
-  /* ── STATUS CONFIG ── */
+  // wa.me link preview
+  const formatWaNum = (n) =>
+    n.replace(/\D/g, "").replace(/^0(\d{10})$/, "92$1");
+  const waNum = formatWaNum(settings.whatsappNumber);
+  const sampleLink = waNum ? `https://wa.me/${waNum}?text=CONFIRM-1001` : null;
+
   const SC = {
     connected: {
       dot: "bg-green-500",
@@ -170,7 +172,7 @@ export default function WhatsappSettings({ shop }) {
             💬 WhatsApp Automation
           </h2>
           <p className="text-[13px] text-gray-400">
-            Send automated order messages. Free — powered by Baileys.
+            Free automated order messages with clickable action links.
           </p>
         </div>
         <span
@@ -195,12 +197,42 @@ export default function WhatsappSettings({ shop }) {
       <div
         className={`mt-6 transition-all ${!settings.enabled ? "opacity-40 pointer-events-none" : ""}`}
       >
-        {/* ── STEP 1: CONNECTION ── */}
+        {/* ── STEP 1: WhatsApp NUMBER ── */}
         <div className="mb-7">
-          <StepLabel n="1" title="Connect Your WhatsApp" />
+          <StepLabel n="1" title="Your Store WhatsApp Number" />
+          <p className="text-[12px] text-gray-400 mt-1 mb-3 ml-8">
+            This number receives customer replies. Must match the connected
+            WhatsApp.
+          </p>
+
+          <input
+            value={settings.whatsappNumber}
+            onChange={(e) => upd("whatsappNumber", e.target.value)}
+            placeholder="e.g. 03001234567 or 923001234567"
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition"
+          />
+
+          {/* Link Preview */}
+          {sampleLink && (
+            <div className="mt-3 bg-green-50 border border-green-100 rounded-xl p-3">
+              <p className="text-[11px] font-bold text-green-700 mb-1.5">
+                ✅ Sample link that will be sent to customers:
+              </p>
+              <code className="text-[11px] text-green-800 bg-white px-2 py-1 rounded-md border border-green-100 break-all">
+                {sampleLink}
+              </code>
+              <p className="text-[11px] text-green-600 mt-1.5">
+                Customer clicks → WhatsApp opens → "CONFIRM-1001" auto-sent 🎉
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* ── STEP 2: CONNECT ── */}
+        <div className="mb-7">
+          <StepLabel n="2" title="Connect WhatsApp" />
 
           {status === "connected" ? (
-            /* Connected State */
             <div className="flex items-center gap-3 mt-3">
               <div className="flex-1 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
                 <span className="text-2xl">✅</span>
@@ -221,7 +253,6 @@ export default function WhatsappSettings({ shop }) {
               </button>
             </div>
           ) : qrCode ? (
-            /* QR State */
             <div className="mt-3 border border-gray-200 rounded-xl p-6 text-center">
               <p className="text-[14px] font-bold text-gray-900 mb-1">
                 📱 Scan with WhatsApp
@@ -230,13 +261,11 @@ export default function WhatsappSettings({ shop }) {
                 Open WhatsApp → Menu → <strong>Linked Devices</strong> →{" "}
                 <strong>Link a Device</strong>
               </p>
-              <div className="flex justify-center mb-4">
-                <img
-                  src={qrCode}
-                  alt="QR Code"
-                  className="w-52 h-52 rounded-xl border-2 border-gray-100 shadow-sm"
-                />
-              </div>
+              <img
+                src={qrCode}
+                alt="QR"
+                className="w-52 h-52 mx-auto rounded-xl border-2 border-gray-100 shadow-sm mb-4"
+              />
               <div className="flex items-center justify-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
                 <p className="text-[12px] text-yellow-700 font-semibold">
@@ -254,42 +283,35 @@ export default function WhatsappSettings({ shop }) {
               </button>
             </div>
           ) : (
-            /* Connect Button */
             <div className="mt-3">
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-4 text-[12px] text-amber-800">
-                <p className="font-bold mb-1">
-                  ⚠️ Important — Use a Dedicated Number
-                </p>
+                <p className="font-bold mb-1">⚠️ Use a Dedicated Number</p>
                 <p className="text-amber-700">
-                  Use a separate SIM card for automation — not your personal
-                  number. This protects you from any potential restrictions.
+                  Use a separate SIM — not your personal number.
                 </p>
               </div>
               <button
                 onClick={handleConnect}
-                disabled={loading}
+                disabled={loading || !settings.whatsappNumber}
                 className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl text-[14px] transition shadow-sm"
               >
-                {loading ? (
-                  <>
-                    <span className="animate-spin">⏳</span> Connecting...
-                  </>
-                ) : (
-                  <>📱 Connect WhatsApp</>
-                )}
+                {loading ? "⏳ Connecting..." : "📱 Connect WhatsApp"}
               </button>
+              {!settings.whatsappNumber && (
+                <p className="text-[11px] text-red-400 mt-2">
+                  ⚠️ Enter your WhatsApp number first (Step 1)
+                </p>
+              )}
             </div>
           )}
         </div>
 
-        {/* ── STEP 2: MESSAGE TEMPLATE ── */}
+        {/* ── STEP 3: MESSAGE TEMPLATE ── */}
         <div className="mb-7">
-          <StepLabel n="2" title="Order Confirmation Message" />
-
-          {/* Variables */}
+          <StepLabel n="3" title="Order Confirmation Message" />
           <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
-              Available Variables
+              Variables
             </p>
             <div className="flex flex-wrap gap-1.5">
               {[
@@ -307,57 +329,90 @@ export default function WhatsappSettings({ shop }) {
                 </code>
               ))}
             </div>
+            <p className="text-[11px] text-gray-400 mt-2">
+              Keep{" "}
+              <code className="bg-white px-1 rounded text-gray-600">
+                1️⃣ - Confirm Order
+              </code>
+              ,{" "}
+              <code className="bg-white px-1 rounded text-gray-600">
+                2️⃣ - Update Address
+              </code>
+              ,{" "}
+              <code className="bg-white px-1 rounded text-gray-600">
+                3️⃣ - Cancel Order
+              </code>{" "}
+              exactly as-is — links auto-inject honge.
+            </p>
           </div>
 
           <textarea
-            rows={13}
+            rows={12}
             value={settings.messageTemplate}
             onChange={(e) => upd("messageTemplate", e.target.value)}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition font-mono resize-y"
           />
 
-          {/* Message Preview */}
-          <div className="mt-3 bg-[#e9fbe5] border border-[#d0f0c0] rounded-xl p-4">
+          {/* Live Preview */}
+          <div className="mt-3 bg-[#e9fbe5] border border-[#c3f0b0] rounded-xl p-4">
             <p className="text-[11px] font-bold text-green-700 uppercase tracking-wider mb-2">
-              📱 Preview
+              📱 Customer Will See
             </p>
             <pre className="text-[12px] text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
               {settings.messageTemplate
                 .replace(/{{name}}/g, "Ahmed")
-                .replace(/{{orderName}}/g, "#1234")
+                .replace(/{{orderName}}/g, "#1001")
                 .replace(/{{currency}}/g, "PKR")
                 .replace(/{{total}}/g, "2,500")
-                .replace(/{{address}}/g, "House 12, Lahore")}
+                .replace(/{{address}}/g, "House 12, Lahore")
+                .replace(
+                  "1️⃣ - Confirm Order",
+                  waNum
+                    ? `✅ *Confirm Order:*\nhttps://wa.me/${waNum}?text=CONFIRM-1001`
+                    : "1️⃣ - Confirm Order",
+                )
+                .replace(
+                  "2️⃣ - Update Address",
+                  waNum
+                    ? `📍 *Update Address:*\nhttps://wa.me/${waNum}?text=ADDRESS-1001`
+                    : "2️⃣ - Update Address",
+                )
+                .replace(
+                  "3️⃣ - Cancel Order",
+                  waNum
+                    ? `❌ *Cancel Order:*\nhttps://wa.me/${waNum}?text=CANCEL-1001`
+                    : "3️⃣ - Cancel Order",
+                )}
             </pre>
           </div>
         </div>
 
-        {/* ── STEP 3: TRIGGERS ── */}
+        {/* ── STEP 4: TRIGGERS ── */}
         <div className="mb-7">
-          <StepLabel n="3" title="When to Send Messages" />
+          <StepLabel n="4" title="When to Send" />
           <div className="mt-3 flex flex-col gap-2">
             <ToggleRow
               label="New Order Placed"
-              desc="Send confirmation + reply options when COD order is placed"
+              desc="Send confirmation + action links on COD order"
               on={settings.sendOnOrderCreate}
               onChange={(v) => upd("sendOnOrderCreate", v)}
             />
             <ToggleRow
               label="Order Fulfilled"
-              desc="Send dispatch notification when order ships"
+              desc="Notify when order is dispatched"
               on={settings.sendOnFulfillment}
               onChange={(v) => upd("sendOnFulfillment", v)}
             />
             <ToggleRow
               label="Order Cancelled"
-              desc="Notify customer when order is cancelled"
+              desc="Notify customer on cancellation"
               on={settings.sendOnCancellation}
               onChange={(v) => upd("sendOnCancellation", v)}
             />
           </div>
         </div>
 
-        {/* ── TEST MESSAGE ── */}
+        {/* ── TEST ── */}
         {status === "connected" && (
           <div className="mb-7 bg-gray-50 border border-gray-200 rounded-xl p-4">
             <p className="text-[13px] font-bold text-gray-800 mb-3">
@@ -367,7 +422,7 @@ export default function WhatsappSettings({ shop }) {
               <input
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
-                placeholder="e.g. 03001234567"
+                placeholder="03001234567"
                 className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] bg-white focus:outline-none focus:border-gray-400"
               />
               <button
@@ -409,7 +464,6 @@ export default function WhatsappSettings({ shop }) {
   );
 }
 
-/* ── HELPERS ── */
 function StepLabel({ n, title }) {
   return (
     <div className="flex items-center gap-2">
