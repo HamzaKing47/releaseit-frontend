@@ -5,6 +5,8 @@ import PixelSettings from "./components/PixelSettings";
 import CodBuilder from "./components/cod/CodBuilder";
 import ThankYouSettings from "./components/ThankYouSettings";
 
+const BACKEND = "https://releaseit-backend.onrender.com";
+
 export default function Admin() {
   const shop = new URLSearchParams(window.location.search).get("shop");
   const [active, setActive] = useState("cod");
@@ -15,6 +17,7 @@ export default function Admin() {
     bgColor: "#000000",
     textColor: "#ffffff",
     borderRadius: 6,
+    position: "below",
     thankYou: {
       heading: "Order Confirmed!",
       subtext: "Thank you! Your order has been placed successfully.",
@@ -34,8 +37,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (!shop) return;
-
-    fetch(`https://releaseit-backend.onrender.com/api/settings?shop=${shop}`)
+    fetch(`${BACKEND}/api/settings?shop=${shop}`)
       .then((r) => r.json())
       .then((d) => {
         if (d.success) {
@@ -43,26 +45,22 @@ export default function Admin() {
           setFormSchema(d.formSchema || []);
         }
       });
-
-    fetch(`https://releaseit-backend.onrender.com/api/pixels?shop=${shop}`)
+    fetch(`${BACKEND}/api/pixels?shop=${shop}`)
       .then((r) => r.json())
       .then((d) => d.success && setPixels(d.pixels));
   }, [shop]);
 
   const saveSettings = async () => {
-    const res = await fetch(
-      `https://releaseit-backend.onrender.com/api/settings?shop=${shop}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...settings, formSchema }),
-      }
-    );
+    const res = await fetch(`${BACKEND}/api/settings?shop=${shop}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...settings, formSchema }),
+    });
     return res.json();
   };
 
   const savePixels = async () => {
-    await fetch(`https://releaseit-backend.onrender.com/api/pixels`, {
+    await fetch(`${BACKEND}/api/pixels`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ shop, pixels }),
@@ -71,29 +69,46 @@ export default function Admin() {
 
   if (!shop) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "#ef4444", fontWeight: 600 }}>❌ Shop not found.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-red-500 font-semibold">
+          ❌ Shop not found. Please reinstall the app.
+        </p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f9fafb" }}>
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar active={active} setActive={setActive} />
 
-      <div style={{ flex: 1, padding: "32px", overflowY: "auto" }}>
+      <div className="flex-1 p-8 overflow-y-auto">
+        {/* COD BUTTON */}
         {active === "cod" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-            <CodSettings settings={settings} update={update} save={saveSettings} />
-            <CodBuilder fields={formSchema} setFields={setFormSchema} />
-          </div>
+          <CodSettings
+            settings={settings}
+            update={update}
+            save={saveSettings}
+          />
         )}
 
+        {/* FORM BUILDER — now its OWN tab */}
+        {active === "form" && (
+          <CodBuilder
+            fields={formSchema}
+            setFields={setFormSchema}
+            save={saveSettings}
+          />
+        )}
+
+        {/* PIXELS */}
         {active === "pixels" && (
           <PixelSettings
             pixels={pixels}
-            addPixel={(newPixel) =>
-              setPixels([...pixels, newPixel || { type: "facebook", pixelId: "", label: "" }])
+            addPixel={(p) =>
+              setPixels([
+                ...pixels,
+                p || { type: "facebook", pixelId: "", label: "" },
+              ])
             }
             updatePixel={(i, k, v) => {
               const arr = [...pixels];
@@ -109,6 +124,7 @@ export default function Admin() {
           />
         )}
 
+        {/* THANK YOU PAGE */}
         {active === "thankyou" && (
           <ThankYouSettings
             settings={settings}

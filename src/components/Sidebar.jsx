@@ -7,70 +7,32 @@ const NAV = [
 
 export default function Sidebar({ active, setActive }) {
   return (
-    <div
-      style={{
-        width: "220px",
-        minWidth: "220px",
-        background: "#fff",
-        borderRight: "1px solid #f0f0f0",
-        padding: "24px 14px",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="w-56 min-w-[224px] bg-white border-r border-gray-100 flex flex-col px-3 py-6">
       {/* LOGO */}
-      <div style={{ paddingLeft: "6px", marginBottom: "28px" }}>
-        <h2
-          style={{
-            fontSize: "16px",
-            fontWeight: 800,
-            color: "#111",
-            margin: 0,
-          }}
-        >
+      <div className="px-2 mb-7">
+        <h2 className="text-[15px] font-extrabold text-gray-900 leading-tight">
           🚀 ReleaseIt
         </h2>
-        <p style={{ fontSize: "11px", color: "#9ca3af", margin: "2px 0 0" }}>
-          COD App Dashboard
-        </p>
+        <p className="text-[11px] text-gray-400 mt-0.5">COD App Dashboard</p>
       </div>
 
-      {/* NAV ITEMS */}
-      <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        {NAV.map(({ key, icon, label }) => {
-          const isActive = active === key;
-          return (
-            <button
-              key={key}
-              onClick={() => setActive(key)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                width: "100%",
-                textAlign: "left",
-                padding: "10px 12px",
-                borderRadius: "9px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "13px",
-                fontWeight: isActive ? 700 : 500,
-                background: isActive ? "#111" : "transparent",
-                color: isActive ? "#fff" : "#4b5563",
-                transition: "all 0.15s",
-              }}
-              onMouseOver={(e) => {
-                if (!isActive) e.currentTarget.style.background = "#f3f4f6";
-              }}
-              onMouseOut={(e) => {
-                if (!isActive) e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <span style={{ fontSize: "15px" }}>{icon}</span>
-              {label}
-            </button>
-          );
-        })}
+      {/* NAV */}
+      <nav className="flex flex-col gap-1">
+        {NAV.map(({ key, icon, label }) => (
+          <button
+            key={key}
+            onClick={() => setActive(key)}
+            className={`flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-150 border-none cursor-pointer
+              ${
+                active === key
+                  ? "bg-gray-900 text-white font-bold"
+                  : "bg-transparent text-gray-600 hover:bg-gray-100"
+              }`}
+          >
+            <span className="text-base">{icon}</span>
+            {label}
+          </button>
+        ))}
       </nav>
     </div>
   );
