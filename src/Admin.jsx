@@ -4,6 +4,7 @@ import CodSettings from "./components/CodSettings";
 import PixelSettings from "./components/PixelSettings";
 import CodBuilder from "./components/cod/CodBuilder";
 import ThankYouSettings from "./components/ThankYouSettings";
+import WhatsappSettings from "./components/WhatsappSettings";
 
 const BACKEND = "https://releaseit-backend.onrender.com";
 
@@ -41,7 +42,7 @@ export default function Admin() {
       .then((r) => r.json())
       .then((d) => {
         if (d.success) {
-          setSettings((prev) => ({ ...prev, ...d }));
+          setSettings((p) => ({ ...p, ...d }));
           setFormSchema(d.formSchema || []);
         }
       });
@@ -82,7 +83,6 @@ export default function Admin() {
       <Sidebar active={active} setActive={setActive} />
 
       <div className="flex-1 p-8 overflow-y-auto">
-        {/* COD BUTTON */}
         {active === "cod" && (
           <CodSettings
             settings={settings}
@@ -90,8 +90,6 @@ export default function Admin() {
             save={saveSettings}
           />
         )}
-
-        {/* FORM BUILDER — now its OWN tab */}
         {active === "form" && (
           <CodBuilder
             fields={formSchema}
@@ -99,32 +97,34 @@ export default function Admin() {
             save={saveSettings}
           />
         )}
-
-        {/* PIXELS */}
         {active === "pixels" && (
           <PixelSettings
             pixels={pixels}
             addPixel={(p) =>
               setPixels([
                 ...pixels,
-                p || { type: "facebook", pixelId: "", label: "" },
+                p || {
+                  type: "facebook",
+                  pixelId: "",
+                  label: "",
+                  accessToken: "",
+                },
               ])
             }
             updatePixel={(i, k, v) => {
-              const arr = [...pixels];
-              arr[i][k] = v;
-              setPixels(arr);
+              const a = [...pixels];
+              a[i][k] = v;
+              setPixels(a);
             }}
             removePixel={(i) => {
-              const arr = [...pixels];
-              arr.splice(i, 1);
-              setPixels(arr);
+              const a = [...pixels];
+              a.splice(i, 1);
+              setPixels(a);
             }}
             savePixels={savePixels}
           />
         )}
-
-        {/* THANK YOU PAGE */}
+        {active === "whatsapp" && <WhatsappSettings shop={shop} />}
         {active === "thankyou" && (
           <ThankYouSettings
             settings={settings}
