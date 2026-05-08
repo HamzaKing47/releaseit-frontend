@@ -1,18 +1,60 @@
 import { useState } from "react";
 
-/* ============================================================
-   PIXEL CONFIG — har platform ka label, events, ID placeholder
-============================================================ */
 const PIXEL_PLATFORMS = [
   {
     value: "facebook",
-    label: "Facebook Pixel",
+    label: "Facebook",
     icon: "📘",
     color: "#1877F2",
     idLabel: "Pixel ID",
-    placeholder: "e.g. 1234567890123456",
+    idPlaceholder: "e.g. 1234567890123456",
     events: ["PageView", "InitiateCheckout", "Purchase"],
-    extra: "Facebook Conversions API ke liye alag se API key daalna hoga.",
+    hasAPI: true,
+    apiLabel: "Conversions API Access Token",
+    apiPlaceholder: "Paste your Facebook CAPI access token",
+    apiDocs:
+      "https://developers.facebook.com/docs/marketing-api/conversions-api/get-started",
+    hasTestCode: true,
+  },
+  {
+    value: "tiktok",
+    label: "TikTok",
+    icon: "🎵",
+    color: "#010101",
+    idLabel: "Pixel ID",
+    idPlaceholder: "e.g. CXXXXXXXXXXXXXXXXX",
+    events: ["PageView", "InitiateCheckout", "PlaceAnOrder", "CompletePayment"],
+    hasAPI: true,
+    apiLabel: "Events API Access Token",
+    apiPlaceholder: "Paste your TikTok Events API token",
+    apiDocs: "https://business-api.tiktok.com/portal/docs",
+  },
+  {
+    value: "snapchat",
+    label: "Snapchat",
+    icon: "👻",
+    color: "#FFFC00",
+    iconBg: "#000",
+    idLabel: "Pixel ID",
+    idPlaceholder: "e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    events: ["PAGE_VIEW", "START_CHECKOUT", "PURCHASE"],
+    hasAPI: true,
+    apiLabel: "Conversions API Token",
+    apiPlaceholder: "Paste your Snapchat CAPI token",
+    apiDocs: "https://marketingapi.snapchat.com/docs/conversion.html",
+  },
+  {
+    value: "pinterest",
+    label: "Pinterest",
+    icon: "📌",
+    color: "#E60023",
+    idLabel: "Ad Account ID",
+    idPlaceholder: "e.g. 1234567890123",
+    events: ["pagevisit", "checkout"],
+    hasAPI: true,
+    apiLabel: "Conversions API Token",
+    apiPlaceholder: "Paste your Pinterest CAPI token",
+    apiDocs: "https://developers.pinterest.com/docs/conversions/conversions/",
   },
   {
     value: "google",
@@ -20,269 +62,239 @@ const PIXEL_PLATFORMS = [
     icon: "📊",
     color: "#E37400",
     idLabel: "Measurement ID",
-    placeholder: "e.g. G-XXXXXXXXXX",
+    idPlaceholder: "e.g. G-XXXXXXXXXX",
     events: ["page_view", "begin_checkout", "purchase"],
-    extra: null,
-  },
-  {
-    value: "tiktok",
-    label: "TikTok Pixel",
-    icon: "🎵",
-    color: "#010101",
-    idLabel: "Pixel ID",
-    placeholder: "e.g. CXXXXXXXXXXXXXXXXX",
-    events: ["PageView", "InitiateCheckout", "PlaceAnOrder", "CompletePayment"],
-    extra: null,
-  },
-  {
-    value: "snapchat",
-    label: "Snapchat Pixel",
-    icon: "👻",
-    color: "#FFFC00",
-    iconBg: "#000",
-    idLabel: "Pixel ID",
-    placeholder: "e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    events: ["PAGE_VIEW", "START_CHECKOUT", "PURCHASE"],
-    extra: null,
-  },
-  {
-    value: "pinterest",
-    label: "Pinterest Tag",
-    icon: "📌",
-    color: "#E60023",
-    idLabel: "Tag ID",
-    placeholder: "e.g. 1234567890123",
-    events: ["pagevisit", "checkout"],
-    extra: null,
-  },
-  {
-    value: "sharechat",
-    label: "ShareChat Tag",
-    icon: "💬",
-    color: "#3A6BC9",
-    idLabel: "Tag ID",
-    placeholder: "e.g. SC-XXXXXXXXX",
-    events: ["Initiate checkout", "Purchase"],
-    extra: null,
+    hasAPI: false,
   },
   {
     value: "taboola",
-    label: "Taboola Tag",
+    label: "Taboola",
     icon: "📢",
     color: "#1D9BF0",
     idLabel: "Account ID",
-    placeholder: "e.g. 1234567",
+    idPlaceholder: "e.g. 1234567",
     events: ["start_checkout", "make_purchase"],
-    extra: null,
+    hasAPI: false,
   },
   {
     value: "kwai",
-    label: "Kwai Tag",
+    label: "Kwai",
     icon: "🎬",
     color: "#FF5A00",
     idLabel: "Pixel ID",
-    placeholder: "e.g. KW-XXXXXXXXX",
+    idPlaceholder: "e.g. KW-XXXXXXXXX",
     events: ["purchase"],
-    extra: null,
+    hasAPI: false,
   },
 ];
 
-/* ============================================================
-   PIXEL CARD
-============================================================ */
+/* ── INPUT STYLES ── */
+const inp =
+  "w-full px-3 py-2.5 border border-gray-200 rounded-lg text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition";
+
 function PixelCard({ pixel, index, updatePixel, removePixel }) {
   const [open, setOpen] = useState(true);
+  const [showToken, setShowToken] = useState(false);
 
   const platform =
     PIXEL_PLATFORMS.find((p) => p.value === pixel.type) || PIXEL_PLATFORMS[0];
+  const hasServerAPI = platform.hasAPI && pixel.accessToken;
 
   return (
-    <div
-      style={{
-        border: "1px solid #e5e7eb",
-        borderRadius: "12px",
-        marginBottom: "12px",
-        overflow: "hidden",
-        background: "#fff",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-      }}
-    >
+    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm mb-3">
       {/* HEADER */}
       <div
         onClick={() => setOpen((p) => !p)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 18px",
-          cursor: "pointer",
-          background: open ? "#fafafa" : "#fff",
-          borderBottom: open ? "1px solid #f0f0f0" : "none",
-        }}
+        className={`flex items-center justify-between px-4 py-3 cursor-pointer transition ${open ? "bg-gray-50 border-b border-gray-100" : "bg-white"}`}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="flex items-center gap-3">
           <span
-            style={{
-              fontSize: "20px",
-              width: "32px",
-              height: "32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "8px",
-              background: platform.iconBg || platform.color + "15",
-            }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-lg"
+            style={{ background: platform.iconBg || platform.color + "18" }}
           >
             {platform.icon}
           </span>
           <div>
-            <p style={{ fontWeight: 600, fontSize: "14px", color: "#111" }}>
+            <p className="text-[13px] font-semibold text-gray-900">
               {platform.label}
             </p>
-            {pixel.pixelId && (
-              <p style={{ fontSize: "11px", color: "#9ca3af" }}>
-                ID: {pixel.pixelId}
-              </p>
-            )}
+            <div className="flex items-center gap-2 mt-0.5">
+              {pixel.pixelId && (
+                <span className="text-[11px] text-gray-400">
+                  ID: {pixel.pixelId}
+                </span>
+              )}
+              {hasServerAPI && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
+                  ✅ Server-side ON
+                </span>
+              )}
+              {platform.hasAPI && !pixel.accessToken && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+                  ⚠️ Browser only
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="flex items-center gap-3">
           <button
             onClick={(e) => {
               e.stopPropagation();
               removePixel(index);
             }}
-            style={{
-              color: "#ef4444",
-              fontSize: "12px",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px 8px",
-              borderRadius: "6px",
-              transition: "background 0.15s",
-            }}
-            onMouseOver={(e) => (e.target.style.background = "#fef2f2")}
-            onMouseOut={(e) => (e.target.style.background = "none")}
+            className="text-[12px] text-red-500 hover:bg-red-50 px-2 py-1 rounded-md transition"
           >
             Remove
           </button>
-          <span style={{ color: "#9ca3af", fontSize: "18px" }}>
-            {open ? "▲" : "▼"}
-          </span>
+          <span className="text-gray-400 text-sm">{open ? "▲" : "▼"}</span>
         </div>
       </div>
 
       {/* BODY */}
       {open && (
-        <div style={{ padding: "18px" }}>
+        <div className="p-4 flex flex-col gap-4">
           {/* PLATFORM SELECT */}
-          <label
-            style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", display: "block", marginBottom: "6px" }}
-          >
-            Platform
-          </label>
-          <select
-            value={pixel.type}
-            onChange={(e) => updatePixel(index, "type", e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "8px",
-              marginBottom: "14px",
-              fontSize: "13px",
-              background: "#fff",
-              cursor: "pointer",
-            }}
-          >
-            {PIXEL_PLATFORMS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.icon} {p.label}
-              </option>
-            ))}
-          </select>
-
-          {/* PIXEL ID */}
-          <label
-            style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", display: "block", marginBottom: "6px" }}
-          >
-            {platform.idLabel}
-          </label>
-          <input
-            placeholder={platform.placeholder}
-            value={pixel.pixelId}
-            onChange={(e) => updatePixel(index, "pixelId", e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "8px",
-              marginBottom: "14px",
-              fontSize: "13px",
-              boxSizing: "border-box",
-            }}
-          />
-
-          {/* LABEL (optional) */}
-          <label
-            style={{ fontSize: "12px", fontWeight: 600, color: "#6b7280", display: "block", marginBottom: "6px" }}
-          >
-            Label <span style={{ fontWeight: 400, color: "#9ca3af" }}>(optional)</span>
-          </label>
-          <input
-            placeholder="e.g. My Facebook Pixel"
-            value={pixel.label || ""}
-            onChange={(e) => updatePixel(index, "label", e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "8px",
-              marginBottom: "14px",
-              fontSize: "13px",
-              boxSizing: "border-box",
-            }}
-          />
-
-          {/* AUTO EVENTS */}
-          <div
-            style={{
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: "8px",
-              padding: "12px 14px",
-            }}
-          >
-            <p
-              style={{ fontSize: "12px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}
+          <div>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+              Platform
+            </label>
+            <select
+              value={pixel.type}
+              onChange={(e) => updatePixel(index, "type", e.target.value)}
+              className={inp}
             >
-              ✅ Auto Events:
+              {PIXEL_PLATFORMS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.icon} {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* TWO COLUMN: ID + LABEL */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                {platform.idLabel}
+              </label>
+              <input
+                placeholder={platform.idPlaceholder}
+                value={pixel.pixelId || ""}
+                onChange={(e) => updatePixel(index, "pixelId", e.target.value)}
+                className={inp}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                Label{" "}
+                <span className="font-normal text-gray-400">(optional)</span>
+              </label>
+              <input
+                placeholder="e.g. My Main Pixel"
+                value={pixel.label || ""}
+                onChange={(e) => updatePixel(index, "label", e.target.value)}
+                className={inp}
+              />
+            </div>
+          </div>
+
+          {/* SERVER-SIDE API SECTION */}
+          {platform.hasAPI && (
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-[13px] font-bold text-blue-900">
+                    🚀 Server-Side API
+                  </p>
+                  <p className="text-[11px] text-blue-600 mt-0.5">
+                    Ad blockers bypass hote hain — browser pixel se zyada
+                    accurate
+                  </p>
+                </div>
+                {platform.apiDocs && (
+                  <a
+                    href={platform.apiDocs}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] text-blue-500 hover:underline whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    How to get token →
+                  </a>
+                )}
+              </div>
+
+              {/* ACCESS TOKEN */}
+              <div className="mb-3">
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                  {platform.apiLabel}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showToken ? "text" : "password"}
+                    placeholder={platform.apiPlaceholder}
+                    value={pixel.accessToken || ""}
+                    onChange={(e) =>
+                      updatePixel(index, "accessToken", e.target.value)
+                    }
+                    className={inp + " pr-16"}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowToken((p) => !p)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 hover:text-gray-600 px-1"
+                  >
+                    {showToken ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              {/* FACEBOOK TEST CODE */}
+              {platform.hasTestCode && (
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    Test Event Code{" "}
+                    <span className="font-normal text-gray-400">
+                      (optional, for testing)
+                    </span>
+                  </label>
+                  <input
+                    placeholder="e.g. TEST12345"
+                    value={pixel.testCode || ""}
+                    onChange={(e) =>
+                      updatePixel(index, "testCode", e.target.value)
+                    }
+                    className={inp}
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Facebook Events Manager → Test Events tab se milega
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* AUTO EVENTS BADGES */}
+          <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+              Auto Events
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            <div className="flex flex-wrap gap-1.5">
               {platform.events.map((ev, i) => (
                 <span
                   key={i}
+                  className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
                   style={{
                     background: platform.color + "15",
                     color: platform.color,
                     border: `1px solid ${platform.color}30`,
-                    borderRadius: "6px",
-                    padding: "3px 10px",
-                    fontSize: "11px",
-                    fontWeight: 600,
                   }}
                 >
                   {ev}
                 </span>
               ))}
             </div>
-
-            {platform.extra && (
-              <p style={{ fontSize: "11px", color: "#9ca3af", marginTop: "10px" }}>
-                ℹ️ {platform.extra}
-              </p>
-            )}
           </div>
         </div>
       )}
@@ -290,9 +302,6 @@ function PixelCard({ pixel, index, updatePixel, removePixel }) {
   );
 }
 
-/* ============================================================
-   MAIN COMPONENT
-============================================================ */
 export default function PixelSettings({
   pixels,
   addPixel,
@@ -308,161 +317,141 @@ export default function PixelSettings({
     setTimeout(() => setSaved(false), 2500);
   };
 
+  const serverSideCount = pixels.filter(
+    (p) =>
+      PIXEL_PLATFORMS.find((pl) => pl.value === p.type)?.hasAPI &&
+      p.accessToken,
+  ).length;
+
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "16px",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-        padding: "28px",
-        maxWidth: "720px",
-      }}
-    >
-      {/* HEADING */}
-      <div style={{ marginBottom: "6px" }}>
-        <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#111" }}>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7 max-w-3xl">
+      {/* HEADER */}
+      <div className="mb-5">
+        <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
           📊 Pixels
         </h2>
-        <p style={{ fontSize: "13px", color: "#6b7280", marginTop: "4px" }}>
-          Apne tracking pixels add karo. Events automatically fire honge jab
-          customer COD form bhare aur order place kare.
+        <p className="text-[13px] text-gray-400">
+          Add tracking pixels. Events fire automatically on checkout and
+          purchase.
         </p>
       </div>
 
-      {/* DIVIDER */}
-      <div style={{ borderTop: "1px solid #f0f0f0", margin: "18px 0" }} />
+      {/* STATUS BAR */}
+      {pixels.length > 0 && (
+        <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+            <span className="text-[12px] font-semibold text-gray-700">
+              {pixels.length} pixel{pixels.length > 1 ? "s" : ""} added
+            </span>
+          </div>
+          <span className="text-gray-300">|</span>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`w-2 h-2 rounded-full ${serverSideCount > 0 ? "bg-blue-500" : "bg-gray-300"}`}
+            ></span>
+            <span className="text-[12px] font-semibold text-gray-700">
+              {serverSideCount} server-side API
+              {serverSideCount !== 1 ? "s" : ""} active
+            </span>
+          </div>
+        </div>
+      )}
 
-      {/* ADD ITEM BUTTON */}
+      <div className="border-t border-gray-100 mb-5" />
+
+      {/* ADD BUTTON */}
       <button
         onClick={() =>
-          addPixel({ type: "facebook", pixelId: "", label: "" })
+          addPixel({
+            type: "facebook",
+            pixelId: "",
+            label: "",
+            accessToken: "",
+            testCode: "",
+          })
         }
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          background: "#111",
-          color: "#fff",
-          border: "none",
-          borderRadius: "8px",
-          padding: "10px 18px",
-          fontSize: "13px",
-          fontWeight: 600,
-          cursor: "pointer",
-          marginBottom: "20px",
-          transition: "background 0.2s",
-        }}
-        onMouseOver={(e) => (e.currentTarget.style.background = "#333")}
-        onMouseOut={(e) => (e.currentTarget.style.background = "#111")}
+        className="flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-[13px] font-bold px-4 py-2.5 rounded-lg transition mb-5"
       >
-        + Add Item
+        + Add Pixel
       </button>
 
       {/* PIXEL LIST */}
       {pixels.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "40px 20px",
-            background: "#fafafa",
-            borderRadius: "12px",
-            border: "1px dashed #e5e7eb",
-            marginBottom: "20px",
-          }}
-        >
-          <p style={{ fontSize: "32px", marginBottom: "10px" }}>📡</p>
-          <p style={{ color: "#9ca3af", fontSize: "14px" }}>
-            Abhi koi pixel nahi. "Add Item" dabao.
+        <div className="border-2 border-dashed border-gray-200 rounded-xl p-10 text-center mb-5">
+          <p className="text-3xl mb-2">📡</p>
+          <p className="text-[13px] text-gray-400">
+            No pixels yet. Click "Add Pixel" to start tracking.
           </p>
         </div>
       ) : (
-        pixels.map((p, i) => (
-          <PixelCard
-            key={i}
-            pixel={p}
-            index={i}
-            updatePixel={updatePixel}
-            removePixel={removePixel}
-          />
-        ))
+        <div className="mb-5">
+          {pixels.map((p, i) => (
+            <PixelCard
+              key={i}
+              pixel={p}
+              index={i}
+              updatePixel={updatePixel}
+              removePixel={removePixel}
+            />
+          ))}
+        </div>
       )}
 
-      {/* PLATFORM OVERVIEW TABLE */}
-      <div
-        style={{
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-          padding: "18px",
-          marginBottom: "20px",
-        }}
-      >
-        <p style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "14px" }}>
-          📋 Har Platform ke Auto Events:
+      {/* HOW IT WORKS */}
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6">
+        <p className="text-[12px] font-bold text-gray-700 mb-3">
+          ⚡ How tracking works
         </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-          }}
-        >
-          {PIXEL_PLATFORMS.map((p) => (
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            {
+              icon: "🌐",
+              title: "Browser Pixel",
+              desc: "PageView + InitiateCheckout fires when customer clicks COD button",
+            },
+            {
+              icon: "🖥️",
+              title: "Server-Side API",
+              desc: "Purchase fires from our server — bypasses ad blockers & iOS 14+",
+            },
+            {
+              icon: "🔒",
+              title: "Deduplication",
+              desc: "Same event_id used for browser + server — no double counting",
+            },
+            {
+              icon: "📱",
+              title: "Phone Hashing",
+              desc: "Customer phone is SHA256 hashed before sending to any platform",
+            },
+          ].map((item, i) => (
             <div
-              key={p.value}
-              style={{
-                background: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                padding: "12px",
-              }}
+              key={i}
+              className="bg-white rounded-lg p-3 border border-gray-100"
             >
-              <p style={{ fontWeight: 700, fontSize: "13px", color: "#111", marginBottom: "6px" }}>
-                {p.icon} {p.label}
+              <p className="text-[12px] font-bold text-gray-800 mb-1">
+                {item.icon} {item.title}
               </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                {p.events.map((ev, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      background: "#f3f4f6",
-                      color: "#374151",
-                      borderRadius: "4px",
-                      padding: "2px 7px",
-                      fontSize: "10px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {ev}
-                  </span>
-                ))}
-              </div>
+              <p className="text-[11px] text-gray-500 leading-relaxed">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* SAVE BUTTON */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      {/* SAVE */}
+      <div className="border-t border-gray-100 pt-5 flex items-center gap-4">
         <button
           onClick={handleSave}
-          style={{
-            background: saved ? "#16a34a" : "#2563eb",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            padding: "11px 24px",
-            fontSize: "14px",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "background 0.3s",
-          }}
+          className={`px-7 py-3 rounded-xl text-[14px] font-bold text-white transition ${saved ? "bg-green-600" : "bg-gray-900 hover:bg-gray-700"}`}
         >
           {saved ? "✅ Saved!" : "Save Pixels"}
         </button>
         {saved && (
-          <span style={{ fontSize: "13px", color: "#16a34a" }}>
-            Pixels save ho gaye!
+          <span className="text-[13px] text-green-600 font-semibold">
+            Pixels saved!
           </span>
         )}
       </div>
