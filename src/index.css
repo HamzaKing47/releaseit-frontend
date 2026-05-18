@@ -2,8 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* react-phone-number-input — match our form input styling */
 .PhoneInput {
-    border: 1px solid #ccc;
-    padding: 12px;
-    border-radius: 10px;
+  display: flex;
+  align-items: center;
+}
+.PhoneInput input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #111;
+}
+.PhoneInputCountry {
+  margin-right: 10px;
+}
+.PhoneInputCountrySelectArrow {
+  opacity: 0.4;
+}
+
+/* Subtle scrollbar for sidebar */
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+aside::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+aside::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }

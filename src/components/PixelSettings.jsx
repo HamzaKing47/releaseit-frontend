@@ -208,8 +208,7 @@ function PixelCard({ pixel, index, updatePixel, removePixel }) {
                     🚀 Server-Side API
                   </p>
                   <p className="text-[11px] text-blue-600 mt-0.5">
-                    Ad blockers bypass hote hain — browser pixel se zyada
-                    accurate
+                    Bypasses ad blockers — more accurate than browser pixel
                   </p>
                 </div>
                 {platform.apiDocs && (
@@ -268,7 +267,7 @@ function PixelCard({ pixel, index, updatePixel, removePixel }) {
                     className={inp}
                   />
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Facebook Events Manager → Test Events tab se milega
+                    Find this in Facebook Events Manager → Test Events tab
                   </p>
                 </div>
               )}
@@ -324,7 +323,7 @@ export default function PixelSettings({
   ).length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7 max-w-3xl">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
       {/* HEADER */}
       <div className="mb-5">
         <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">

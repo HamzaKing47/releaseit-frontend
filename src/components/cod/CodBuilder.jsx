@@ -23,6 +23,7 @@ const TYPE_ICONS = {
 const DEFAULT_FIELDS = [
   {
     id: 1,
+    name: "firstName",
     label: "First Name",
     type: "text",
     required: true,
@@ -30,23 +31,34 @@ const DEFAULT_FIELDS = [
   },
   {
     id: 2,
+    name: "lastName",
+    label: "Last Name",
+    type: "text",
+    required: false,
+    placeholder: "Enter your last name",
+  },
+  {
+    id: 3,
+    name: "phone",
     label: "Phone",
     type: "phone",
     required: true,
     placeholder: "03XX-XXXXXXX",
   },
   {
-    id: 3,
+    id: 4,
+    name: "address",
     label: "Address",
     type: "text",
     required: true,
     placeholder: "Enter your address",
   },
   {
-    id: 4,
+    id: 5,
+    name: "city",
     label: "City",
     type: "text",
-    required: false,
+    required: true,
     placeholder: "Enter your city",
   },
 ];
@@ -67,9 +79,17 @@ export default function CodBuilder({
     if (setPropFields) setPropFields(val);
   };
 
+  const slugify = (s) =>
+    (s || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_|_$/g, "");
+
   const addField = () => {
+    const baseName = `field_${fields.length + 1}`;
     const f = {
       id: Date.now(),
+      name: baseName,
       label: "New Field",
       type: "text",
       required: false,
@@ -81,11 +101,25 @@ export default function CodBuilder({
   };
 
   const updateField = (id, key, value) => {
-    const updated = fields.map((f) =>
-      f.id === id ? { ...f, [key]: value } : f,
-    );
+    const updated = fields.map((f) => {
+      if (f.id !== id) return f;
+      const next = { ...f, [key]: value };
+      // Auto-derive `name` from label if user hasn't set one
+      if (key === "label" && (!f.name || f.name.startsWith("field_"))) {
+        next.name = slugify(value) || `field_${id}`;
+      }
+      return next;
+    });
     setFields(updated);
-    if (selected?.id === id) setSelected((prev) => ({ ...prev, [key]: value }));
+    if (selected?.id === id) {
+      setSelected((prev) => {
+        const next = { ...prev, [key]: value };
+        if (key === "label" && (!prev.name || prev.name.startsWith("field_"))) {
+          next.name = slugify(value) || `field_${id}`;
+        }
+        return next;
+      });
+    }
   };
 
   const removeField = (id) => {
@@ -114,7 +148,6 @@ export default function CodBuilder({
         borderRadius: "16px",
         boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
         padding: "28px",
-        maxWidth: "860px",
       }}
     >
       {/* HEADER */}
@@ -529,7 +562,7 @@ export default function CodBuilder({
         </div>
       </div>
 
-      {/* FORM PREVIEW */}
+      {/* FORM PREVIEW — mirrors customer-facing App.jsx exactly */}
       {fields.length > 0 && (
         <>
           <div style={{ borderTop: "1px solid #f3f4f6", margin: "24px 0" }} />
@@ -544,70 +577,18 @@ export default function CodBuilder({
                 marginBottom: "12px",
               }}
             >
-              Form Preview
+              Customer Preview
             </p>
-            <div
+            <p
               style={{
-                background: "#f9fafb",
-                borderRadius: "12px",
-                padding: "20px",
-                border: "1px solid #e5e7eb",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
+                fontSize: "11px",
+                color: "#9ca3af",
+                marginBottom: "16px",
               }}
             >
-              {fields.map((f) => (
-                <div key={f.id}>
-                  <label
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: "#374151",
-                      display: "block",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {f.label}{" "}
-                    {f.required && <span style={{ color: "#ef4444" }}>*</span>}
-                  </label>
-                  {f.type === "select" ? (
-                    <select
-                      disabled
-                      style={{
-                        ...inputStyle,
-                        background: "#fff",
-                        cursor: "default",
-                        color: "#9ca3af",
-                      }}
-                    >
-                      <option>{f.placeholder || "Select option..."}</option>
-                    </select>
-                  ) : f.type === "textarea" ? (
-                    <textarea
-                      disabled
-                      rows={2}
-                      placeholder={f.placeholder || f.label}
-                      style={{
-                        ...inputStyle,
-                        resize: "none",
-                        background: "#fff",
-                      }}
-                    />
-                  ) : (
-                    <input
-                      disabled
-                      placeholder={f.placeholder || f.label}
-                      style={{
-                        ...inputStyle,
-                        background: "#fff",
-                        color: "#9ca3af",
-                      }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+              This is exactly what customers will see on the checkout page.
+            </p>
+            <CustomerFormPreview fields={fields} />
           </div>
         </>
       )}
@@ -674,3 +655,247 @@ const inputStyle = {
   background: "#fafafa",
   fontFamily: "inherit",
 };
+
+/* ────────────────────────────────────────────────
+   CustomerFormPreview — mirrors App.jsx visually
+   ──────────────────────────────────────────────── */
+function CustomerFormPreview({ fields }) {
+  const contactNames = ["firstName", "lastName", "phone", "email"];
+  const visible = fields.filter((f) => f.type !== "hidden");
+  const contactFields = visible.filter((f) => contactNames.includes(f.name));
+  const otherFields = visible.filter((f) => !contactNames.includes(f.name));
+  const firstName = contactFields.find((f) => f.name === "firstName");
+  const lastName = contactFields.find((f) => f.name === "lastName");
+  const restContact = contactFields.filter(
+    (f) => f.name !== "firstName" && f.name !== "lastName",
+  );
+
+  const previewInput = {
+    width: "100%",
+    padding: "10px 12px",
+    fontSize: "14px",
+    color: "#9ca3af",
+    border: "1px solid #e5e7eb",
+    borderRadius: "8px",
+    background: "#f9fafb",
+    boxSizing: "border-box",
+    fontFamily: "inherit",
+  };
+
+  const renderInput = (f) => {
+    if (!f) return null;
+    if (f.type === "phone") {
+      return (
+        <div
+          style={{
+            ...previewInput,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <span style={{ fontSize: "13px" }}>🇵🇰 +92</span>
+          <span style={{ color: "#d1d5db" }}>|</span>
+          <span style={{ color: "#9ca3af", fontSize: "13px" }}>
+            {f.placeholder || "300 1234567"}
+          </span>
+        </div>
+      );
+    }
+    if (f.type === "select") {
+      return (
+        <select disabled style={previewInput}>
+          <option>{f.placeholder || `Select ${f.label}`}</option>
+        </select>
+      );
+    }
+    if (f.type === "textarea") {
+      return (
+        <textarea
+          disabled
+          rows={3}
+          placeholder={f.placeholder || f.label}
+          style={{ ...previewInput, resize: "none" }}
+        />
+      );
+    }
+    return (
+      <input
+        disabled
+        placeholder={f.placeholder || f.label}
+        style={previewInput}
+      />
+    );
+  };
+
+  return (
+    <div
+      style={{
+        background: "linear-gradient(to bottom, #f9fafb, #f3f4f6)",
+        borderRadius: "16px",
+        padding: "24px 16px",
+        border: "1px solid #e5e7eb",
+      }}
+    >
+      <div style={{ maxWidth: "440px", margin: "0 auto" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: "9999px",
+              padding: "5px 12px",
+              fontSize: "11px",
+              fontWeight: 600,
+              color: "#4b5563",
+              marginBottom: "10px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+            }}
+          >
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "#22c55e",
+              }}
+            />
+            Secure Checkout
+          </div>
+          <h3
+            style={{
+              fontSize: "20px",
+              fontWeight: 800,
+              color: "#111",
+              margin: 0,
+            }}
+          >
+            Cash on Delivery
+          </h3>
+          <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
+            Pay when you receive your order
+          </p>
+        </div>
+
+        {/* Form card */}
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: "16px",
+            border: "1px solid #f3f4f6",
+            padding: "20px",
+            boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          {/* Contact section */}
+          {contactFields.length > 0 && (
+            <div style={{ marginBottom: "14px" }}>
+              <p
+                style={{
+                  fontSize: "10.5px",
+                  fontWeight: 700,
+                  color: "#9ca3af",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "10px",
+                }}
+              >
+                Contact Information
+              </p>
+              {(firstName || lastName) && (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "10px",
+                  }}
+                >
+                  {firstName && <div>{renderInput(firstName)}</div>}
+                  {lastName && <div>{renderInput(lastName)}</div>}
+                </div>
+              )}
+              {restContact.map((f) => (
+                <div key={f.name} style={{ marginTop: "10px" }}>
+                  {renderInput(f)}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Shipping section */}
+          {otherFields.length > 0 && (
+            <div>
+              <p
+                style={{
+                  fontSize: "10.5px",
+                  fontWeight: 700,
+                  color: "#9ca3af",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginBottom: "10px",
+                }}
+              >
+                Shipping Address
+              </p>
+              {otherFields.map((f, idx) => (
+                <div
+                  key={f.name}
+                  style={{ marginTop: idx === 0 ? 0 : "10px" }}
+                >
+                  {renderInput(f)}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Place Order button */}
+          <button
+            disabled
+            style={{
+              width: "100%",
+              marginTop: "16px",
+              background: "#111",
+              color: "#fff",
+              border: "none",
+              borderRadius: "10px",
+              padding: "12px",
+              fontSize: "14px",
+              fontWeight: 700,
+              cursor: "default",
+            }}
+          >
+            Place Order
+          </button>
+
+          <p
+            style={{
+              textAlign: "center",
+              fontSize: "11px",
+              color: "#9ca3af",
+              marginTop: "10px",
+            }}
+          >
+            🔒 Your information is secure and never shared
+          </p>
+        </div>
+
+        {/* Footer */}
+        <p
+          style={{
+            textAlign: "center",
+            fontSize: "11px",
+            color: "#9ca3af",
+            marginTop: "12px",
+          }}
+        >
+          Powered by{" "}
+          <span style={{ fontWeight: 600, color: "#4b5563" }}>ReleaseIt</span>
+        </p>
+      </div>
+    </div>
+  );
+}

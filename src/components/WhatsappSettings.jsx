@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
-const BACKEND = "https://releaseit-backend.onrender.com";
+import { BACKEND } from "../backend.js";
 
 const DEFAULT_TEMPLATE = `🛍️ *New Order!*
 
@@ -33,6 +32,7 @@ export default function WhatsappSettings({ shop }) {
   const [testPhone, setTestPhone] = useState("");
   const [testMsg, setTestMsg] = useState("");
   const [connectMsg, setConnectMsg] = useState("");
+  const [usage, setUsage] = useState(null);
 
   const pollRef = useRef(null);
   const isMounted = useRef(true);
@@ -61,6 +61,7 @@ export default function WhatsappSettings({ shop }) {
           messageTemplate: d.messageTemplate || DEFAULT_TEMPLATE,
         });
         setStatus(d.status || "disconnected");
+        if (d.usage) setUsage(d.usage);
       })
       .catch(console.error);
   }, [shop]);
@@ -105,7 +106,7 @@ export default function WhatsappSettings({ shop }) {
           setLoading(false);
           setConnectMsg("");
         } else if (d.status === "starting") {
-          setConnectMsg(`⏳ Starting Baileys... (${attempts * 3}s)`);
+          setConnectMsg(`⏳ Starting WhatsApp session... (${attempts * 3}s)`);
         }
       } catch (err) {
         console.error("[WA Poll]", err.message);
@@ -165,7 +166,7 @@ export default function WhatsappSettings({ shop }) {
 
     // "starting" — poll karo
     if (d.status === "starting" || d.success) {
-      setConnectMsg("⏳ Initializing Baileys, please wait...");
+      setConnectMsg("⏳ Initializing WhatsApp, please wait...");
       startPolling();
     } else {
       setLoading(false);
@@ -237,7 +238,7 @@ export default function WhatsappSettings({ shop }) {
   const sc = SC[status] || SC.disconnected;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7 max-w-3xl">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
       {/* HEADER */}
       <div className="flex items-start justify-between mb-5">
         <div>
@@ -259,6 +260,9 @@ export default function WhatsappSettings({ shop }) {
       </div>
 
       <div className="border-t border-gray-100 mb-6" />
+
+      {/* USAGE BAR */}
+      {usage && <UsageBar usage={usage} />}
 
       {/* MASTER TOGGLE */}
       <ToggleRow
@@ -403,7 +407,7 @@ export default function WhatsappSettings({ shop }) {
         {/* ── STEP 3: TEMPLATE ── */}
         <div className="mb-7">
           <StepLabel n="3" title="Order Confirmation Message" />
-          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
+          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 mb-4">
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
               Variables
             </p>
@@ -428,53 +432,63 @@ export default function WhatsappSettings({ shop }) {
               <code className="bg-white px-1 rounded">1️⃣ - Confirm Order</code>,{" "}
               <code className="bg-white px-1 rounded">2️⃣ - Update Address</code>
               , <code className="bg-white px-1 rounded">3️⃣ - Cancel Order</code>{" "}
-              exactly — links auto-inject honge.
+              exactly — links will be auto-injected.
             </p>
           </div>
-          <textarea
-            rows={12}
-            value={settings.messageTemplate}
-            onChange={(e) => upd("messageTemplate", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition font-mono resize-y"
-          />
-          {/* Preview */}
-          <div className="mt-3 bg-[#e9fbe5] border border-[#c3f0b0] rounded-xl p-4">
-            <p className="text-[11px] font-bold text-green-700 uppercase tracking-wider mb-2">
-              📱 Customer Will See
-            </p>
-            <pre className="text-[12px] text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
-              {settings.messageTemplate
-                .replace(/{{name}}/g, "Ahmed")
-                .replace(/{{orderName}}/g, "#1001")
-                .replace(/{{currency}}/g, "PKR")
-                .replace(/{{total}}/g, "2,500")
-                .replace(/{{address}}/g, "House 12, Lahore")
-                .replace(
-                  "1️⃣ - Confirm Order",
-                  waNum.length >= 10
-                    ? `✅ *Confirm Order:*\nhttps://wa.me/${waNum}?text=CONFIRM-1001`
-                    : "1️⃣ - Confirm Order",
-                )
-                .replace(
-                  "2️⃣ - Update Address",
-                  waNum.length >= 10
-                    ? `📍 *Update Address:*\nhttps://wa.me/${waNum}?text=ADDRESS-1001`
-                    : "2️⃣ - Update Address",
-                )
-                .replace(
-                  "3️⃣ - Cancel Order",
-                  waNum.length >= 10
-                    ? `❌ *Cancel Order:*\nhttps://wa.me/${waNum}?text=CANCEL-1001`
-                    : "3️⃣ - Cancel Order",
-                )}
-            </pre>
+
+          {/* Two-column on wide screens — editor left, live preview right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+                ✏️ Template Editor
+              </p>
+              <textarea
+                rows={18}
+                value={settings.messageTemplate}
+                onChange={(e) => upd("messageTemplate", e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[13px] bg-gray-50 focus:outline-none focus:border-gray-400 transition font-mono resize-y h-full min-h-[360px]"
+              />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-green-700 uppercase tracking-wider mb-2">
+                📱 Customer Will See
+              </p>
+              <div className="bg-[#e9fbe5] border border-[#c3f0b0] rounded-xl p-4 h-full min-h-[360px] overflow-auto">
+                <pre className="text-[12px] text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
+                  {settings.messageTemplate
+                    .replace(/{{name}}/g, "Ahmed")
+                    .replace(/{{orderName}}/g, "#1001")
+                    .replace(/{{currency}}/g, "PKR")
+                    .replace(/{{total}}/g, "2,500")
+                    .replace(/{{address}}/g, "House 12, Lahore")
+                    .replace(
+                      "1️⃣ - Confirm Order",
+                      waNum.length >= 10
+                        ? `✅ *Confirm Order:*\nhttps://wa.me/${waNum}?text=CONFIRM-1001`
+                        : "1️⃣ - Confirm Order",
+                    )
+                    .replace(
+                      "2️⃣ - Update Address",
+                      waNum.length >= 10
+                        ? `📍 *Update Address:*\nhttps://wa.me/${waNum}?text=ADDRESS-1001`
+                        : "2️⃣ - Update Address",
+                    )
+                    .replace(
+                      "3️⃣ - Cancel Order",
+                      waNum.length >= 10
+                        ? `❌ *Cancel Order:*\nhttps://wa.me/${waNum}?text=CANCEL-1001`
+                        : "3️⃣ - Cancel Order",
+                    )}
+                </pre>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* ── STEP 4: TRIGGERS ── */}
         <div className="mb-7">
           <StepLabel n="4" title="When to Send" />
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
             <ToggleRow
               label="New Order Placed"
               desc="Send confirmation + action links on COD order"
@@ -555,6 +569,141 @@ function StepLabel({ n, title }) {
         {n}
       </span>
       <p className="text-[13px] font-bold text-gray-800">{title}</p>
+    </div>
+  );
+}
+
+function UsageBar({ usage }) {
+  const {
+    plan,
+    sent,
+    limit,
+    remaining,
+    percentUsed,
+    cycleEnd,
+    dailySent = 0,
+    dailyCap = 0,
+    warmingUp = false,
+    warmupDaysLeft = 0,
+  } = usage;
+  const planLabel =
+    { free: "Free", starter: "Starter", growth: "Growth", pro: "Pro" }[plan] ||
+    "Free";
+
+  // Color shifts as monthly usage climbs
+  const barColor =
+    percentUsed >= 100
+      ? "bg-red-500"
+      : percentUsed >= 80
+        ? "bg-amber-500"
+        : "bg-green-500";
+  const isOver = remaining <= 0;
+  const isNear = percentUsed >= 80 && !isOver;
+
+  // Daily cap status
+  const dailyPct = dailyCap > 0 ? Math.min(100, (dailySent / dailyCap) * 100) : 0;
+  const dailyOver = dailyCap > 0 && dailySent >= dailyCap;
+
+  const resetDate = cycleEnd
+    ? new Date(cycleEnd).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+      })
+    : "";
+
+  return (
+    <div
+      className={`mb-6 rounded-xl border p-4 ${
+        isOver
+          ? "bg-red-50 border-red-200"
+          : isNear
+            ? "bg-amber-50 border-amber-200"
+            : "bg-gray-50 border-gray-200"
+      }`}
+    >
+      {/* Monthly */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-bold text-gray-900">
+            Message Usage
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide bg-gray-900 text-white px-2 py-0.5 rounded-full">
+            {planLabel} Plan
+          </span>
+        </div>
+        <span className="text-[12px] font-semibold text-gray-600">
+          {sent.toLocaleString()} / {limit.toLocaleString()}
+        </span>
+      </div>
+
+      <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${barColor} transition-all duration-500`}
+          style={{ width: `${Math.min(100, percentUsed)}%` }}
+        />
+      </div>
+
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-[11px] text-gray-500">
+          {isOver ? (
+            <span className="text-red-600 font-semibold">
+              ⚠️ Monthly limit reached — resets {resetDate}
+            </span>
+          ) : isNear ? (
+            <span className="text-amber-700 font-semibold">
+              ⚠️ {remaining.toLocaleString()} messages left this cycle
+            </span>
+          ) : (
+            <>
+              {remaining.toLocaleString()} messages left · resets {resetDate}
+            </>
+          )}
+        </p>
+        {(isOver || isNear) && (
+          <span className="text-[11px] font-bold text-blue-600">
+            Upgrade plan →
+          </span>
+        )}
+      </div>
+
+      {/* Daily cap + warm-up */}
+      {dailyCap > 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-200/70">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-semibold text-gray-600">
+              Today's sends
+            </span>
+            <span className="text-[11px] font-semibold text-gray-500">
+              {dailySent.toLocaleString()} / {dailyCap.toLocaleString()}
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 ${
+                dailyOver ? "bg-red-400" : "bg-blue-400"
+              }`}
+              style={{ width: `${dailyPct}%` }}
+            />
+          </div>
+          {warmingUp ? (
+            <p className="text-[11px] text-blue-600 mt-1.5">
+              🔥 Number warm-up in progress — daily limit is reduced for the
+              first few weeks to protect your number from bans. Full speed in ~
+              {warmupDaysLeft} day{warmupDaysLeft === 1 ? "" : "s"}.
+            </p>
+          ) : dailyOver ? (
+            <p className="text-[11px] text-red-600 mt-1.5 font-semibold">
+              ⚠️ Daily cap reached — remaining messages resume tomorrow. This
+              paces sending to keep your WhatsApp number safe.
+            </p>
+          ) : (
+            <p className="text-[11px] text-gray-400 mt-1.5">
+              Daily cap protects your number from WhatsApp bans. Unused
+              messages roll into the monthly total.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

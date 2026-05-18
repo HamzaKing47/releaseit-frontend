@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const BACKEND = "https://releaseit-backend.onrender.com";
+import { BACKEND } from "./backend.js";
 
 const DEFAULTS = {
   heading: "Order Confirmed!",
