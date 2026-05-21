@@ -148,7 +148,12 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
   };
 
   const handleCancel = async () => {
-    if (!confirm("Cancel your subscription and return to the Free plan?")) return;
+    if (
+      !confirm(
+        "Manage or cancel your subscription on Shopify's billing page?",
+      )
+    )
+      return;
     setLoadingPlan("cancel");
     try {
       const r = await fetch(`${BACKEND}/api/billing/cancel`, {
@@ -158,7 +163,12 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
       });
       const data = await r.json();
       if (data.success) {
-        setSuccess("✅ Subscription cancelled — you're back on the Free plan.");
+        // Send them to Shopify's managed-pricing page to confirm cancellation.
+        if (data.manageUrl) {
+          window.location.href = data.manageUrl;
+          return;
+        }
+        setSuccess("✅ You're back on the Free plan.");
         setTimeout(() => window.location.reload(), 1500);
       } else {
         throw new Error(data.message || "Cancel failed");

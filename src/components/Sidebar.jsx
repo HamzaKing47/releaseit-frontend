@@ -3,8 +3,10 @@ const NAV = [
   { key: "form", icon: "📝", label: "Form Builder" },
   { key: "pixels", icon: "📊", label: "Pixels" },
   { key: "whatsapp", icon: "💬", label: "WhatsApp" },
+  { key: "fraud", icon: "🛡️", label: "Fraud Prevention" },
   { key: "thankyou", icon: "🎉", label: "Thank You Page" },
   { key: "pricing", icon: "💎", label: "Pricing & Plans" },
+  { key: "contact", icon: "💬", label: "Contact Support" },
 ];
 
 export default function Sidebar({ active, setActive, shop }) {

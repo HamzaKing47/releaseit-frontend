@@ -101,6 +101,16 @@ function App() {
       }
     });
 
+    // Pull email + postal code (if such fields exist) for fraud checks
+    const emailField = fields.find(
+      (f) => f.type === "email" || f.name === "email",
+    );
+    const postalField = fields.find((f) =>
+      ["postalCode", "postal_code", "zip", "zipcode"].includes(f.name),
+    );
+    const email = emailField ? form[emailField.name] || "" : "";
+    const postalCode = postalField ? form[postalField.name] || "" : "";
+
     try {
       const res = await fetch(`${BACKEND}/api/create-order?shop=${shop}`, {
         method: "POST",
@@ -110,12 +120,21 @@ function App() {
           phone,
           address,
           city,
+          email,
+          postalCode,
           items: cart,
           extras,
         }),
       });
 
       const data = await res.json();
+
+      if (data.blocked) {
+        // Fraud rule blocked this order — show the merchant's custom message
+        setError(data.message || "Your order could not be processed.");
+        setLoading(false);
+        return;
+      }
 
       if (data.success) {
         const orderId = data.order?.id || "";

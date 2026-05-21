@@ -6,6 +6,8 @@ import CodBuilder from "./components/cod/CodBuilder";
 import ThankYouSettings from "./components/ThankYouSettings";
 import WhatsappSettings from "./components/WhatsappSettings";
 import PricingPlans from "./components/PricingPlans";
+import FraudPrevention from "./components/FraudPrevention";
+import ContactUs from "./components/ContactUs";
 import { BACKEND } from "./backend.js";
 
 export default function Admin() {
@@ -106,8 +108,10 @@ export default function Admin() {
       form: "Form Builder",
       pixels: "Pixels",
       whatsapp: "WhatsApp Automation",
+      fraud: "Fraud Prevention",
       thankyou: "Thank You Page",
       pricing: "Pricing & Plans",
+      contact: "Contact Support",
     }[active] || "Dashboard";
 
   return (
@@ -177,6 +181,7 @@ export default function Admin() {
               save={saveSettings}
             />
           )}
+          {active === "fraud" && <FraudPrevention shop={shop} />}
           {active === "pricing" && (
             <PricingPlans
               shop={shop}
@@ -184,6 +189,7 @@ export default function Admin() {
               usage={waSummary.usage}
             />
           )}
+          {active === "contact" && <ContactUs shop={shop} />}
         </div>
       </main>
     </div>
