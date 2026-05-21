@@ -43,6 +43,8 @@ function App() {
   const [fields, setFields] = useState(DEFAULT_FIELDS);
   const [form, setForm] = useState({});
   const [cart, setCart] = useState([]);
+  const [booster, setBooster] = useState(null); // sales booster settings
+  const [selectedAddons, setSelectedAddons] = useState([]);
 
   // Fetch products + form schema together
   useEffect(() => {
@@ -65,9 +67,18 @@ function App() {
           }));
           setFields(normalized);
         }
+        if (data.success && data.salesBooster) setBooster(data.salesBooster);
       })
       .catch(() => {});
   }, []);
+
+  const toggleAddon = (addon) => {
+    setSelectedAddons((prev) =>
+      prev.find((a) => a.id === addon.id)
+        ? prev.filter((a) => a.id !== addon.id)
+        : [...prev, addon],
+    );
+  };
 
   const handleChange = (name, value) => {
     setForm((p) => ({ ...p, [name]: value }));
@@ -124,6 +135,7 @@ function App() {
           postalCode,
           items: cart,
           extras,
+          addons: selectedAddons,
         }),
       });
 
@@ -185,6 +197,26 @@ function App() {
     (sum, item) => sum + (Number(item.price) || 0) * (item.quantity || 1),
     0,
   );
+
+  // ── Sales Booster computations ──
+  const totalQty = cart.reduce((s, it) => s + (it.quantity || 1), 0);
+  const quantityOffers = booster?.quantityOffersEnabled
+    ? [...(booster.quantityOffers || [])].sort((a, b) => a.minQty - b.minQty)
+    : [];
+  const activeOffer = quantityOffers
+    .filter((o) => totalQty >= (o.minQty || 0))
+    .sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0))[0];
+  const nextOffer = quantityOffers.find((o) => totalQty < (o.minQty || 0));
+  const discountPct = activeOffer?.discountPercent || 0;
+  const discountAmount = Math.round((subtotal * discountPct) / 100);
+
+  const availableAddons = booster?.addonsEnabled ? booster.addons || [] : [];
+  const addonsTotal = selectedAddons.reduce(
+    (s, a) => s + (Number(a.price) || 0),
+    0,
+  );
+
+  const grandTotal = subtotal - discountAmount + addonsTotal;
 
   // Render a single field based on its type
   const renderField = (field) => {
@@ -351,13 +383,91 @@ function App() {
                 </div>
               </div>
             ))}
-            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-[13px] font-semibold text-gray-600">
-                Subtotal
-              </span>
-              <span className="text-[16px] font-extrabold text-gray-900">
-                Rs. {subtotal.toLocaleString()}
-              </span>
+            {/* Quantity offer nudge */}
+            {nextOffer && (
+              <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                <p className="text-[11.5px] text-amber-800 font-semibold">
+                  🎁 Add {nextOffer.minQty - totalQty} more to get{" "}
+                  {nextOffer.discountPercent}% off your order!
+                </p>
+              </div>
+            )}
+            {activeOffer && (
+              <div className="mt-3 bg-green-50 border border-green-100 rounded-xl px-3 py-2">
+                <p className="text-[11.5px] text-green-700 font-semibold">
+                  ✅ {activeOffer.discountPercent}% bulk discount applied!
+                </p>
+              </div>
+            )}
+
+            {/* Order add-ons */}
+            {availableAddons.length > 0 && (
+              <div className="mt-4">
+                <p className="text-[10.5px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Add to your order
+                </p>
+                <div className="space-y-2">
+                  {availableAddons.map((a) => {
+                    const checked = !!selectedAddons.find((s) => s.id === a.id);
+                    return (
+                      <label
+                        key={a.id}
+                        className={`flex items-center gap-3 border rounded-xl px-3 py-2.5 cursor-pointer transition ${
+                          checked
+                            ? "border-gray-900 bg-gray-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleAddon(a)}
+                          className="w-4 h-4 accent-gray-900"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-semibold text-gray-900">
+                            {a.title}
+                          </p>
+                          {a.description && (
+                            <p className="text-[11px] text-gray-400">
+                              {a.description}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-[13px] font-bold text-gray-900">
+                          +Rs. {Number(a.price).toLocaleString()}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Totals */}
+            <div className="mt-4 pt-3 border-t border-gray-100 space-y-1.5">
+              <Row label="Subtotal" value={`Rs. ${subtotal.toLocaleString()}`} />
+              {discountAmount > 0 && (
+                <Row
+                  label={`Discount (${discountPct}%)`}
+                  value={`− Rs. ${discountAmount.toLocaleString()}`}
+                  green
+                />
+              )}
+              {addonsTotal > 0 && (
+                <Row
+                  label="Add-ons"
+                  value={`+ Rs. ${addonsTotal.toLocaleString()}`}
+                />
+              )}
+              <div className="flex items-center justify-between pt-1.5">
+                <span className="text-[14px] font-bold text-gray-900">
+                  Total
+                </span>
+                <span className="text-[17px] font-extrabold text-gray-900">
+                  Rs. {grandTotal.toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -433,9 +543,9 @@ function App() {
               ) : (
                 <>
                   Place Order
-                  {subtotal > 0 && (
+                  {grandTotal > 0 && (
                     <span className="text-white/70">
-                      · Rs. {subtotal.toLocaleString()}
+                      · Rs. {grandTotal.toLocaleString()}
                     </span>
                   )}
                 </>
@@ -453,6 +563,19 @@ function App() {
           Powered by <span className="font-semibold text-gray-600">ReleaseIt</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Row({ label, value, green }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[12.5px] text-gray-500">{label}</span>
+      <span
+        className={`text-[13px] font-semibold ${green ? "text-green-600" : "text-gray-700"}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import WhatsappSettings from "./components/WhatsappSettings";
 import PricingPlans from "./components/PricingPlans";
 import FraudPrevention from "./components/FraudPrevention";
 import ContactUs from "./components/ContactUs";
+import SalesBooster from "./components/SalesBooster";
 import { BACKEND } from "./backend.js";
 
 export default function Admin() {
@@ -108,6 +109,7 @@ export default function Admin() {
       form: "Form Builder",
       pixels: "Pixels",
       whatsapp: "WhatsApp Automation",
+      booster: "Sales Booster",
       fraud: "Fraud Prevention",
       thankyou: "Thank You Page",
       pricing: "Pricing & Plans",
@@ -181,6 +183,7 @@ export default function Admin() {
               save={saveSettings}
             />
           )}
+          {active === "booster" && <SalesBooster shop={shop} />}
           {active === "fraud" && <FraudPrevention shop={shop} />}
           {active === "pricing" && (
             <PricingPlans
