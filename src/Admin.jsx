@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import CodSettings from "./components/CodSettings";
 import PixelSettings from "./components/PixelSettings";
@@ -11,9 +12,46 @@ import ContactUs from "./components/ContactUs";
 import SalesBooster from "./components/SalesBooster";
 import { BACKEND } from "./backend.js";
 
+// Nav items — single source of truth for both the custom sidebar
+// (standalone) and the App Bridge nav menu (embedded in Shopify).
+const NAV = [
+  { key: "cod", label: "COD Button" },
+  { key: "form", label: "Form Builder" },
+  { key: "pixels", label: "Pixels" },
+  { key: "whatsapp", label: "WhatsApp" },
+  { key: "booster", label: "Sales Booster" },
+  { key: "fraud", label: "Fraud Prevention" },
+  { key: "thankyou", label: "Thank You Page" },
+  { key: "pricing", label: "Pricing & Plans" },
+  { key: "contact", label: "Contact Support" },
+];
+
 export default function Admin() {
-  const shop = new URLSearchParams(window.location.search).get("shop");
-  const [active, setActive] = useState("cod");
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Resolve shop from the URL, falling back to sessionStorage so that
+  // App Bridge navigation (which may reshape the URL) never loses it.
+  let shop = searchParams.get("shop");
+  if (typeof window !== "undefined") {
+    if (shop) sessionStorage.setItem("releaseit_shop", shop);
+    else shop = sessionStorage.getItem("releaseit_shop");
+  }
+  const active = searchParams.get("tab") || "cod";
+
+  // Embedded = running inside Shopify admin's iframe. When embedded,
+  // Shopify provides the chrome (top bar + sidebar via App Bridge), so we
+  // hide our own. Standalone keeps the custom sidebar.
+  const isEmbedded =
+    typeof window !== "undefined" && window.top !== window.self;
+
+  const setActive = (tab) =>
+    setSearchParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        p.set("tab", tab);
+        return p;
+      },
+      { replace: true },
+    );
 
   const [settings, setSettings] = useState({
     mode: "both",
@@ -104,37 +142,38 @@ export default function Admin() {
   }
 
   const activeLabel =
-    {
-      cod: "COD Button",
-      form: "Form Builder",
-      pixels: "Pixels",
-      whatsapp: "WhatsApp Automation",
-      booster: "Sales Booster",
-      fraud: "Fraud Prevention",
-      thankyou: "Thank You Page",
-      pricing: "Pricing & Plans",
-      contact: "Contact Support",
-    }[active] || "Dashboard";
+    (NAV.find((n) => n.key === active)?.label) || "Dashboard";
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar active={active} setActive={setActive} shop={shop} />
+  // App Bridge nav — renders in Shopify's own sidebar when embedded.
+  // Harmless (invisible) when running standalone.
+  const navMenu = (
+    <ui-nav-menu>
+      <a href={`/admin?shop=${shop}`} rel="home">
+        ReleaseIt
+      </a>
+      {NAV.map((n) => (
+        <a key={n.key} href={`/admin?shop=${shop}&tab=${n.key}`}>
+          {n.label}
+        </a>
+      ))}
+    </ui-nav-menu>
+  );
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar — sticky inside main column */}
-        <header className="flex-shrink-0 h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6 sm:px-8">
-          <h1 className="text-[15px] font-bold text-gray-900">{activeLabel}</h1>
-          <div className="flex items-center gap-2 text-[11px] text-gray-400">
-            <span className="hidden sm:inline">Store:</span>
-            <code className="text-[11px] bg-gray-50 border border-gray-100 px-2 py-1 rounded-md text-gray-600 max-w-[260px] truncate">
-              {shop}
-            </code>
-          </div>
-        </header>
+  // Content (shared by both layouts)
+  const content = (
+    <div
+      className={
+        isEmbedded ? "p-4 sm:p-6 max-w-5xl mx-auto" : "flex-1 overflow-y-auto p-6 sm:p-8"
+      }
+    >
+      {renderSection()}
+    </div>
+  );
 
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8">
-          {active === "cod" && (
+  function renderSection() {
+    return (
+      <>
+        {active === "cod" && (
             <CodSettings
               settings={settings}
               update={update}
@@ -193,7 +232,39 @@ export default function Admin() {
             />
           )}
           {active === "contact" && <ContactUs shop={shop} />}
-        </div>
+      </>
+    );
+  }
+
+  // ── EMBEDDED: Shopify provides the sidebar (via App Bridge) + top chrome.
+  // We render only the content, plus the <ui-nav-menu> for Shopify's sidebar.
+  if (isEmbedded) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {navMenu}
+        {content}
+      </div>
+    );
+  }
+
+  // ── STANDALONE: our own sidebar + top bar (no App Bridge nav menu).
+  return (
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      <Sidebar active={active} setActive={setActive} shop={shop} />
+
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar — sticky inside main column */}
+        <header className="flex-shrink-0 h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6 sm:px-8">
+          <h1 className="text-[15px] font-bold text-gray-900">{activeLabel}</h1>
+          <div className="flex items-center gap-2 text-[11px] text-gray-400">
+            <span className="hidden sm:inline">Store:</span>
+            <code className="text-[11px] bg-gray-50 border border-gray-100 px-2 py-1 rounded-md text-gray-600 max-w-[260px] truncate">
+              {shop}
+            </code>
+          </div>
+        </header>
+
+        {content}
       </main>
     </div>
   );
