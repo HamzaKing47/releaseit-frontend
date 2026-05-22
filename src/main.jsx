@@ -14,6 +14,8 @@ createRoot(document.getElementById("root")).render(
         <Route path="/" element={<App />} />
         <Route path="/thank-you" element={<ThankYou />} />
         <Route path="/admin" element={<Admin />} />
+        {/* Path-based sections so App Bridge highlights the right nav item */}
+        <Route path="/admin/:tab" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

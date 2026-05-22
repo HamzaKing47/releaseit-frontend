@@ -6,7 +6,6 @@ const S = {
     borderRadius: "16px",
     boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
     padding: "28px",
-    maxWidth: "860px",
   },
   label: {
     fontSize: "11px",

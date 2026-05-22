@@ -30,7 +30,6 @@ export default function ThankYouSettings({ settings, update, save }) {
         borderRadius: "16px",
         boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
         padding: "28px",
-        maxWidth: "860px",
       }}
     >
       {/* HEADER */}

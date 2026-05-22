@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import CodSettings from "./components/CodSettings";
 import PixelSettings from "./components/PixelSettings";
@@ -27,7 +27,10 @@ const NAV = [
 ];
 
 export default function Admin() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const { tab } = useParams();
+  const navigate = useNavigate();
+
   // Resolve shop from the URL, falling back to sessionStorage so that
   // App Bridge navigation (which may reshape the URL) never loses it.
   let shop = searchParams.get("shop");
@@ -35,7 +38,10 @@ export default function Admin() {
     if (shop) sessionStorage.setItem("releaseit_shop", shop);
     else shop = sessionStorage.getItem("releaseit_shop");
   }
-  const active = searchParams.get("tab") || "cod";
+
+  // Active section comes from the PATH (/admin/<tab>) so App Bridge can
+  // highlight the matching nav item. Defaults to "cod".
+  const active = tab || "cod";
 
   // Embedded = running inside Shopify admin's iframe. When embedded,
   // Shopify provides the chrome (top bar + sidebar via App Bridge), so we
@@ -43,15 +49,8 @@ export default function Admin() {
   const isEmbedded =
     typeof window !== "undefined" && window.top !== window.self;
 
-  const setActive = (tab) =>
-    setSearchParams(
-      (prev) => {
-        const p = new URLSearchParams(prev);
-        p.set("tab", tab);
-        return p;
-      },
-      { replace: true },
-    );
+  const setActive = (t) =>
+    navigate(`/admin/${t}?shop=${shop || ""}`, { replace: true });
 
   const [settings, setSettings] = useState({
     mode: "both",
@@ -76,13 +75,18 @@ export default function Admin() {
   const [formSchema, setFormSchema] = useState([]);
   const [waSummary, setWaSummary] = useState({ plan: "free", usage: null });
 
-  // If we just came back from a Shopify billing flow, jump to the
-  // Pricing tab so the merchant sees the success/error banner.
+  // On first load: handle billing return, otherwise normalize the URL to
+  // /admin/cod so App Bridge highlights the correct nav item.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
     if (params.has("upgraded") || params.has("billing_error")) {
-      setActive("pricing");
+      // Keep the query (shop + upgraded) so the Pricing banner still shows.
+      navigate(`/admin/pricing${search}`, { replace: true });
+    } else if (!tab) {
+      navigate(`/admin/cod?shop=${shop || ""}`, { replace: true });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch the current WhatsApp plan + usage (drives the Pricing page)
@@ -148,11 +152,12 @@ export default function Admin() {
   // Harmless (invisible) when running standalone.
   const navMenu = (
     <ui-nav-menu>
-      <a href={`/admin?shop=${shop}`} rel="home">
-        ReleaseIt
+      {/* First link (rel="home") is the app's home — App Bridge requires it. */}
+      <a href={`/admin/cod?shop=${shop}`} rel="home">
+        COD Button
       </a>
-      {NAV.map((n) => (
-        <a key={n.key} href={`/admin?shop=${shop}&tab=${n.key}`}>
+      {NAV.filter((n) => n.key !== "cod").map((n) => (
+        <a key={n.key} href={`/admin/${n.key}?shop=${shop}`}>
           {n.label}
         </a>
       ))}
