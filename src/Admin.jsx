@@ -89,6 +89,28 @@ export default function Admin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 🔑 Token Exchange — when embedded, grab a session token from App Bridge
+  // and exchange it for a fresh (expiring) offline token on the backend.
+  // This keeps the stored Admin-API token valid for all operations.
+  useEffect(() => {
+    if (!shop) return;
+    const w = typeof window !== "undefined" ? window : null;
+    if (w?.shopify?.idToken) {
+      w.shopify
+        .idToken()
+        .then((sessionToken) =>
+          fetch(`${BACKEND}/api/auth/token-exchange`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ shop, sessionToken }),
+          }),
+        )
+        .then(() => console.log("[Auth] token refreshed"))
+        .catch((e) => console.warn("[Auth] token exchange:", e.message));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shop]);
+
   // Fetch the current WhatsApp plan + usage (drives the Pricing page)
   useEffect(() => {
     if (!shop) return;
