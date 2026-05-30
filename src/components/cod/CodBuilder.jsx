@@ -63,6 +63,11 @@ const DEFAULT_FIELDS = [
   },
 ];
 
+const SECTION_LABEL_CLS =
+  "text-[11px] font-bold text-gray-500 uppercase tracking-[0.05em] mb-2.5";
+const INPUT_CLS =
+  "w-full px-3 py-2.5 border-[1.5px] border-gray-200 rounded-[7px] text-[13px] text-gray-900 bg-neutral-50 font-[inherit] focus:outline-none focus:border-gray-400 transition-colors";
+
 export default function CodBuilder({
   fields: propFields,
   setFields: setPropFields,
@@ -142,141 +147,63 @@ export default function CodBuilder({
   };
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "16px",
-        boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
-        padding: "28px",
-      }}
-    >
+    <div className="bg-white rounded-2xl shadow-[0_1px_8px_rgba(0,0,0,0.07)] p-7">
       {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: "22px",
-        }}
-      >
+      <div className="flex items-start justify-between mb-[22px]">
         <div>
-          <h2
-            style={{
-              fontSize: "18px",
-              fontWeight: 800,
-              color: "#111",
-              marginBottom: "4px",
-            }}
-          >
+          <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
             📝 Form Builder
           </h2>
-          <p style={{ fontSize: "13px", color: "#9ca3af" }}>
+          <p className="text-[13px] text-gray-400">
             Design your COD order form. Add, edit, and reorder fields.
           </p>
         </div>
         <button
           onClick={addField}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            background: "#111",
-            color: "#fff",
-            border: "none",
-            borderRadius: "9px",
-            padding: "10px 18px",
-            fontSize: "13px",
-            fontWeight: 700,
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.background = "#333")}
-          onMouseOut={(e) => (e.currentTarget.style.background = "#111")}
+          className="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white border-none rounded-[9px] px-[18px] py-2.5 text-[13px] font-bold cursor-pointer whitespace-nowrap transition-colors"
         >
           + Add Field
         </button>
       </div>
 
-      <div style={{ borderTop: "1px solid #f3f4f6", marginBottom: "22px" }} />
+      <div className="border-t border-gray-100 mb-[22px]" />
 
       {/* TWO COLUMN */}
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}
-      >
+      <div className="grid grid-cols-2 gap-5">
         {/* ── LEFT: FIELD LIST ── */}
         <div>
-          <p
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#6b7280",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              marginBottom: "10px",
-            }}
-          >
-            Fields ({fields.length})
-          </p>
+          <p className={SECTION_LABEL_CLS}>Fields ({fields.length})</p>
 
           {fields.length === 0 ? (
-            <div
-              style={{
-                border: "2px dashed #e5e7eb",
-                borderRadius: "10px",
-                padding: "32px",
-                textAlign: "center",
-              }}
-            >
-              <p style={{ fontSize: "24px", marginBottom: "8px" }}>📋</p>
-              <p style={{ fontSize: "13px", color: "#9ca3af" }}>
+            <div className="border-2 border-dashed border-gray-200 rounded-[10px] p-8 text-center">
+              <p className="text-2xl mb-2">📋</p>
+              <p className="text-[13px] text-gray-400">
                 No fields yet. Click "+ Add Field".
               </p>
             </div>
           ) : (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
+            <div className="flex flex-col gap-1.5">
               {fields.map((f, idx) => {
                 const isSelected = selected?.id === f.id;
                 return (
                   <div
                     key={f.id}
                     onClick={() => setSelected(f)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "11px 14px",
-                      borderRadius: "9px",
-                      border: `1.5px solid ${isSelected ? "#111" : "#e5e7eb"}`,
-                      background: isSelected ? "#f9fafb" : "#fff",
-                      cursor: "pointer",
-                      transition: "all 0.12s",
-                    }}
+                    className={`flex items-center gap-2.5 px-3.5 py-3 rounded-[9px] border-[1.5px] cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-gray-900 bg-gray-50"
+                        : "border-gray-200 bg-white"
+                    }`}
                   >
                     {/* drag handle / order buttons */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "2px",
-                      }}
-                    >
+                    <div className="flex flex-col gap-0.5">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           moveField(idx, -1);
                         }}
                         disabled={idx === 0}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: idx === 0 ? "default" : "pointer",
-                          color: idx === 0 ? "#d1d5db" : "#6b7280",
-                          fontSize: "10px",
-                          padding: "0",
-                          lineHeight: 1,
-                        }}
+                        className="bg-none border-none p-0 leading-none text-[10px] text-gray-500 disabled:text-gray-300 disabled:cursor-default cursor-pointer"
                       >
                         ▲
                       </button>
@@ -286,49 +213,23 @@ export default function CodBuilder({
                           moveField(idx, 1);
                         }}
                         disabled={idx === fields.length - 1}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor:
-                            idx === fields.length - 1 ? "default" : "pointer",
-                          color:
-                            idx === fields.length - 1 ? "#d1d5db" : "#6b7280",
-                          fontSize: "10px",
-                          padding: "0",
-                          lineHeight: 1,
-                        }}
+                        className="bg-none border-none p-0 leading-none text-[10px] text-gray-500 disabled:text-gray-300 disabled:cursor-default cursor-pointer"
                       >
                         ▼
                       </button>
                     </div>
 
                     {/* icon */}
-                    <span style={{ fontSize: "16px", flexShrink: 0 }}>
+                    <span className="text-[16px] shrink-0">
                       {TYPE_ICONS[f.type] || "📝"}
                     </span>
 
                     {/* info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "#111",
-                          margin: 0,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">
                         {f.label}
                       </p>
-                      <p
-                        style={{
-                          fontSize: "11px",
-                          color: "#9ca3af",
-                          margin: 0,
-                        }}
-                      >
+                      <p className="text-[11px] text-gray-400 m-0">
                         {f.type}
                         {f.required ? " · required" : ""}
                       </p>
@@ -340,22 +241,7 @@ export default function CodBuilder({
                         e.stopPropagation();
                         removeField(f.id);
                       }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "#ef4444",
-                        fontSize: "14px",
-                        padding: "2px 4px",
-                        borderRadius: "4px",
-                        flexShrink: 0,
-                      }}
-                      onMouseOver={(e) =>
-                        (e.currentTarget.style.background = "#fef2f2")
-                      }
-                      onMouseOut={(e) =>
-                        (e.currentTarget.style.background = "none")
-                      }
+                      className="bg-none border-none cursor-pointer text-red-500 hover:bg-red-50 text-[14px] px-1 py-0.5 rounded shrink-0 transition-colors"
                     >
                       ✕
                     </button>
@@ -368,44 +254,17 @@ export default function CodBuilder({
 
         {/* ── RIGHT: EDITOR ── */}
         <div>
-          <p
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#6b7280",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              marginBottom: "10px",
-            }}
-          >
-            Edit Field
-          </p>
+          <p className={SECTION_LABEL_CLS}>Edit Field</p>
 
           {!selected ? (
-            <div
-              style={{
-                border: "2px dashed #e5e7eb",
-                borderRadius: "10px",
-                padding: "48px 20px",
-                textAlign: "center",
-              }}
-            >
-              <p style={{ fontSize: "24px", marginBottom: "8px" }}>👈</p>
-              <p style={{ fontSize: "13px", color: "#9ca3af" }}>
+            <div className="border-2 border-dashed border-gray-200 rounded-[10px] px-5 py-12 text-center">
+              <p className="text-2xl mb-2">👈</p>
+              <p className="text-[13px] text-gray-400">
                 Select a field from the left to edit it.
               </p>
             </div>
           ) : (
-            <div
-              style={{
-                border: "1.5px solid #e5e7eb",
-                borderRadius: "10px",
-                padding: "18px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-              }}
-            >
+            <div className="border-[1.5px] border-gray-200 rounded-[10px] p-[18px] flex flex-col gap-4">
               {/* LABEL */}
               <EditorField label="Label">
                 <input
@@ -413,7 +272,7 @@ export default function CodBuilder({
                   onChange={(e) =>
                     updateField(selected.id, "label", e.target.value)
                   }
-                  style={inputStyle}
+                  className={INPUT_CLS}
                 />
               </EditorField>
 
@@ -425,19 +284,13 @@ export default function CodBuilder({
                     updateField(selected.id, "placeholder", e.target.value)
                   }
                   placeholder="Hint text shown inside field"
-                  style={inputStyle}
+                  className={INPUT_CLS}
                 />
               </EditorField>
 
               {/* TYPE */}
               <EditorField label="Field Type">
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "6px",
-                  }}
-                >
+                <div className="grid grid-cols-2 gap-1.5">
                   {FIELD_TYPES.map((t) => {
                     const active = selected.type === t.value;
                     return (
@@ -446,31 +299,23 @@ export default function CodBuilder({
                         onClick={() =>
                           updateField(selected.id, "type", t.value)
                         }
-                        style={{
-                          padding: "8px 10px",
-                          borderRadius: "7px",
-                          border: `1.5px solid ${active ? "#111" : "#e5e7eb"}`,
-                          background: active ? "#111" : "#fff",
-                          cursor: "pointer",
-                          transition: "all 0.12s",
-                        }}
+                        className={`px-2.5 py-2 rounded-[7px] border-[1.5px] cursor-pointer transition-all ${
+                          active
+                            ? "border-gray-900 bg-gray-900"
+                            : "border-gray-200 bg-white"
+                        }`}
                       >
                         <p
-                          style={{
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            color: active ? "#fff" : "#111",
-                            margin: 0,
-                          }}
+                          className={`text-[12px] font-semibold m-0 ${
+                            active ? "text-white" : "text-gray-900"
+                          }`}
                         >
                           {t.label}
                         </p>
                         <p
-                          style={{
-                            fontSize: "10px",
-                            color: active ? "#ccc" : "#9ca3af",
-                            margin: 0,
-                          }}
+                          className={`text-[10px] m-0 ${
+                            active ? "text-gray-300" : "text-gray-400"
+                          }`}
                         >
                           {t.desc}
                         </p>
@@ -494,7 +339,7 @@ export default function CodBuilder({
                       )
                     }
                     placeholder={"Option 1\nOption 2\nOption 3"}
-                    style={{ ...inputStyle, resize: "vertical" }}
+                    className={INPUT_CLS + " resize-y"}
                   />
                 </EditorField>
               )}
@@ -504,56 +349,26 @@ export default function CodBuilder({
                 onClick={() =>
                   updateField(selected.id, "required", !selected.required)
                 }
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px 14px",
-                  borderRadius: "8px",
-                  border: "1.5px solid #e5e7eb",
-                  cursor: "pointer",
-                  background: "#fafafa",
-                }}
+                className="flex items-center justify-between px-3.5 py-3 rounded-lg border-[1.5px] border-gray-200 cursor-pointer bg-neutral-50"
               >
                 <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "#111",
-                      margin: 0,
-                    }}
-                  >
+                  <p className="text-[13px] font-semibold text-gray-900 m-0">
                     Required field
                   </p>
-                  <p style={{ fontSize: "11px", color: "#9ca3af", margin: 0 }}>
+                  <p className="text-[11px] text-gray-400 m-0">
                     Customer must fill this field
                   </p>
                 </div>
                 {/* toggle pill */}
                 <div
-                  style={{
-                    width: "40px",
-                    height: "22px",
-                    borderRadius: "11px",
-                    background: selected.required ? "#111" : "#d1d5db",
-                    position: "relative",
-                    transition: "background 0.2s",
-                    flexShrink: 0,
-                  }}
+                  className={`w-10 h-[22px] rounded-[11px] relative transition-colors shrink-0 ${
+                    selected.required ? "bg-gray-900" : "bg-gray-300"
+                  }`}
                 >
                   <div
-                    style={{
-                      position: "absolute",
-                      top: "3px",
-                      left: selected.required ? "21px" : "3px",
-                      width: "16px",
-                      height: "16px",
-                      borderRadius: "50%",
-                      background: "#fff",
-                      transition: "left 0.2s",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                    }}
+                    className={`absolute top-[3px] w-4 h-4 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all ${
+                      selected.required ? "left-[21px]" : "left-[3px]"
+                    }`}
                   />
                 </div>
               </div>
@@ -565,27 +380,12 @@ export default function CodBuilder({
       {/* FORM PREVIEW — mirrors customer-facing App.jsx exactly */}
       {fields.length > 0 && (
         <>
-          <div style={{ borderTop: "1px solid #f3f4f6", margin: "24px 0" }} />
+          <div className="border-t border-gray-100 my-6" />
           <div>
-            <p
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                color: "#6b7280",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                marginBottom: "12px",
-              }}
-            >
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-[0.05em] mb-3">
               Customer Preview
             </p>
-            <p
-              style={{
-                fontSize: "11px",
-                color: "#9ca3af",
-                marginBottom: "16px",
-              }}
-            >
+            <p className="text-[11px] text-gray-400 mb-4">
               This is exactly what customers will see on the checkout page.
             </p>
             <CustomerFormPreview fields={fields} />
@@ -593,28 +393,20 @@ export default function CodBuilder({
         </>
       )}
 
-      <div style={{ borderTop: "1px solid #f3f4f6", margin: "24px 0" }} />
+      <div className="border-t border-gray-100 my-6" />
 
       {/* SAVE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <div className="flex items-center gap-3.5">
         <button
           onClick={handleSave}
-          style={{
-            background: saved ? "#16a34a" : "#111",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            padding: "12px 28px",
-            fontSize: "14px",
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "background 0.3s",
-          }}
+          className={`text-white border-none rounded-[10px] px-7 py-3 text-[14px] font-bold cursor-pointer transition-colors ${
+            saved ? "bg-green-600" : "bg-gray-900 hover:bg-gray-700"
+          }`}
         >
           {saved ? "✅ Saved!" : "Save Form"}
         </button>
         {saved && (
-          <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 600 }}>
+          <span className="text-[13px] text-green-600 font-semibold">
             Form layout saved!
           </span>
         )}
@@ -626,35 +418,13 @@ export default function CodBuilder({
 function EditorField({ label, children }) {
   return (
     <div>
-      <label
-        style={{
-          fontSize: "11px",
-          fontWeight: 700,
-          color: "#6b7280",
-          display: "block",
-          marginBottom: "6px",
-          textTransform: "uppercase",
-          letterSpacing: "0.04em",
-        }}
-      >
+      <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-[0.04em] mb-1.5">
         {label}
       </label>
       {children}
     </div>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "9px 12px",
-  border: "1.5px solid #e5e7eb",
-  borderRadius: "7px",
-  fontSize: "13px",
-  color: "#111",
-  boxSizing: "border-box",
-  background: "#fafafa",
-  fontFamily: "inherit",
-};
 
 /* ────────────────────────────────────────────────
    CustomerFormPreview — mirrors App.jsx visually
@@ -670,33 +440,17 @@ function CustomerFormPreview({ fields }) {
     (f) => f.name !== "firstName" && f.name !== "lastName",
   );
 
-  const previewInput = {
-    width: "100%",
-    padding: "10px 12px",
-    fontSize: "14px",
-    color: "#9ca3af",
-    border: "1px solid #e5e7eb",
-    borderRadius: "8px",
-    background: "#f9fafb",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
-  };
+  const PREVIEW_INPUT_CLS =
+    "w-full px-3 py-2.5 text-[14px] text-gray-400 border border-gray-200 rounded-lg bg-gray-50 font-[inherit]";
 
   const renderInput = (f) => {
     if (!f) return null;
     if (f.type === "phone") {
       return (
-        <div
-          style={{
-            ...previewInput,
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          <span style={{ fontSize: "13px" }}>🇵🇰 +92</span>
-          <span style={{ color: "#d1d5db" }}>|</span>
-          <span style={{ color: "#9ca3af", fontSize: "13px" }}>
+        <div className={PREVIEW_INPUT_CLS + " flex items-center gap-2"}>
+          <span className="text-[13px]">🇵🇰 +92</span>
+          <span className="text-gray-300">|</span>
+          <span className="text-gray-400 text-[13px]">
             {f.placeholder || "300 1234567"}
           </span>
         </div>
@@ -704,7 +458,7 @@ function CustomerFormPreview({ fields }) {
     }
     if (f.type === "select") {
       return (
-        <select disabled style={previewInput}>
+        <select disabled className={PREVIEW_INPUT_CLS}>
           <option>{f.placeholder || `Select ${f.label}`}</option>
         </select>
       );
@@ -715,7 +469,7 @@ function CustomerFormPreview({ fields }) {
           disabled
           rows={3}
           placeholder={f.placeholder || f.label}
-          style={{ ...previewInput, resize: "none" }}
+          className={PREVIEW_INPUT_CLS + " resize-none"}
         />
       );
     }
@@ -723,103 +477,44 @@ function CustomerFormPreview({ fields }) {
       <input
         disabled
         placeholder={f.placeholder || f.label}
-        style={previewInput}
+        className={PREVIEW_INPUT_CLS}
       />
     );
   };
 
   return (
-    <div
-      style={{
-        background: "linear-gradient(to bottom, #f9fafb, #f3f4f6)",
-        borderRadius: "16px",
-        padding: "24px 16px",
-        border: "1px solid #e5e7eb",
-      }}
-    >
-      <div style={{ maxWidth: "440px", margin: "0 auto" }}>
+    <div className="bg-gradient-to-b from-gray-50 to-gray-100 rounded-2xl px-4 py-6 border border-gray-200">
+      <div className="max-w-[440px] mx-auto">
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "#fff",
-              border: "1px solid #e5e7eb",
-              borderRadius: "9999px",
-              padding: "5px 12px",
-              fontSize: "11px",
-              fontWeight: 600,
-              color: "#4b5563",
-              marginBottom: "10px",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-            }}
-          >
-            <span
-              style={{
-                width: "6px",
-                height: "6px",
-                borderRadius: "50%",
-                background: "#22c55e",
-              }}
-            />
+        <div className="text-center mb-5">
+          <div className="inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1.5 text-[11px] font-semibold text-gray-600 mb-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
             Secure Checkout
           </div>
-          <h3
-            style={{
-              fontSize: "20px",
-              fontWeight: 800,
-              color: "#111",
-              margin: 0,
-            }}
-          >
+          <h3 className="text-[20px] font-extrabold text-gray-900 m-0">
             Cash on Delivery
           </h3>
-          <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
+          <p className="text-[12px] text-gray-500 mt-1">
             Pay when you receive your order
           </p>
         </div>
 
         {/* Form card */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "16px",
-            border: "1px solid #f3f4f6",
-            padding: "20px",
-            boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
-          }}
-        >
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-[0_1px_8px_rgba(0,0,0,0.05)]">
           {/* Contact section */}
           {contactFields.length > 0 && (
-            <div style={{ marginBottom: "14px" }}>
-              <p
-                style={{
-                  fontSize: "10.5px",
-                  fontWeight: 700,
-                  color: "#9ca3af",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  marginBottom: "10px",
-                }}
-              >
+            <div className="mb-3.5">
+              <p className="text-[10.5px] font-bold text-gray-400 uppercase tracking-[0.05em] mb-2.5">
                 Contact Information
               </p>
               {(firstName || lastName) && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "10px",
-                  }}
-                >
+                <div className="grid grid-cols-2 gap-2.5">
                   {firstName && <div>{renderInput(firstName)}</div>}
                   {lastName && <div>{renderInput(lastName)}</div>}
                 </div>
               )}
               {restContact.map((f) => (
-                <div key={f.name} style={{ marginTop: "10px" }}>
+                <div key={f.name} className="mt-2.5">
                   {renderInput(f)}
                 </div>
               ))}
@@ -829,23 +524,11 @@ function CustomerFormPreview({ fields }) {
           {/* Shipping section */}
           {otherFields.length > 0 && (
             <div>
-              <p
-                style={{
-                  fontSize: "10.5px",
-                  fontWeight: 700,
-                  color: "#9ca3af",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  marginBottom: "10px",
-                }}
-              >
+              <p className="text-[10.5px] font-bold text-gray-400 uppercase tracking-[0.05em] mb-2.5">
                 Shipping Address
               </p>
               {otherFields.map((f, idx) => (
-                <div
-                  key={f.name}
-                  style={{ marginTop: idx === 0 ? 0 : "10px" }}
-                >
+                <div key={f.name} className={idx === 0 ? "" : "mt-2.5"}>
                   {renderInput(f)}
                 </div>
               ))}
@@ -855,45 +538,20 @@ function CustomerFormPreview({ fields }) {
           {/* Place Order button */}
           <button
             disabled
-            style={{
-              width: "100%",
-              marginTop: "16px",
-              background: "#111",
-              color: "#fff",
-              border: "none",
-              borderRadius: "10px",
-              padding: "12px",
-              fontSize: "14px",
-              fontWeight: 700,
-              cursor: "default",
-            }}
+            className="w-full mt-4 bg-gray-900 text-white border-none rounded-[10px] py-3 text-[14px] font-bold cursor-default"
           >
             Place Order
           </button>
 
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "11px",
-              color: "#9ca3af",
-              marginTop: "10px",
-            }}
-          >
+          <p className="text-center text-[11px] text-gray-400 mt-2.5">
             🔒 Your information is secure and never shared
           </p>
         </div>
 
         {/* Footer */}
-        <p
-          style={{
-            textAlign: "center",
-            fontSize: "11px",
-            color: "#9ca3af",
-            marginTop: "12px",
-          }}
-        >
+        <p className="text-center text-[11px] text-gray-400 mt-3">
           Powered by{" "}
-          <span style={{ fontWeight: 600, color: "#4b5563" }}>ReleaseIt</span>
+          <span className="font-semibold text-gray-600">ReleaseIt</span>
         </p>
       </div>
     </div>

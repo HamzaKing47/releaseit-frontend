@@ -11,6 +11,9 @@ const DEFAULTS = {
   textColor: "#374151",
 };
 
+const LABEL_CLS =
+  "block text-[11px] font-bold text-gray-500 uppercase tracking-[0.05em] mb-1.5";
+
 export default function ThankYouSettings({ settings, update, save }) {
   const [saved, setSaved] = useState(false);
 
@@ -24,40 +27,24 @@ export default function ThankYouSettings({ settings, update, save }) {
   };
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: "16px",
-        boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
-        padding: "28px",
-      }}
-    >
+    <div className="bg-white rounded-2xl shadow-[0_1px_8px_rgba(0,0,0,0.07)] p-7">
       {/* HEADER */}
-      <div style={{ marginBottom: "22px" }}>
-        <h2
-          style={{
-            fontSize: "18px",
-            fontWeight: 800,
-            color: "#111",
-            marginBottom: "4px",
-          }}
-        >
+      <div className="mb-[22px]">
+        <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
           🎉 Thank You Page
         </h2>
-        <p style={{ fontSize: "13px", color: "#9ca3af" }}>
+        <p className="text-[13px] text-gray-400">
           Customize the message shown to customers after order is placed. Any
           language works.
         </p>
       </div>
 
-      <div style={{ borderTop: "1px solid #f3f4f6", marginBottom: "22px" }} />
+      <div className="border-t border-gray-100 mb-[22px]" />
 
       {/* TWO COLUMN */}
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}
-      >
+      <div className="grid grid-cols-2 gap-8">
         {/* LEFT — FIELDS */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="flex flex-col gap-4">
           <Field
             label="Heading"
             value={ty.heading ?? DEFAULTS.heading}
@@ -90,14 +77,8 @@ export default function ThankYouSettings({ settings, update, save }) {
 
           {/* COLORS */}
           <div>
-            <label style={labelStyle}>Colors</label>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-              }}
-            >
+            <label className={LABEL_CLS}>Colors</label>
+            <div className="grid grid-cols-2 gap-2.5">
               <ColorPicker
                 label="Background"
                 value={ty.bgColor ?? DEFAULTS.bgColor}
@@ -124,87 +105,40 @@ export default function ThankYouSettings({ settings, update, save }) {
 
         {/* RIGHT — LIVE PREVIEW */}
         <div>
-          <label style={labelStyle}>Live Preview</label>
+          <label className={LABEL_CLS}>Live Preview</label>
           <div
-            style={{
-              background: ty.bgColor ?? DEFAULTS.bgColor,
-              borderRadius: "14px",
-              padding: "28px 20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "300px",
-              border: "1px solid #e5e7eb",
-              transition: "background 0.2s",
-            }}
+            className="rounded-[14px] px-5 py-7 flex items-center justify-center min-h-[300px] border border-gray-200 transition-colors"
+            style={{ background: ty.bgColor ?? DEFAULTS.bgColor }}
           >
             <div
-              style={{
-                background: ty.cardColor ?? DEFAULTS.cardColor,
-                borderRadius: "14px",
-                padding: "24px 20px",
-                textAlign: "center",
-                width: "100%",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-              }}
+              className="rounded-[14px] px-5 py-6 text-center w-full shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+              style={{ background: ty.cardColor ?? DEFAULTS.cardColor }}
             >
               <div
+                className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-[22px]"
                 style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
                   background: (ty.headingColor ?? DEFAULTS.headingColor) + "20",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 12px",
-                  fontSize: "22px",
                 }}
               >
                 ✅
               </div>
 
               <h3
-                style={{
-                  color: ty.headingColor ?? DEFAULTS.headingColor,
-                  fontWeight: 700,
-                  fontSize: "16px",
-                  marginBottom: "8px",
-                }}
+                className="font-bold text-[16px] mb-2"
+                style={{ color: ty.headingColor ?? DEFAULTS.headingColor }}
               >
                 {ty.heading || DEFAULTS.heading}
               </h3>
               <p
-                style={{
-                  color: ty.textColor ?? DEFAULTS.textColor,
-                  fontSize: "13px",
-                  marginBottom: "6px",
-                  lineHeight: 1.5,
-                }}
+                className="text-[13px] mb-1.5 leading-[1.5]"
+                style={{ color: ty.textColor ?? DEFAULTS.textColor }}
               >
                 {ty.subtext || DEFAULTS.subtext}
               </p>
-              <p
-                style={{
-                  color: "#9ca3af",
-                  fontSize: "11px",
-                  marginBottom: "16px",
-                  lineHeight: 1.5,
-                }}
-              >
+              <p className="text-gray-400 text-[11px] mb-4 leading-[1.5]">
                 {ty.note || DEFAULTS.note}
               </p>
-              <div
-                style={{
-                  background: "#111",
-                  color: "#fff",
-                  borderRadius: "8px",
-                  padding: "8px 18px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  display: "inline-block",
-                }}
-              >
+              <div className="bg-gray-900 text-white rounded-lg px-[18px] py-2 text-[12px] font-semibold inline-block">
                 {ty.buttonText || DEFAULTS.buttonText}
               </div>
             </div>
@@ -212,28 +146,20 @@ export default function ThankYouSettings({ settings, update, save }) {
         </div>
       </div>
 
-      <div style={{ borderTop: "1px solid #f3f4f6", margin: "24px 0" }} />
+      <div className="border-t border-gray-100 my-6" />
 
       {/* SAVE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <div className="flex items-center gap-3.5">
         <button
           onClick={handleSave}
-          style={{
-            background: saved ? "#16a34a" : "#111",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            padding: "12px 28px",
-            fontSize: "14px",
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "background 0.3s",
-          }}
+          className={`text-white border-none rounded-[10px] px-7 py-3 text-[14px] font-bold cursor-pointer transition-colors ${
+            saved ? "bg-green-600" : "bg-gray-900 hover:bg-gray-700"
+          }`}
         >
           {saved ? "✅ Saved!" : "Save Settings"}
         </button>
         {saved && (
-          <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 600 }}>
+          <span className="text-[13px] text-green-600 font-semibold">
             Thank You page updated!
           </span>
         )}
@@ -243,39 +169,19 @@ export default function ThankYouSettings({ settings, update, save }) {
 }
 
 /* ── HELPERS ── */
-const labelStyle = {
-  fontSize: "11px",
-  fontWeight: 700,
-  color: "#6b7280",
-  display: "block",
-  marginBottom: "6px",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-};
-
 function Field({ label, value, onChange, placeholder, multiline }) {
-  const style = {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1.5px solid #e5e7eb",
-    borderRadius: "8px",
-    fontSize: "13px",
-    color: "#111",
-    boxSizing: "border-box",
-    background: "#fafafa",
-    fontFamily: "inherit",
-    resize: "vertical",
-  };
+  const cls =
+    "w-full px-3 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-[13px] text-gray-900 bg-neutral-50 resize-y font-[inherit] focus:outline-none focus:border-gray-400 transition-colors";
   return (
     <div>
-      <label style={labelStyle}>{label}</label>
+      <label className={LABEL_CLS}>{label}</label>
       {multiline ? (
         <textarea
           rows={2}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          style={style}
+          className={cls}
         />
       ) : (
         <input
@@ -283,7 +189,7 @@ function Field({ label, value, onChange, placeholder, multiline }) {
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          style={style}
+          className={cls}
         />
       )}
     </div>
@@ -292,64 +198,24 @@ function Field({ label, value, onChange, placeholder, multiline }) {
 
 function ColorPicker({ label, value, onChange }) {
   return (
-    <label
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "8px 10px",
-        border: "1.5px solid #e5e7eb",
-        borderRadius: "8px",
-        cursor: "pointer",
-        background: "#fafafa",
-      }}
-    >
-      <div style={{ position: "relative" }}>
+    <label className="flex items-center gap-2 px-2.5 py-2 border-[1.5px] border-gray-200 rounded-lg cursor-pointer bg-neutral-50">
+      <div className="relative">
         <div
-          style={{
-            width: "26px",
-            height: "26px",
-            borderRadius: "6px",
-            background: value,
-            border: "2px solid #e5e7eb",
-          }}
+          className="w-[26px] h-[26px] rounded-md border-2 border-gray-200"
+          style={{ background: value }}
         />
         <input
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0,
-            cursor: "pointer",
-            width: "100%",
-            height: "100%",
-          }}
+          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
         />
       </div>
       <div>
-        <p
-          style={{
-            fontSize: "10px",
-            fontWeight: 700,
-            color: "#6b7280",
-            margin: 0,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="text-[10px] font-bold text-gray-500 m-0 uppercase">
           {label}
         </p>
-        <p
-          style={{
-            fontSize: "11px",
-            color: "#111",
-            margin: 0,
-            fontFamily: "monospace",
-          }}
-        >
-          {value}
-        </p>
+        <p className="text-[11px] text-gray-900 m-0 font-mono">{value}</p>
       </div>
     </label>
   );

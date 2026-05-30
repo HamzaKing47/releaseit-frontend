@@ -182,70 +182,44 @@ function ThankYou() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f3f4f6" }}>
-        <div style={{ width: "36px", height: "36px", border: "3px solid #e5e7eb", borderTop: "3px solid #111", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="w-9 h-9 border-[3px] border-gray-200 border-t-gray-900 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: ty.bgColor,
-        padding: "16px",
-        transition: "background 0.3s",
-      }}
+      className="min-h-screen flex items-center justify-center p-4 transition-colors"
+      style={{ background: ty.bgColor }}
     >
       <div
-        style={{
-          background: ty.cardColor,
-          borderRadius: "20px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
-          padding: "40px 32px",
-          textAlign: "center",
-          maxWidth: "420px",
-          width: "100%",
-        }}
+        className="rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.10)] px-8 py-10 text-center max-w-[420px] w-full"
+        style={{ background: ty.cardColor }}
       >
         <div
-          style={{
-            width: "64px", height: "64px", borderRadius: "50%",
-            background: ty.headingColor + "20",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 16px", fontSize: "30px",
-          }}
+          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-[30px]"
+          style={{ background: ty.headingColor + "20" }}
         >
           ✅
         </div>
 
-        <h1 style={{ color: ty.headingColor, fontWeight: 700, fontSize: "22px", marginBottom: "10px" }}>
+        <h1 className="font-bold text-[22px] mb-2.5" style={{ color: ty.headingColor }}>
           {ty.heading}
         </h1>
 
-        <p style={{ color: ty.textColor, fontSize: "15px", marginBottom: "8px", lineHeight: "1.6" }}>
+        <p className="text-[15px] mb-2 leading-relaxed" style={{ color: ty.textColor }}>
           {ty.subtext}
         </p>
 
-        <p style={{ color: "#9ca3af", fontSize: "13px", marginBottom: "28px", lineHeight: "1.6" }}>
+        <p className="text-gray-400 text-[13px] mb-7 leading-relaxed">
           {ty.note}
         </p>
 
         {shopUrl && (
           <button
             onClick={() => (window.location.href = shopUrl)}
-            style={{
-              background: "#111", color: "#fff", border: "none",
-              borderRadius: "10px", padding: "13px 28px",
-              fontSize: "14px", fontWeight: 600, cursor: "pointer",
-              transition: "background 0.2s",
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.background = "#333")}
-            onMouseOut={(e) => (e.currentTarget.style.background = "#111")}
+            className="bg-gray-900 hover:bg-gray-700 text-white rounded-[10px] px-7 py-3 text-[14px] font-semibold cursor-pointer transition-colors"
           >
             {ty.buttonText}
           </button>

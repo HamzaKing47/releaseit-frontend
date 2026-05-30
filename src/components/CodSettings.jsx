@@ -1,45 +1,9 @@
 import { useState } from "react";
 
-const S = {
-  card: {
-    background: "#fff",
-    borderRadius: "16px",
-    boxShadow: "0 1px 8px rgba(0,0,0,0.07)",
-    padding: "28px",
-  },
-  label: {
-    fontSize: "11px",
-    fontWeight: 700,
-    color: "#6b7280",
-    display: "block",
-    marginBottom: "6px",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-  },
-  input: {
-    width: "100%",
-    padding: "10px 14px",
-    border: "1.5px solid #e5e7eb",
-    borderRadius: "8px",
-    fontSize: "14px",
-    color: "#111",
-    boxSizing: "border-box",
-    background: "#fafafa",
-  },
-  select: {
-    width: "100%",
-    padding: "10px 14px",
-    border: "1.5px solid #e5e7eb",
-    borderRadius: "8px",
-    fontSize: "14px",
-    color: "#111",
-    boxSizing: "border-box",
-    background: "#fafafa",
-    cursor: "pointer",
-  },
-  row: { marginBottom: "20px" },
-  divider: { borderTop: "1px solid #f3f4f6", margin: "24px 0" },
-};
+const LABEL_CLS =
+  "block text-[11px] font-bold text-gray-500 uppercase tracking-[0.05em] mb-1.5";
+const INPUT_CLS =
+  "w-full px-3.5 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-[14px] text-gray-900 bg-neutral-50 focus:outline-none focus:border-gray-400 transition-colors";
 
 const MODE_OPTIONS = [
   {
@@ -76,96 +40,52 @@ export default function CodSettings({ settings, update, save }) {
   };
 
   return (
-    <div style={S.card}>
+    <div className="bg-white rounded-2xl shadow-[0_1px_8px_rgba(0,0,0,0.07)] p-7">
       {/* HEADER */}
-      <div style={{ marginBottom: "22px" }}>
-        <h2
-          style={{
-            fontSize: "18px",
-            fontWeight: 800,
-            color: "#111",
-            marginBottom: "4px",
-          }}
-        >
+      <div className="mb-[22px]">
+        <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
           ⚙️ COD Button Settings
         </h2>
-        <p style={{ fontSize: "13px", color: "#9ca3af" }}>
+        <p className="text-[13px] text-gray-400">
           Customize your Cash on Delivery button appearance and behavior.
         </p>
       </div>
 
-      <div style={S.divider} />
+      <div className="border-t border-gray-100 my-6" />
 
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}
-      >
+      <div className="grid grid-cols-2 gap-8">
         {/* ── LEFT: CONTROLS ── */}
         <div>
           {/* MODE — radio cards */}
-          <div style={S.row}>
-            <label style={S.label}>Button Mode</label>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "7px" }}
-            >
+          <div className="mb-5">
+            <label className={LABEL_CLS}>Button Mode</label>
+            <div className="flex flex-col gap-[7px]">
               {MODE_OPTIONS.map((opt) => {
                 const active = settings.mode === opt.value;
                 return (
                   <div
                     key={opt.value}
                     onClick={() => update("mode", opt.value)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "10px 14px",
-                      borderRadius: "8px",
-                      border: `1.5px solid ${active ? "#111" : "#e5e7eb"}`,
-                      background: active ? "#fafafa" : "#fff",
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                    }}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg border-[1.5px] cursor-pointer transition-all ${
+                      active
+                        ? "border-gray-900 bg-neutral-50"
+                        : "border-gray-200 bg-white"
+                    }`}
                   >
                     <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        border: `2px solid ${active ? "#111" : "#d1d5db"}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      className={`w-4 h-4 rounded-full shrink-0 border-2 flex items-center justify-center ${
+                        active ? "border-gray-900" : "border-gray-300"
+                      }`}
                     >
                       {active && (
-                        <div
-                          style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            background: "#111",
-                          }}
-                        />
+                        <div className="w-2 h-2 rounded-full bg-gray-900" />
                       )}
                     </div>
                     <div>
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "#111",
-                          margin: 0,
-                        }}
-                      >
+                      <p className="text-[13px] font-semibold text-gray-900 m-0">
                         {opt.label}
                       </p>
-                      <p
-                        style={{
-                          fontSize: "11px",
-                          color: "#9ca3af",
-                          margin: 0,
-                        }}
-                      >
+                      <p className="text-[11px] text-gray-400 m-0">
                         {opt.desc}
                       </p>
                     </div>
@@ -176,12 +96,12 @@ export default function CodSettings({ settings, update, save }) {
           </div>
 
           {/* POSITION */}
-          <div style={S.row}>
-            <label style={S.label}>Button Position</label>
+          <div className="mb-5">
+            <label className={LABEL_CLS}>Button Position</label>
             <select
               value={settings.position || "below"}
               onChange={(e) => update("position", e.target.value)}
-              style={S.select}
+              className={INPUT_CLS + " cursor-pointer"}
             >
               {POSITION_OPTIONS.map((p) => (
                 <option key={p.value} value={p.value}>
@@ -192,26 +112,20 @@ export default function CodSettings({ settings, update, save }) {
           </div>
 
           {/* TEXT */}
-          <div style={S.row}>
-            <label style={S.label}>Button Text</label>
+          <div className="mb-5">
+            <label className={LABEL_CLS}>Button Text</label>
             <input
               value={settings.buttonText}
               onChange={(e) => update("buttonText", e.target.value)}
               placeholder="Buy with Cash on Delivery"
-              style={S.input}
+              className={INPUT_CLS}
             />
           </div>
 
           {/* COLORS */}
-          <div style={S.row}>
-            <label style={S.label}>Colors</label>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-              }}
-            >
+          <div className="mb-5">
+            <label className={LABEL_CLS}>Colors</label>
+            <div className="grid grid-cols-2 gap-2.5">
               <ColorSwatch
                 label="Background"
                 value={settings.bgColor}
@@ -226,12 +140,10 @@ export default function CodSettings({ settings, update, save }) {
           </div>
 
           {/* BORDER RADIUS */}
-          <div style={S.row}>
-            <label style={S.label}>
+          <div className="mb-5">
+            <label className={LABEL_CLS}>
               Border Radius &nbsp;
-              <span
-                style={{ color: "#111", fontWeight: 800, fontSize: "13px" }}
-              >
+              <span className="text-gray-900 font-extrabold text-[13px]">
                 {settings.borderRadius}px
               </span>
             </label>
@@ -241,17 +153,9 @@ export default function CodSettings({ settings, update, save }) {
               max="30"
               value={settings.borderRadius}
               onChange={(e) => update("borderRadius", Number(e.target.value))}
-              style={{ width: "100%", accentColor: "#111" }}
+              className="w-full accent-gray-900"
             />
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: "10px",
-                color: "#9ca3af",
-                marginTop: "2px",
-              }}
-            >
+            <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
               <span>Square</span>
               <span>Rounded</span>
               <span>Pill</span>
@@ -261,87 +165,29 @@ export default function CodSettings({ settings, update, save }) {
 
         {/* ── RIGHT: PREVIEW ── */}
         <div>
-          <label style={S.label}>Live Preview</label>
+          <label className={LABEL_CLS}>Live Preview</label>
 
           {/* PHONE MOCKUP */}
-          <div
-            style={{
-              background: "#1a1a1a",
-              borderRadius: "28px",
-              padding: "16px 12px 20px",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
-              maxWidth: "260px",
-              margin: "0 auto",
-            }}
-          >
+          <div className="bg-[#1a1a1a] rounded-[28px] px-3 pt-4 pb-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] max-w-[260px] mx-auto">
             {/* notch */}
-            <div
-              style={{
-                width: "60px",
-                height: "6px",
-                background: "#333",
-                borderRadius: "3px",
-                margin: "0 auto 14px",
-              }}
-            />
+            <div className="w-[60px] h-1.5 bg-[#333] rounded-[3px] mx-auto mb-3.5" />
 
             {/* product mock */}
-            <div
-              style={{
-                background: "#fff",
-                borderRadius: "16px",
-                padding: "14px 12px",
-              }}
-            >
+            <div className="bg-white rounded-2xl px-3 py-3.5">
               {/* product image placeholder */}
-              <div
-                style={{
-                  background: "#f3f4f6",
-                  borderRadius: "10px",
-                  height: "100px",
-                  marginBottom: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span style={{ fontSize: "28px" }}>👟</span>
+              <div className="bg-gray-100 rounded-[10px] h-[100px] mb-2.5 flex items-center justify-center">
+                <span className="text-[28px]">👟</span>
               </div>
-              <p
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: "#111",
-                  marginBottom: "4px",
-                }}
-              >
+              <p className="text-[12px] font-bold text-gray-900 mb-1">
                 Product Name
               </p>
-              <p
-                style={{
-                  fontSize: "11px",
-                  color: "#9ca3af",
-                  marginBottom: "12px",
-                }}
-              >
-                Rs. 2,500
-              </p>
+              <p className="text-[11px] text-gray-400 mb-3">Rs. 2,500</p>
 
               {/* BUTTONS */}
               {settings.mode !== "replace" && settings.mode !== "cod_only" && (
                 <button
-                  style={{
-                    width: "100%",
-                    padding: "9px",
-                    background: "#fff",
-                    border: "1.5px solid #d1d5db",
-                    borderRadius: `${settings.borderRadius}px`,
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    color: "#374151",
-                    marginBottom: "6px",
-                    cursor: "default",
-                  }}
+                  className="w-full py-[9px] bg-white border-[1.5px] border-gray-300 text-[11px] font-medium text-gray-700 mb-1.5 cursor-default"
+                  style={{ borderRadius: `${settings.borderRadius}px` }}
                 >
                   Add to cart
                 </button>
@@ -350,34 +196,19 @@ export default function CodSettings({ settings, update, save }) {
               {settings.mode !== "replace_buy_now" &&
                 settings.mode !== "cod_only" && (
                   <button
-                    style={{
-                      width: "100%",
-                      padding: "9px",
-                      background: "#111",
-                      border: "none",
-                      borderRadius: `${settings.borderRadius}px`,
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      color: "#fff",
-                      marginBottom: "6px",
-                      cursor: "default",
-                    }}
+                    className="w-full py-[9px] bg-gray-900 border-none text-[11px] font-semibold text-white mb-1.5 cursor-default"
+                    style={{ borderRadius: `${settings.borderRadius}px` }}
                   >
                     Buy it now
                   </button>
                 )}
 
               <button
+                className="w-full py-2.5 border-none text-[11px] font-bold cursor-default"
                 style={{
-                  width: "100%",
-                  padding: "10px",
                   background: settings.bgColor,
                   color: settings.textColor,
                   borderRadius: `${settings.borderRadius}px`,
-                  border: "none",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  cursor: "default",
                 }}
               >
                 {settings.buttonText || "Buy with Cash on Delivery"}
@@ -386,48 +217,26 @@ export default function CodSettings({ settings, update, save }) {
           </div>
 
           {/* mode badge */}
-          <div
-            style={{
-              marginTop: "14px",
-              background: "#f0fdf4",
-              border: "1px solid #bbf7d0",
-              borderRadius: "8px",
-              padding: "9px 14px",
-              fontSize: "12px",
-              color: "#15803d",
-              fontWeight: 600,
-              maxWidth: "260px",
-              margin: "14px auto 0",
-              textAlign: "center",
-            }}
-          >
+          <div className="mt-3.5 bg-green-50 border border-green-200 rounded-lg px-3.5 py-2.5 text-[12px] text-green-700 font-semibold max-w-[260px] mx-auto text-center">
             ✅ {MODE_OPTIONS.find((m) => m.value === settings.mode)?.label}
           </div>
         </div>
       </div>
 
-      <div style={S.divider} />
+      <div className="border-t border-gray-100 my-6" />
 
       {/* SAVE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+      <div className="flex items-center gap-3.5">
         <button
           onClick={handleSave}
-          style={{
-            background: saved ? "#16a34a" : "#111",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            padding: "12px 28px",
-            fontSize: "14px",
-            fontWeight: 700,
-            cursor: "pointer",
-            transition: "background 0.3s",
-          }}
+          className={`text-white border-none rounded-[10px] px-7 py-3 text-[14px] font-bold cursor-pointer transition-colors ${
+            saved ? "bg-green-600" : "bg-gray-900 hover:bg-gray-700"
+          }`}
         >
           {saved ? "✅ Saved!" : "Save Settings"}
         </button>
         {saved && (
-          <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 600 }}>
+          <span className="text-[13px] text-green-600 font-semibold">
             COD settings updated!
           </span>
         )}
@@ -438,64 +247,24 @@ export default function CodSettings({ settings, update, save }) {
 
 function ColorSwatch({ label, value, onChange }) {
   return (
-    <label
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "9px 12px",
-        border: "1.5px solid #e5e7eb",
-        borderRadius: "8px",
-        cursor: "pointer",
-        background: "#fafafa",
-      }}
-    >
-      <div style={{ position: "relative", flexShrink: 0 }}>
+    <label className="flex items-center gap-2.5 px-3 py-2 border-[1.5px] border-gray-200 rounded-lg cursor-pointer bg-neutral-50">
+      <div className="relative shrink-0">
         <div
-          style={{
-            width: "28px",
-            height: "28px",
-            borderRadius: "6px",
-            background: value,
-            border: "2px solid #e5e7eb",
-          }}
+          className="w-7 h-7 rounded-md border-2 border-gray-200"
+          style={{ background: value }}
         />
         <input
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0,
-            cursor: "pointer",
-            width: "100%",
-            height: "100%",
-          }}
+          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
         />
       </div>
       <div>
-        <p
-          style={{
-            fontSize: "10px",
-            fontWeight: 700,
-            color: "#6b7280",
-            margin: 0,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="text-[10px] font-bold text-gray-500 m-0 uppercase">
           {label}
         </p>
-        <p
-          style={{
-            fontSize: "12px",
-            color: "#111",
-            margin: 0,
-            fontFamily: "monospace",
-          }}
-        >
-          {value}
-        </p>
+        <p className="text-[12px] text-gray-900 m-0 font-mono">{value}</p>
       </div>
     </label>
   );
