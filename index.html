@@ -6,9 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Shopify App Bridge — embeds the app inside Shopify admin and renders
          the nav menu in Shopify's own sidebar. The API key is the app's
-         public Client ID (safe to expose). -->
-    <meta name="shopify-api-key" content="1682ecf4f171ef91c740b0c0445d2803" />
-    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+         public Client ID (safe to expose).
+         IMPORTANT: load App Bridge ONLY on /admin routes. App Bridge force-
+         embeds any page that has a ?shop= param into the Shopify admin, which
+         would otherwise hijack the customer-facing COD form (served at "/"). -->
+    <script>
+      if (window.location.pathname.indexOf("/admin") === 0) {
+        var m = document.createElement("meta");
+        m.name = "shopify-api-key";
+        m.content = "1682ecf4f171ef91c740b0c0445d2803";
+        document.head.appendChild(m);
+        var s = document.createElement("script");
+        s.src = "https://cdn.shopify.com/shopifycloud/app-bridge.js";
+        document.head.appendChild(s);
+      }
+    </script>
     <title>ReleaseIt — COD App</title>
   </head>
   <body>
