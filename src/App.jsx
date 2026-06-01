@@ -153,6 +153,13 @@ function App() {
         const orderValue = data.order?.total_price || "";
         const product = cart[0]?.title || "";
 
+        // Prefer Shopify's official order-status (Thank you) page when available.
+        if (data.order?.order_status_url) {
+          window.location.href = data.order.order_status_url;
+          return;
+        }
+
+        // Fallback: our own thank-you page.
         window.location.href =
           `/thank-you?shop=${shop}` +
           `&variant=${cart[0]?.variantId || ""}` +
