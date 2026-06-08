@@ -7,4 +7,4 @@ const isLocal =
 
 export const BACKEND =
   import.meta.env?.VITE_BACKEND_URL ||
-  (isLocal ? "http://localhost:5000" : "https://releaseit-backend.onrender.com");
+  (isLocal ? "http://localhost:5000" : "https://api.ordernowcodform.xyz");
