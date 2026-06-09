@@ -137,13 +137,12 @@ function ThankYou() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const shop = params.get("shop");
-    const product = params.get("product");
     const orderId = params.get("orderId");
     const value = params.get("value");
 
-    if (shop && product) {
-      setShopUrl(`https://${shop}/products/${decodeURIComponent(product)}`);
-    } else if (shop) {
+    // "Back to Store" always goes to the store home (a product handle isn't
+    // reliably available here, and the store root is always valid).
+    if (shop) {
       setShopUrl(`https://${shop}`);
     }
 
