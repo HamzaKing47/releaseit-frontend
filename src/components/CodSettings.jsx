@@ -183,36 +183,56 @@ export default function CodSettings({ settings, update, save }) {
               </p>
               <p className="text-[11px] text-gray-400 mb-3">Rs. 2,500</p>
 
-              {/* BUTTONS */}
-              {settings.mode !== "replace" && settings.mode !== "cod_only" && (
-                <button
-                  className="w-full py-[9px] bg-white border-[1.5px] border-gray-300 text-[11px] font-medium text-gray-700 mb-1.5 cursor-default"
-                  style={{ borderRadius: `${settings.borderRadius}px` }}
-                >
-                  Add to cart
-                </button>
-              )}
+              {/* BUTTONS — order respects the selected position (matches storefront) */}
+              {(() => {
+                const showAdd =
+                  settings.mode !== "replace" && settings.mode !== "cod_only";
+                const showBuy =
+                  settings.mode !== "replace_buy_now" &&
+                  settings.mode !== "cod_only";
 
-              {settings.mode !== "replace_buy_now" &&
-                settings.mode !== "cod_only" && (
+                const addBtn = showAdd && (
                   <button
+                    key="add"
+                    className="w-full py-[9px] bg-white border-[1.5px] border-gray-300 text-[11px] font-medium text-gray-700 mb-1.5 cursor-default"
+                    style={{ borderRadius: `${settings.borderRadius}px` }}
+                  >
+                    Add to cart
+                  </button>
+                );
+
+                const buyBtn = showBuy && (
+                  <button
+                    key="buy"
                     className="w-full py-[9px] bg-gray-900 border-none text-[11px] font-semibold text-white mb-1.5 cursor-default"
                     style={{ borderRadius: `${settings.borderRadius}px` }}
                   >
                     Buy it now
                   </button>
-                )}
+                );
 
-              <button
-                className="w-full py-2.5 border-none text-[11px] font-bold cursor-default"
-                style={{
-                  background: settings.bgColor,
-                  color: settings.textColor,
-                  borderRadius: `${settings.borderRadius}px`,
-                }}
-              >
-                {settings.buttonText || "Buy with Cash on Delivery"}
-              </button>
+                const codBtn = (
+                  <button
+                    key="cod"
+                    className="w-full py-2.5 border-none text-[11px] font-bold mb-1.5 cursor-default"
+                    style={{
+                      background: settings.bgColor,
+                      color: settings.textColor,
+                      borderRadius: `${settings.borderRadius}px`,
+                    }}
+                  >
+                    {settings.buttonText || "Buy with Cash on Delivery"}
+                  </button>
+                );
+
+                let order;
+                if (settings.position === "above") order = [codBtn, addBtn, buyBtn];
+                else if (settings.position === "below_buy_now")
+                  order = [addBtn, buyBtn, codBtn];
+                else order = [addBtn, codBtn, buyBtn]; // "below" (default)
+
+                return order.filter(Boolean);
+              })()}
             </div>
           </div>
 
