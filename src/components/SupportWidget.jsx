@@ -36,10 +36,13 @@ export default function SupportWidget({ shop }) {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
-      {/* POPUP */}
+    <div className="fixed bottom-5 right-5 z-50">
+      {/* POPUP — opens to the LEFT of the launcher button, with a pop-in animation */}
       {open && (
-        <div className="mb-3 w-[320px] max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100">
+        <div
+          style={{ animation: "owPop .18s ease-out" }}
+          className="absolute bottom-0 right-[4.25rem] w-[320px] max-w-[calc(100vw-6rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100"
+        >
           {/* header */}
           <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3 text-white rounded-t-2xl">
             <h3 className="text-[14px] font-extrabold">💬 Contact Support</h3>
@@ -109,6 +112,8 @@ export default function SupportWidget({ shop }) {
       >
         <span className="text-[24px] leading-none">{open ? "✕" : "💬"}</span>
       </button>
+
+      <style>{`@keyframes owPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}`}</style>
     </div>
   );
 }
