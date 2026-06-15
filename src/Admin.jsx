@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
 import CodSettings from "./components/CodSettings";
 import PixelSettings from "./components/PixelSettings";
 import CodBuilder from "./components/cod/CodBuilder";
@@ -15,6 +16,7 @@ import { BACKEND } from "./backend.js";
 // Nav items — single source of truth for both the custom sidebar
 // (standalone) and the App Bridge nav menu (embedded in Shopify).
 const NAV = [
+  { key: "dashboard", label: "Dashboard" },
   { key: "cod", label: "COD Button" },
   { key: "form", label: "Form Builder" },
   { key: "pixels", label: "Pixels" },
@@ -40,8 +42,8 @@ export default function Admin() {
   }
 
   // Active section comes from the PATH (/admin/<tab>) so App Bridge can
-  // highlight the matching nav item. Defaults to "cod".
-  const active = tab || "cod";
+  // highlight the matching nav item. Defaults to the Dashboard (home).
+  const active = tab || "dashboard";
 
   // Embedded = running inside Shopify admin's iframe. When embedded,
   // Shopify provides the chrome (top bar + sidebar via App Bridge), so we
@@ -84,7 +86,7 @@ export default function Admin() {
       // Keep the query (shop + upgraded) so the Pricing banner still shows.
       navigate(`/admin/pricing${search}`, { replace: true });
     } else if (!tab) {
-      navigate(`/admin/cod?shop=${shop || ""}`, { replace: true });
+      navigate(`/admin/dashboard?shop=${shop || ""}`, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -175,10 +177,10 @@ export default function Admin() {
   const navMenu = (
     <ui-nav-menu>
       {/* First link (rel="home") is the app's home — App Bridge requires it. */}
-      <a href={`/admin/cod?shop=${shop}`} rel="home">
-        COD Button
+      <a href={`/admin/dashboard?shop=${shop}`} rel="home">
+        Dashboard
       </a>
-      {NAV.filter((n) => n.key !== "cod").map((n) => (
+      {NAV.filter((n) => n.key !== "dashboard").map((n) => (
         <a key={n.key} href={`/admin/${n.key}?shop=${shop}`}>
           {n.label}
         </a>
@@ -200,7 +202,15 @@ export default function Admin() {
   function renderSection() {
     return (
       <>
-        {active === "cod" && (
+        {active === "dashboard" && (
+            <Dashboard
+              shop={shop}
+              usage={waSummary.usage}
+              currentPlan={waSummary.plan}
+              setActive={setActive}
+            />
+          )}
+          {active === "cod" && (
             <CodSettings
               settings={settings}
               update={update}

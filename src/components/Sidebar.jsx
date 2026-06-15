@@ -1,4 +1,5 @@
 const NAV = [
+  { key: "dashboard", icon: "🏠", label: "Dashboard" },
   { key: "cod", icon: "⚙️", label: "COD Button" },
   { key: "form", icon: "📝", label: "Form Builder" },
   { key: "pixels", icon: "📊", label: "Pixels" },
@@ -16,8 +17,8 @@ export default function Sidebar({ active, setActive, shop }) {
       {/* Brand */}
       <div className="flex-shrink-0 px-5 pt-6 pb-5 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center text-white text-base font-bold shadow-sm">
-            R
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-base font-bold shadow-sm">
+            O
           </div>
           <div>
             <h2 className="text-[15px] font-extrabold text-gray-900 leading-tight">
