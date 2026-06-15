@@ -8,7 +8,6 @@ const NAV = [
   { key: "fraud", icon: "🛡️", label: "Fraud Prevention" },
   { key: "thankyou", icon: "🎉", label: "Thank You Page" },
   { key: "pricing", icon: "💎", label: "Pricing & Plans" },
-  { key: "contact", icon: "💬", label: "Contact Support" },
 ];
 
 export default function Sidebar({ active, setActive, shop }) {

@@ -158,7 +158,7 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
 
       {/* SUPPORT FOOTER */}
       <div className="text-center text-[12px] text-gray-400">
-        Need help? <button onClick={() => setActive?.("contact")} className="text-indigo-600 font-semibold">Contact support</button>
+        Need help? Tap the 💬 button at the bottom-right to message us.
       </div>
     </div>
   );

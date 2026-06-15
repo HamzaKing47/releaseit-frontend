@@ -9,7 +9,7 @@ import ThankYouSettings from "./components/ThankYouSettings";
 import WhatsappSettings from "./components/WhatsappSettings";
 import PricingPlans from "./components/PricingPlans";
 import FraudPrevention from "./components/FraudPrevention";
-import ContactUs from "./components/ContactUs";
+import SupportWidget from "./components/SupportWidget";
 import SalesBooster from "./components/SalesBooster";
 import { BACKEND } from "./backend.js";
 
@@ -25,7 +25,6 @@ const NAV = [
   { key: "fraud", label: "Fraud Prevention" },
   { key: "thankyou", label: "Thank You Page" },
   { key: "pricing", label: "Pricing & Plans" },
-  { key: "contact", label: "Contact Support" },
 ];
 
 export default function Admin() {
@@ -268,7 +267,6 @@ export default function Admin() {
               usage={waSummary.usage}
             />
           )}
-          {active === "contact" && <ContactUs shop={shop} />}
       </>
     );
   }
@@ -280,6 +278,7 @@ export default function Admin() {
       <div className="min-h-screen bg-gray-50">
         {navMenu}
         {content}
+        <SupportWidget shop={shop} />
       </div>
     );
   }
@@ -303,6 +302,7 @@ export default function Admin() {
 
         {content}
       </main>
+      <SupportWidget shop={shop} />
     </div>
   );
 }
