@@ -42,6 +42,34 @@ export default function ThankYouSettings({ settings, update, save }) {
         </p>
       </div>
 
+      {/* ENABLE TOGGLE — custom page vs Shopify's official order-status page */}
+      <div className="mb-[22px] flex items-start justify-between gap-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5">
+        <div>
+          <p className="text-[14px] font-bold text-gray-900">
+            Use custom Thank-You page
+          </p>
+          <p className="text-[12px] text-gray-500 mt-0.5">
+            {settings.thankYouEnabled
+              ? "On — customers see your custom page below after a COD order."
+              : "Off — customers see Shopify’s default order-status page."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => update("thankYouEnabled", !settings.thankYouEnabled)}
+          aria-pressed={!!settings.thankYouEnabled}
+          className={`shrink-0 w-12 h-7 rounded-full transition relative ${
+            settings.thankYouEnabled ? "bg-indigo-600" : "bg-gray-300"
+          }`}
+        >
+          <span
+            className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+              settings.thankYouEnabled ? "translate-x-5" : ""
+            }`}
+          />
+        </button>
+      </div>
+
       <div className="border-t border-gray-100 mb-[22px]" />
 
       {/* TWO COLUMN */}

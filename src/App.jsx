@@ -45,6 +45,7 @@ function App() {
   const [cart, setCart] = useState([]);
   const [booster, setBooster] = useState(null); // sales booster settings
   const [selectedAddons, setSelectedAddons] = useState([]);
+  const [thankYouEnabled, setThankYouEnabled] = useState(false); // custom vs official page
 
   // Fetch products + form schema together
   useEffect(() => {
@@ -68,6 +69,7 @@ function App() {
           setFields(normalized);
         }
         if (data.success && data.salesBooster) setBooster(data.salesBooster);
+        if (data.success) setThankYouEnabled(!!data.thankYouEnabled);
       })
       .catch(() => {});
   }, []);
@@ -153,13 +155,15 @@ function App() {
         const orderValue = data.order?.total_price || "";
         const product = cart[0]?.title || "";
 
-        // Prefer Shopify's official order-status (Thank you) page when available.
-        if (data.order?.order_status_url) {
+        // If the merchant DIDN'T enable the custom page, send them to Shopify's
+        // official order-status (Thank you) page.
+        if (!thankYouEnabled && data.order?.order_status_url) {
           window.location.href = data.order.order_status_url;
           return;
         }
 
-        // Fallback: our own thank-you page.
+        // Custom thank-you page (enabled by the merchant, or fallback if Shopify
+        // didn't return an order-status URL).
         window.location.href =
           `/thank-you?shop=${shop}` +
           `&variant=${cart[0]?.variantId || ""}` +
