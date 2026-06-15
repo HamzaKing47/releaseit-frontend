@@ -121,8 +121,18 @@ export default function ContactUs({ shop }) {
           <h3 className="text-[14px] font-bold text-gray-900 mb-4">
             Other ways to reach us
           </h3>
-          <InfoRow icon="📧" label="Email" value="support@ordernowcodform.xyz" />
-          <InfoRow icon="💬" label="WhatsApp" value="+92 300 1234567" />
+          <InfoRow
+            icon="📧"
+            label="Email"
+            value="agentx5410@gmail.com"
+            href="mailto:agentx5410@gmail.com"
+          />
+          <InfoRow
+            icon="💬"
+            label="WhatsApp"
+            value="+92 302 3782105"
+            href="https://wa.me/923023782105"
+          />
           <InfoRow icon="⏱️" label="Response time" value="Within 24 hours" />
           <InfoRow icon="🕒" label="Hours" value="Mon–Sat, 9am–6pm PKT" />
         </div>
@@ -130,16 +140,16 @@ export default function ContactUs({ shop }) {
         <div className="bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl p-6 text-white">
           <h3 className="text-[14px] font-bold mb-1.5">📚 Quick Help</h3>
           <p className="text-[12px] text-white/70 leading-relaxed mb-3">
-            Most questions are answered in our setup guide — covering COD
-            button, WhatsApp connection, pixels, and fraud rules.
+            Need a hand setting up the COD button, WhatsApp, pixels, or fraud
+            rules? Message us on WhatsApp — we’ll walk you through it.
           </p>
           <a
-            href="https://ordernowcodform.xyz"
+            href="https://wa.me/923023782105"
             target="_blank"
             rel="noreferrer"
             className="inline-block text-[12px] font-bold bg-white/15 hover:bg-white/25 px-4 py-2 rounded-lg transition"
           >
-            View Documentation →
+            Chat with us on WhatsApp →
           </a>
         </div>
 
@@ -171,7 +181,19 @@ function Field({ label, required, children }) {
   );
 }
 
-function InfoRow({ icon, label, value }) {
+function InfoRow({ icon, label, value, href }) {
+  const valueEl = href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="text-[13px] text-indigo-600 font-medium hover:underline break-all"
+    >
+      {value}
+    </a>
+  ) : (
+    <p className="text-[13px] text-gray-800 font-medium">{value}</p>
+  );
   return (
     <div className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
       <span className="text-[16px]">{icon}</span>
@@ -179,7 +201,7 @@ function InfoRow({ icon, label, value }) {
         <p className="text-[10.5px] text-gray-400 uppercase tracking-wider font-semibold">
           {label}
         </p>
-        <p className="text-[13px] text-gray-800 font-medium">{value}</p>
+        {valueEl}
       </div>
     </div>
   );
