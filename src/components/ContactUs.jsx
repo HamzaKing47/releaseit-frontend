@@ -121,7 +121,7 @@ export default function ContactUs({ shop }) {
           <h3 className="text-[14px] font-bold text-gray-900 mb-4">
             Other ways to reach us
           </h3>
-          <InfoRow icon="📧" label="Email" value="support@releaseit.app" />
+          <InfoRow icon="📧" label="Email" value="support@ordernowcodform.xyz" />
           <InfoRow icon="💬" label="WhatsApp" value="+92 300 1234567" />
           <InfoRow icon="⏱️" label="Response time" value="Within 24 hours" />
           <InfoRow icon="🕒" label="Hours" value="Mon–Sat, 9am–6pm PKT" />
@@ -134,7 +134,7 @@ export default function ContactUs({ shop }) {
             button, WhatsApp connection, pixels, and fraud rules.
           </p>
           <a
-            href="https://docs.releaseit.app"
+            href="https://ordernowcodform.xyz"
             target="_blank"
             rel="noreferrer"
             className="inline-block text-[12px] font-bold bg-white/15 hover:bg-white/25 px-4 py-2 rounded-lg transition"
@@ -145,7 +145,7 @@ export default function ContactUs({ shop }) {
 
         <div className="bg-green-50 border border-green-100 rounded-2xl p-5">
           <p className="text-[12px] font-bold text-green-800 mb-1">
-            ⭐ Enjoying ReleaseIt?
+            ⭐ Enjoying Order Now?
           </p>
           <p className="text-[11px] text-green-700 leading-relaxed">
             Leave a review on the Shopify App Store — it helps us a lot and

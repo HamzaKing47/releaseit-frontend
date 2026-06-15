@@ -8,9 +8,12 @@ const PLANS = [
     price: 0,
     tag: "Get started",
     messages: 50,
+    orders: 60,
     features: [
+      "Up to 60 COD orders / month",
+      "50 WhatsApp messages / month",
       "COD Button on product pages",
-      "Custom Form Builder",
+      "Custom Form Builder (drag & drop)",
       "Browser-side Pixel tracking",
       "WhatsApp order confirmations",
       "Reply links (Confirm / Cancel / Address)",
@@ -24,10 +27,14 @@ const PLANS = [
     price: 9.99,
     tag: "Perfect for new stores",
     messages: 1000,
+    orders: 420,
     features: [
       "Everything in Free",
+      "Up to 420 COD orders / month",
       "1,000 WhatsApp messages / month",
       "Server-side conversion tracking",
+      "Sales Booster (upsells & quantity offers)",
+      "Fraud prevention rules",
       "Email support",
     ],
     ctaLabel: "Upgrade to Starter",
@@ -39,12 +46,14 @@ const PLANS = [
     tag: "For growing stores",
     popular: true,
     messages: 3000,
+    orders: 10000,
     features: [
       "Everything in Starter",
+      "Up to 10,000 COD orders / month",
       "3,000 WhatsApp messages / month",
-      "Priority email support",
       "Advanced form fields (dropdown, hidden, etc.)",
       "Multi-pixel server tracking (8 platforms)",
+      "Priority email support",
     ],
     ctaLabel: "Upgrade to Growth",
   },
@@ -54,12 +63,14 @@ const PLANS = [
     price: 34.99,
     tag: "For high-volume stores",
     messages: 7500,
+    orders: "Unlimited",
     features: [
       "Everything in Growth",
+      "Unlimited COD orders / month",
       "7,500 WhatsApp messages / month",
+      "Per-trigger message templates",
       "Dedicated WhatsApp session",
       "Live chat support",
-      "Custom message templates per trigger",
     ],
     ctaLabel: "Upgrade to Pro",
   },
@@ -228,6 +239,13 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
             <p className="text-[15px] font-bold text-gray-900 mt-0.5">
               {PLANS.find((p) => p.key === currentPlan)?.name || "Free"} ·{" "}
               <span className="text-gray-500 font-medium">
+                {usage.ordersUsed?.toLocaleString() || 0} /{" "}
+                {usage.orderLimit === null ||
+                usage.orderLimit === undefined ||
+                !isFinite(usage.orderLimit)
+                  ? "∞"
+                  : usage.orderLimit?.toLocaleString()}{" "}
+                orders ·{" "}
                 {usage.sent?.toLocaleString() || 0} /{" "}
                 {usage.limit?.toLocaleString() || 0} messages this cycle
               </span>
@@ -287,7 +305,13 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
                     / month
                   </span>
                 </div>
-                <p className="text-[12px] text-gray-500 mt-1">
+                <p className="text-[12px] font-semibold text-gray-700 mt-1">
+                  {typeof plan.orders === "number"
+                    ? `${plan.orders.toLocaleString()} COD orders`
+                    : "Unlimited COD orders"}{" "}
+                  / month
+                </p>
+                <p className="text-[12px] text-gray-500">
                   {plan.messages.toLocaleString()} WhatsApp messages / month
                 </p>
               </div>
@@ -333,7 +357,7 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
         <span className="font-bold">💡 Why it's a good deal:</span>
         <span>
           Other apps charge $9.99–$29.99 for COD checkout AND $4.99–$14.99
-          separately for WhatsApp. ReleaseIt gives you both — starting at $9.99.
+          separately for WhatsApp. Order Now gives you both — starting at $9.99.
         </span>
       </div>
 

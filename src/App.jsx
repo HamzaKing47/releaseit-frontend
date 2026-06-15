@@ -567,7 +567,7 @@ function App() {
 
         {/* Trust footer */}
         <div className="text-center mt-5 text-[11px] text-gray-400">
-          Powered by <span className="font-semibold text-gray-600">ReleaseIt</span>
+          Powered by <span className="font-semibold text-gray-600">Order Now</span>
         </div>
       </div>
     </div>

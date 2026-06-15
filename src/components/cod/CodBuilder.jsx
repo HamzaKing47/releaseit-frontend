@@ -551,7 +551,7 @@ function CustomerFormPreview({ fields }) {
         {/* Footer */}
         <p className="text-center text-[11px] text-gray-400 mt-3">
           Powered by{" "}
-          <span className="font-semibold text-gray-600">ReleaseIt</span>
+          <span className="font-semibold text-gray-600">Order Now</span>
         </p>
       </div>
     </div>

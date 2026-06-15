@@ -21,7 +21,7 @@ export default function Sidebar({ active, setActive, shop }) {
           </div>
           <div>
             <h2 className="text-[15px] font-extrabold text-gray-900 leading-tight">
-              ReleaseIt
+              Order Now
             </h2>
             <p className="text-[10.5px] text-gray-400 mt-0.5 font-medium">
               COD App Dashboard
@@ -63,7 +63,7 @@ export default function Sidebar({ active, setActive, shop }) {
             {shop ? shop.replace(".myshopify.com", "") : "Not connected"}
           </span>
         </div>
-        <p className="text-[10px] text-gray-300 mt-2">v1.0 • ReleaseIt</p>
+        <p className="text-[10px] text-gray-300 mt-2">v1.0 • Order Now</p>
       </div>
     </aside>
   );

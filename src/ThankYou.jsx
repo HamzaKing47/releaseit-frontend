@@ -24,7 +24,8 @@ const loadFacebook = (id) => {
     };
     if (!f._fbq) f._fbq = n;
     n.queue = [];
-    t = b.createElement(e); t.async = true;
+    t = b.createElement(e);
+    t.async = true;
     t.src = "https://connect.facebook.net/en_US/fbevents.js";
     s = b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t, s);
@@ -40,7 +41,9 @@ const loadGoogle = (id) => {
   s.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
   document.head.appendChild(s);
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function () { window.dataLayer.push(arguments); };
+  window.gtag = function () {
+    window.dataLayer.push(arguments);
+  };
   gtag("js", new Date());
   gtag("config", id);
 };
@@ -52,11 +55,15 @@ const loadTikTok = (id) => {
     var ttq = (w[t] = w[t] || []);
     ttq.methods = ["page", "track", "identify"];
     ttq.setAndDefer = function (t, e) {
-      t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); };
+      t[e] = function () {
+        t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+      };
     };
-    for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+    for (var i = 0; i < ttq.methods.length; i++)
+      ttq.setAndDefer(ttq, ttq.methods[i]);
     ttq.load = function (e) {
-      var s = d.createElement("script"); s.async = true;
+      var s = d.createElement("script");
+      s.async = true;
       s.src = "https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=" + e;
       d.getElementsByTagName("script")[0].parentNode.insertBefore(s, null);
     };
@@ -69,21 +76,31 @@ const loadSnapchat = (id) => {
   !(function (e, t, n) {
     if (e.snaptr) return;
     var a = (e.snaptr = function () {
-      a.handleRequest ? a.handleRequest.apply(a, arguments) : a.queue.push(arguments);
+      a.handleRequest
+        ? a.handleRequest.apply(a, arguments)
+        : a.queue.push(arguments);
     });
     a.queue = [];
-    var r = t.createElement("script"); r.async = true;
+    var r = t.createElement("script");
+    r.async = true;
     r.src = n;
-    t.getElementsByTagName("script")[0].parentNode.insertBefore(r, t.getElementsByTagName("script")[0]);
+    t.getElementsByTagName("script")[0].parentNode.insertBefore(
+      r,
+      t.getElementsByTagName("script")[0],
+    );
   })(window, document, "https://sc-static.net/scevent.min.js");
   snaptr("init", id);
 };
 
 const loadPinterest = (id) => {
   if (window.pintrk) return;
-  window.pintrk = function () { window.pintrk.queue.push(Array.prototype.slice.call(arguments)); };
-  window.pintrk.queue = []; window.pintrk.version = "3.0";
-  var s = document.createElement("script"); s.async = true;
+  window.pintrk = function () {
+    window.pintrk.queue.push(Array.prototype.slice.call(arguments));
+  };
+  window.pintrk.queue = [];
+  window.pintrk.version = "3.0";
+  var s = document.createElement("script");
+  s.async = true;
   s.src = "https://s.pinimg.com/ct/core.js";
   document.head.appendChild(s);
   pintrk("load", id);
@@ -92,7 +109,8 @@ const loadPinterest = (id) => {
 const loadTaboola = (id) => {
   if (window._tfa) return;
   window._tfa = [];
-  var s = document.createElement("script"); s.async = true;
+  var s = document.createElement("script");
+  s.async = true;
   s.src = "//cdn.taboola.com/libtrc/unip/" + id + "/tfa.js";
   document.head.appendChild(s);
 };
@@ -104,22 +122,48 @@ const firePurchase = (pixels, orderId, value) => {
     pixels.forEach((p) => {
       switch (p.type) {
         case "facebook":
-          if (window.fbq) fbq("track", "Purchase", { value: val, currency: "PKR", order_id: oid });
+          if (window.fbq)
+            fbq("track", "Purchase", {
+              value: val,
+              currency: "PKR",
+              order_id: oid,
+            });
           break;
         case "google":
-          if (window.gtag) gtag("event", "purchase", { transaction_id: oid, value: val, currency: "PKR" });
+          if (window.gtag)
+            gtag("event", "purchase", {
+              transaction_id: oid,
+              value: val,
+              currency: "PKR",
+            });
           break;
         case "tiktok":
-          if (window.ttq) ttq.track("CompletePayment", { value: val, currency: "PKR", order_id: oid });
+          if (window.ttq)
+            ttq.track("CompletePayment", {
+              value: val,
+              currency: "PKR",
+              order_id: oid,
+            });
           break;
         case "snapchat":
-          if (window.snaptr) snaptr("track", "PURCHASE", { price: val, currency: "PKR" });
+          if (window.snaptr)
+            snaptr("track", "PURCHASE", { price: val, currency: "PKR" });
           break;
         case "pinterest":
-          if (window.pintrk) pintrk("track", "checkout", { value: val, currency: "PKR", order_id: oid });
+          if (window.pintrk)
+            pintrk("track", "checkout", {
+              value: val,
+              currency: "PKR",
+              order_id: oid,
+            });
           break;
         case "taboola":
-          if (window._tfa) _tfa.push({ notify: "event", name: "make_purchase", id: p.pixelId });
+          if (window._tfa)
+            _tfa.push({
+              notify: "event",
+              name: "make_purchase",
+              id: p.pixelId,
+            });
           break;
       }
     });
@@ -146,7 +190,10 @@ function ThankYou() {
       setShopUrl(`https://${shop}`);
     }
 
-    if (!shop) { setLoading(false); return; }
+    if (!shop) {
+      setLoading(false);
+      return;
+    }
 
     // 🔥 Settings + Pixels parallel fetch
     Promise.all([
@@ -164,18 +211,30 @@ function ThankYou() {
           const pixels = pixelsData.pixels.filter((p) => p.pixelId);
           pixels.forEach((p) => {
             switch (p.type) {
-              case "facebook":  loadFacebook(p.pixelId);  break;
-              case "google":    loadGoogle(p.pixelId);    break;
-              case "tiktok":    loadTikTok(p.pixelId);    break;
-              case "snapchat":  loadSnapchat(p.pixelId);  break;
-              case "pinterest": loadPinterest(p.pixelId); break;
-              case "taboola":   loadTaboola(p.pixelId);   break;
+              case "facebook":
+                loadFacebook(p.pixelId);
+                break;
+              case "google":
+                loadGoogle(p.pixelId);
+                break;
+              case "tiktok":
+                loadTikTok(p.pixelId);
+                break;
+              case "snapchat":
+                loadSnapchat(p.pixelId);
+                break;
+              case "pinterest":
+                loadPinterest(p.pixelId);
+                break;
+              case "taboola":
+                loadTaboola(p.pixelId);
+                break;
             }
           });
           firePurchase(pixels, orderId, value);
         }
       })
-      .catch((err) => console.log("[ReleaseIt]", err.message))
+      .catch((err) => console.log("[Order Now]", err.message))
       .finally(() => setLoading(false));
   }, []);
 
@@ -203,11 +262,17 @@ function ThankYou() {
           ✅
         </div>
 
-        <h1 className="font-bold text-[22px] mb-2.5" style={{ color: ty.headingColor }}>
+        <h1
+          className="font-bold text-[22px] mb-2.5"
+          style={{ color: ty.headingColor }}
+        >
           {ty.heading}
         </h1>
 
-        <p className="text-[15px] mb-2 leading-relaxed" style={{ color: ty.textColor }}>
+        <p
+          className="text-[15px] mb-2 leading-relaxed"
+          style={{ color: ty.textColor }}
+        >
           {ty.subtext}
         </p>
 
