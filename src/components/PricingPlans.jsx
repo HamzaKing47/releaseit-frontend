@@ -42,7 +42,7 @@ const PLANS = [
   {
     key: "growth",
     name: "Growth",
-    price: 19.99,
+    price: 24.99,
     tag: "For growing stores",
     popular: true,
     messages: 3000,
@@ -60,7 +60,7 @@ const PLANS = [
   {
     key: "pro",
     name: "Pro",
-    price: 34.99,
+    price: 49.99,
     tag: "For high-volume stores",
     messages: 7500,
     orders: "Unlimited",
