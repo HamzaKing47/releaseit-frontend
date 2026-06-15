@@ -39,16 +39,16 @@ export default function SupportWidget({ shop }) {
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
       {/* POPUP */}
       {open && (
-        <div className="mb-3 w-[340px] max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div className="mb-3 w-[320px] max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100">
           {/* header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-4 text-white">
-            <h3 className="text-[15px] font-extrabold">💬 Contact Support</h3>
-            <p className="text-[12px] text-indigo-100 mt-0.5">
+          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3 text-white rounded-t-2xl">
+            <h3 className="text-[14px] font-extrabold">💬 Contact Support</h3>
+            <p className="text-[11.5px] text-indigo-100 mt-0.5">
               Send us a message — we’ll reply by email.
             </p>
           </div>
 
-          <form onSubmit={submit} className="p-5 space-y-3">
+          <form onSubmit={submit} className="p-4 space-y-2.5">
             {result && (
               <div
                 className={`rounded-lg px-3 py-2 text-[12px] font-semibold border ${
@@ -81,7 +81,7 @@ export default function SupportWidget({ shop }) {
                 Message <span className="text-red-400">*</span>
               </label>
               <textarea
-                rows={4}
+                rows={3}
                 required
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
