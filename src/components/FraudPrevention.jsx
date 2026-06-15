@@ -60,8 +60,11 @@ export default function FraudPrevention({ shop }) {
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
       {/* HEADER */}
       <div className="mb-6">
-        <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
-          🛡️ Fraud Prevention
+        <h2 className="text-[20px] font-extrabold text-gray-900 mb-1 flex items-center gap-2.5">
+          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-[16px] shadow-sm">
+            🛡️
+          </span>
+          Fraud Prevention
         </h2>
         <p className="text-[13px] text-gray-400">
           Block suspicious customers and reduce fake COD orders.

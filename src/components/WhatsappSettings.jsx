@@ -242,8 +242,11 @@ export default function WhatsappSettings({ shop }) {
       {/* HEADER */}
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
-            💬 WhatsApp Automation
+          <h2 className="text-[20px] font-extrabold text-gray-900 mb-1 flex items-center gap-2.5">
+            <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-[16px] shadow-sm">
+              💬
+            </span>
+            WhatsApp Automation
           </h2>
           <p className="text-[13px] text-gray-400">
             Free automated order messages with clickable action links.

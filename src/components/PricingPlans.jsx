@@ -195,8 +195,11 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
       {/* HEADER */}
       <div className="mb-5 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-[20px] font-extrabold text-gray-900 mb-1">
-            💎 Pricing & Plans
+          <h2 className="text-[20px] font-extrabold text-gray-900 mb-1 flex items-center gap-2.5">
+            <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-[16px] shadow-sm">
+              💎
+            </span>
+            Pricing & Plans
           </h2>
           <p className="text-[13px] text-gray-500">
             One app — COD checkout + WhatsApp automation. Replaces apps costing

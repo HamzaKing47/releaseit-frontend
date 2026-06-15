@@ -147,12 +147,15 @@ export default function CodBuilder({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_1px_8px_rgba(0,0,0,0.07)] p-7">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
       {/* HEADER */}
       <div className="flex items-start justify-between mb-[22px]">
         <div>
-          <h2 className="text-[18px] font-extrabold text-gray-900 mb-1">
-            📝 Form Builder
+          <h2 className="text-[20px] font-extrabold text-gray-900 mb-1 flex items-center gap-2.5">
+            <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-[16px] shadow-sm">
+              📝
+            </span>
+            Form Builder
           </h2>
           <p className="text-[13px] text-gray-400">
             Design your COD order form. Add, edit, and reorder fields.
