@@ -50,7 +50,7 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
     { key: "form", icon: "🧱", title: "Form Builder", desc: "Customize your COD form fields" },
     { key: "whatsapp", icon: "💬", title: "WhatsApp", desc: "Auto order confirmations & replies" },
     { key: "booster", icon: "🚀", title: "Sales Booster", desc: "Upsells & quantity offers" },
-    { key: "pixels", icon: "🎯", title: "Pixels", desc: "Track conversions (8 platforms)" },
+    { key: "pixels", icon: "🎯", title: "Pixels", desc: "Server-side conversion tracking" },
     { key: "fraud", icon: "🛡️", title: "Fraud Prevention", desc: "Block fake COD orders" },
     { key: "pricing", icon: "💎", title: "Pricing & Plans", desc: "View limits & upgrade" },
   ];
