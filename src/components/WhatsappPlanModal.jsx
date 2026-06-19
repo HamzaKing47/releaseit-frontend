@@ -38,9 +38,9 @@ export default function WhatsappPlanModal({ shop, onClose, onBought }) {
 
   return (
     <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        {/* header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5 text-white rounded-t-2xl flex items-start justify-between gap-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* header (fixed) */}
+        <div className="shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5 text-white flex items-start justify-between gap-4">
           <div>
             <h2 className="text-[18px] font-extrabold">
               💬 WhatsApp Automation Plans
@@ -59,7 +59,7 @@ export default function WhatsappPlanModal({ shop, onClose, onBought }) {
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {paid.map((p, i) => {
               const popular = i === 1; // middle (Growth) = popular
