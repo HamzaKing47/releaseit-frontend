@@ -11,7 +11,7 @@ const PLANS = [
     orders: 60,
     features: [
       "Up to 60 COD orders / month",
-      "50 WhatsApp messages / month",
+      "WhatsApp automation (separate add-on)",
       "COD Button on product pages",
       "Custom Form Builder (drag & drop)",
       "Browser-side Pixel tracking",
@@ -31,7 +31,6 @@ const PLANS = [
     features: [
       "Everything in Free",
       "Up to 420 COD orders / month",
-      "1,000 WhatsApp messages / month",
       "Server-side conversion tracking",
       "Sales Booster (upsells & quantity offers)",
       "Fraud prevention rules",
@@ -50,7 +49,6 @@ const PLANS = [
     features: [
       "Everything in Starter",
       "Up to 10,000 COD orders / month",
-      "3,000 WhatsApp messages / month",
       "Advanced form fields (dropdown, hidden, etc.)",
       "Multi-pixel server tracking (8 platforms)",
       "Priority email support",
@@ -67,7 +65,6 @@ const PLANS = [
     features: [
       "Everything in Growth",
       "Unlimited COD orders / month",
-      "7,500 WhatsApp messages / month",
       "Per-trigger message templates",
       "Dedicated WhatsApp session",
       "Live chat support",
@@ -202,8 +199,8 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
             Pricing & Plans
           </h2>
           <p className="text-[13px] text-gray-500">
-            One app — COD checkout + WhatsApp automation. Replaces apps costing
-            $45/month elsewhere.
+            COD checkout plans — priced by order volume. WhatsApp automation is a
+            separate add-on (manage it on the WhatsApp page).
           </p>
         </div>
         {/* Payment-gateway trust badge */}
@@ -248,9 +245,7 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
                 !isFinite(usage.orderLimit)
                   ? "∞"
                   : usage.orderLimit?.toLocaleString()}{" "}
-                orders ·{" "}
-                {usage.sent?.toLocaleString() || 0} /{" "}
-                {usage.limit?.toLocaleString() || 0} messages this cycle
+                COD orders this cycle
               </span>
             </p>
           </div>
@@ -314,9 +309,6 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
                     : "Unlimited COD orders"}{" "}
                   / month
                 </p>
-                <p className="text-[12px] text-gray-500">
-                  {plan.messages.toLocaleString()} WhatsApp messages / month
-                </p>
               </div>
 
               <ul className="space-y-2 mb-5 flex-1">
@@ -359,8 +351,8 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
       <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-[12px] text-blue-700 flex items-start gap-2">
         <span className="font-bold">💡 Why it's a good deal:</span>
         <span>
-          Other apps charge $9.99–$29.99 for COD checkout AND $4.99–$14.99
-          separately for WhatsApp. Order Now gives you both — starting at $9.99.
+          Pay only for what you use: COD plans from $9.99/mo, and add WhatsApp
+          automation separately from just $4.99/mo — only if you want it.
         </span>
       </div>
 

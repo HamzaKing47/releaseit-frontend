@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { BACKEND } from "../backend.js";
+import WhatsappPlanModal from "./WhatsappPlanModal";
 
 const DEFAULT_TEMPLATE = `🛍️ *New Order!*
 
@@ -33,6 +34,7 @@ export default function WhatsappSettings({ shop }) {
   const [testMsg, setTestMsg] = useState("");
   const [connectMsg, setConnectMsg] = useState("");
   const [usage, setUsage] = useState(null);
+  const [showWaPlans, setShowWaPlans] = useState(false);
 
   const pollRef = useRef(null);
   const isMounted = useRef(true);
@@ -62,6 +64,9 @@ export default function WhatsappSettings({ shop }) {
         });
         setStatus(d.status || "disconnected");
         if (d.usage) setUsage(d.usage);
+        // On the free WhatsApp plan → show the pricing modal each visit until
+        // they buy a WhatsApp add-on.
+        if ((d.usage?.whatsappPlan || "free") === "free") setShowWaPlans(true);
       })
       .catch(console.error);
   }, [shop]);
@@ -239,6 +244,12 @@ export default function WhatsappSettings({ shop }) {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-7">
+      {showWaPlans && (
+        <WhatsappPlanModal
+          shop={shop}
+          onClose={() => setShowWaPlans(false)}
+        />
+      )}
       {/* HEADER */}
       <div className="flex items-start justify-between mb-5">
         <div>
