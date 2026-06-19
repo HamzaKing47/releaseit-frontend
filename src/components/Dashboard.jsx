@@ -94,15 +94,11 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[15px] font-bold text-gray-900">
-            Your plan ·{" "}
-            <span className="text-indigo-600">{planName}</span>
+            Plans &amp; usage
           </h3>
-          <button
-            onClick={() => setActive?.("pricing")}
-            className="text-[12px] font-bold text-indigo-600 hover:text-indigo-800"
-          >
-            {currentPlan === "pro" ? "Manage plan" : "Upgrade →"}
-          </button>
+          <span className="text-[12px] text-gray-400">
+            COD: <span className="font-semibold text-indigo-600">{planName}</span>
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -121,6 +117,12 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
                 Limit reached — new orders are paused until you upgrade.
               </p>
             )}
+            <button
+              onClick={() => setActive?.("pricing")}
+              className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 mt-2"
+            >
+              {orderUnlimited ? "Manage COD plan →" : "Upgrade COD plan →"}
+            </button>
           </div>
 
           {/* Messages */}
@@ -132,6 +134,12 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
               </span>
             </div>
             <Bar used={msgUsed} limit={msgLimit} color="bg-emerald-500" />
+            <button
+              onClick={() => setActive?.("whatsapp")}
+              className="text-[11px] font-bold text-emerald-600 hover:text-emerald-800 mt-2"
+            >
+              Upgrade WhatsApp →
+            </button>
           </div>
         </div>
       </div>
