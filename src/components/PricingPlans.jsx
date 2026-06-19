@@ -101,6 +101,8 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [testMode, setTestMode] = useState(false);
+  const [cycle, setCycle] = useState("monthly"); // monthly | annual (25% off)
+  const ANNUAL_OFF = 0.25;
 
   // Find out if Shopify Billing is in test mode (no real money charged)
   useEffect(() => {
@@ -141,7 +143,11 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
       const r = await fetch(`${BACKEND}/api/billing/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shop, plan: planKey }),
+        body: JSON.stringify({
+          shop,
+          plan: planKey,
+          interval: cycle === "annual" ? "ANNUAL" : "EVERY_30_DAYS",
+        }),
       });
       const data = await r.json();
       if (!data.success || !data.confirmationUrl) {
@@ -214,6 +220,37 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
               Test Mode
             </span>
           )}
+        </div>
+      </div>
+
+      {/* BILLING CYCLE TOGGLE */}
+      <div className="flex justify-center mb-6">
+        <div className="inline-flex bg-gray-100 rounded-full p-1">
+          <button
+            type="button"
+            onClick={() => setCycle("monthly")}
+            className={`px-5 py-1.5 rounded-full text-[12px] font-bold transition ${
+              cycle === "monthly"
+                ? "bg-white shadow text-gray-900"
+                : "text-gray-500"
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            type="button"
+            onClick={() => setCycle("annual")}
+            className={`px-5 py-1.5 rounded-full text-[12px] font-bold transition flex items-center gap-1.5 ${
+              cycle === "annual"
+                ? "bg-white shadow text-gray-900"
+                : "text-gray-500"
+            }`}
+          >
+            Annual
+            <span className="bg-green-100 text-green-700 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full">
+              -25%
+            </span>
+          </button>
         </div>
       </div>
 
@@ -297,12 +334,23 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
                 </h3>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className="text-[28px] font-extrabold text-gray-900">
-                    ${plan.price}
+                    {plan.price === 0
+                      ? "$0"
+                      : `$${(cycle === "annual"
+                          ? plan.price * (1 - ANNUAL_OFF)
+                          : plan.price
+                        ).toFixed(2)}`}
                   </span>
                   <span className="text-[12px] text-gray-400 font-medium">
                     / month
                   </span>
                 </div>
+                {cycle === "annual" && plan.price > 0 && (
+                  <p className="text-[11px] text-green-600 font-semibold mt-0.5">
+                    billed ${(plan.price * 12 * (1 - ANNUAL_OFF)).toFixed(2)}/yr
+                    · save 25%
+                  </p>
+                )}
                 <p className="text-[12px] font-semibold text-gray-700 mt-1">
                   {typeof plan.orders === "number"
                     ? `${plan.orders.toLocaleString()} COD orders`
@@ -351,8 +399,8 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
       <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-[12px] text-blue-700 flex items-start gap-2">
         <span className="font-bold">💡 Why it's a good deal:</span>
         <span>
-          Pay only for what you use: COD plans from $9.99/mo, and add WhatsApp
-          automation separately from just $4.99/mo — only if you want it.
+          Pay only for what you use: COD plans from $9.99/mo (save 25% on
+          annual), and add WhatsApp automation separately from just $4.99/mo.
         </span>
       </div>
 
