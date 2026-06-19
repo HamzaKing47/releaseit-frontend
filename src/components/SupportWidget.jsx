@@ -41,17 +41,17 @@ export default function SupportWidget({ shop }) {
       {open && (
         <div
           style={{ animation: "owPop .18s ease-out" }}
-          className="absolute bottom-0 right-[4.25rem] w-[320px] max-w-[calc(100vw-6rem)] max-h-[calc(100vh-7rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100"
+          className="absolute bottom-0 right-[4.25rem] w-[320px] max-w-[calc(100vw-6rem)] max-h-[calc(100vh-7rem)] overflow-hidden flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-100"
         >
-          {/* header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3 text-white rounded-t-2xl">
+          {/* header (fixed) */}
+          <div className="shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3 text-white">
             <h3 className="text-[14px] font-extrabold">💬 Contact Support</h3>
             <p className="text-[11.5px] text-indigo-100 mt-0.5">
               Send us a message — we’ll reply by email.
             </p>
           </div>
 
-          <form onSubmit={submit} className="p-4 space-y-2.5">
+          <form onSubmit={submit} className="p-4 space-y-2.5 overflow-y-auto">
             {result && (
               <div
                 className={`rounded-lg px-3 py-2 text-[12px] font-semibold border ${
