@@ -24,7 +24,7 @@ const PLANS = [
   {
     key: "starter",
     name: "Starter",
-    price: 9.99,
+    price: 8.99,
     tag: "Perfect for new stores",
     messages: 1000,
     orders: 420,
@@ -58,7 +58,7 @@ const PLANS = [
   {
     key: "pro",
     name: "Pro",
-    price: 49.99,
+    price: 54.99,
     tag: "For high-volume stores",
     messages: 7500,
     orders: "Unlimited",
@@ -399,7 +399,7 @@ export default function PricingPlans({ shop, currentPlan = "free", usage }) {
       <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-[12px] text-blue-700 flex items-start gap-2">
         <span className="font-bold">💡 Why it's a good deal:</span>
         <span>
-          Pay only for what you use: COD plans from $9.99/mo (save 25% on
+          Pay only for what you use: COD plans from $8.99/mo (save 25% on
           annual), and add WhatsApp automation separately from just $4.99/mo.
         </span>
       </div>
