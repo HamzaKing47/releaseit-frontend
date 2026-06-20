@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — Order Now COD form and Upsells</title>
+    <style>
+      body {
+        font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        color: #1f2937;
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+        line-height: 1.65;
+      }
+      h1 { font-size: 28px; margin-bottom: 4px; }
+      h2 { font-size: 19px; margin-top: 32px; color: #111827; }
+      .muted { color: #6b7280; font-size: 14px; }
+      a { color: #4f46e5; }
+      table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 14px; }
+      th, td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; vertical-align: top; }
+      th { background: #f9fafb; }
+      code { background: #f3f4f6; padding: 1px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>Privacy Policy</h1>
+    <p class="muted">
+      Application: <strong>Order Now COD form and Upsells</strong> (the “App”),
+      operated by [Your Legal Name / Company] (“we”, “us”).<br />
+      Last updated: [Month DD, YYYY]
+    </p>
+
+    <p>
+      This Privacy Policy explains what information the App collects, how it is
+      used, and the choices available to merchants and their customers. The App
+      is installed by Shopify merchants (“Merchants”) to collect Cash-on-Delivery
+      (COD) orders and send order notifications. For data submitted by a
+      Merchant’s shoppers, the Merchant is the data controller and we act as a
+      data processor on the Merchant’s behalf.
+    </p>
+
+    <h2>1. Information we collect</h2>
+    <table>
+      <tr><th>Category</th><th>Examples</th><th>Why</th></tr>
+      <tr>
+        <td>Order / shopper details</td>
+        <td>Name, phone number, email (optional), shipping address, items, order value</td>
+        <td>To create the order in the Merchant’s Shopify admin and send order confirmations</td>
+      </tr>
+      <tr>
+        <td>Store information</td>
+        <td>Shop domain, access tokens, app settings (form fields, button style, plan)</td>
+        <td>To operate the App for the Merchant’s store</td>
+      </tr>
+      <tr>
+        <td>Fraud-prevention logs</td>
+        <td>Phone, email, IP address of recent orders</td>
+        <td>To enforce Merchant-configured anti-fraud limits. Automatically deleted after 30 days.</td>
+      </tr>
+      <tr>
+        <td>Messaging data</td>
+        <td>WhatsApp number, message status, customer replies (confirm / cancel / address update)</td>
+        <td>To send order confirmations and process customer replies</td>
+      </tr>
+    </table>
+
+    <h2>2. How we use information</h2>
+    <p>We use the information only to provide the App’s functionality, namely to:</p>
+    <ul>
+      <li>create and update COD orders in the Merchant’s Shopify store;</li>
+      <li>send WhatsApp order confirmations and process customer replies;</li>
+      <li>apply Merchant-configured upsells, discounts and anti-fraud rules;</li>
+      <li>forward conversion events to advertising platforms <em>only when the Merchant configures a pixel</em> (see §4);</li>
+      <li>manage the Merchant’s subscription plan and usage limits.</li>
+    </ul>
+    <p>We do <strong>not</strong> sell personal information, and we do not use shopper data for our own advertising.</p>
+
+    <h2>3. Service providers (sub-processors)</h2>
+    <p>The App relies on the following providers, who process data only to deliver the service:</p>
+    <table>
+      <tr><th>Provider</th><th>Purpose</th></tr>
+      <tr><td>Shopify</td><td>Order creation, app hosting framework, billing</td></tr>
+      <tr><td>MongoDB Atlas</td><td>Encrypted database storage of app settings and logs</td></tr>
+      <tr><td>DigitalOcean</td><td>Application server hosting</td></tr>
+      <tr><td>WhatsApp messaging service</td><td>Delivery of order-confirmation messages</td></tr>
+      <tr><td>Meta, TikTok, Snapchat, Pinterest</td><td>Server-side conversion tracking — only if the Merchant adds a pixel</td></tr>
+    </table>
+
+    <h2>4. Advertising pixels &amp; conversion tracking</h2>
+    <p>
+      If a Merchant configures one or more advertising pixels, the App sends
+      conversion events (e.g. order value, hashed contact data) to the chosen
+      platform(s) to measure ad performance. This is controlled entirely by the
+      Merchant and is disabled by default.
+    </p>
+
+    <h2>5. Data retention</h2>
+    <p>
+      We keep store settings and messaging configuration for as long as the App
+      is installed. Fraud-prevention order logs are automatically deleted after
+      30 days. When a Merchant uninstalls the App, we revoke stored access tokens
+      immediately, and we erase all of the store’s data when Shopify sends the
+      <code>shop/redact</code> request (about 48 hours after uninstall).
+    </p>
+
+    <h2>6. GDPR &amp; data-subject requests</h2>
+    <p>
+      We honor Shopify’s mandatory privacy webhooks
+      (<code>customers/data_request</code>, <code>customers/redact</code>,
+      <code>shop/redact</code>). Shoppers who wish to access or delete their data
+      should contact the Merchant (the data controller); the Merchant can then
+      trigger these requests through Shopify, and we will action them promptly.
+    </p>
+
+    <h2>7. Security</h2>
+    <ul>
+      <li>All traffic is served over HTTPS/TLS.</li>
+      <li>Incoming Shopify webhooks are verified with HMAC signatures.</li>
+      <li>Access tokens are stored securely and refreshed using short-lived, expiring credentials.</li>
+      <li>Access to production data is restricted to authorized personnel.</li>
+    </ul>
+
+    <h2>8. International transfers</h2>
+    <p>
+      Data may be processed in countries other than where the Merchant or shopper
+      is located. We rely on our providers’ safeguards for any such transfers.
+    </p>
+
+    <h2>9. Children</h2>
+    <p>The App is not directed to individuals under 16 and we do not knowingly collect their data.</p>
+
+    <h2>10. Changes to this policy</h2>
+    <p>
+      We may update this policy from time to time. Material changes will be
+      reflected by updating the “Last updated” date above.
+    </p>
+
+    <h2>11. Contact</h2>
+    <p>
+      Questions about this policy? Email
+      <a href="mailto:support@ordernowcodform.xyz">support@ordernowcodform.xyz</a>.
+    </p>
+  </body>
+</html>
