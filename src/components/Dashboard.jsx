@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { BACKEND } from "../backend.js";
 
-/* Theme App Extension identifiers — used to deep-link the merchant straight to
-   the Theme Editor with our COD-button app embed pre-selected. Shopify does NOT
-   allow apps to toggle an app embed programmatically, so a one-click deep link
-   is the closest we can get to "auto-enable". */
-const EXTENSION_UUID = "b6336a02-415c-1803-a2c7-33bcc6606d07d2557307";
-const EMBED_HANDLE = "cod_button";
-
+/* We deep-link the merchant straight to the Theme Editor's App embeds panel.
+   Shopify does NOT allow apps to toggle an app embed programmatically, so the
+   merchant flips "Order Now COD Button" on there (one click). We open the
+   panel directly (no activateAppId) so it works reliably across stores. */
 function storeHandle(shop) {
   return (shop || "").replace(".myshopify.com", "");
 }
@@ -30,9 +27,9 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
 
   useEffect(() => {
     const h = storeHandle(shop);
-    // New Shopify admin theme-editor deep link, app-embeds panel, our block pre-activated.
+    // Open the Theme Editor's App embeds panel; merchant toggles our embed on.
     setEmbedUrl(
-      `https://admin.shopify.com/store/${h}/themes/current/editor?context=apps&activateAppId=${EXTENSION_UUID}/${EMBED_HANDLE}`,
+      `https://admin.shopify.com/store/${h}/themes/current/editor?context=apps`,
     );
   }, [shop]);
 
@@ -74,9 +71,10 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
               Enable the COD button on your store
             </h3>
             <p className="text-[13px] text-gray-500 mt-1 max-w-xl">
-              This turns on the “Buy with Cash on Delivery” button on your product
-              pages. Shopify requires you to flip this on in your theme — it’s one
-              click. (Apps can’t enable it for you automatically.)
+              This opens your theme’s <b>App embeds</b> — toggle on{" "}
+              <b>“Order Now COD Button”</b> and click Save. That shows the “Buy
+              with Cash on Delivery” button on your product pages. (Shopify
+              requires this one-click step; apps can’t do it for you.)
             </p>
           </div>
         </div>
