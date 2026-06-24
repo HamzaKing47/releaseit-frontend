@@ -22,7 +22,7 @@ function Bar({ used, limit, color }) {
   );
 }
 
-export default function Dashboard({ shop, usage, currentPlan = "free", setActive }) {
+export default function Dashboard({ shop, usage, currentPlan = "free", setActive, openWhatsappPlans }) {
   const [embedUrl, setEmbedUrl] = useState("#");
 
   useEffect(() => {
@@ -133,7 +133,9 @@ export default function Dashboard({ shop, usage, currentPlan = "free", setActive
             </div>
             <Bar used={msgUsed} limit={msgLimit} color="bg-emerald-500" />
             <button
-              onClick={() => setActive?.("whatsapp")}
+              onClick={() =>
+                openWhatsappPlans ? openWhatsappPlans() : setActive?.("whatsapp")
+              }
               className="text-[11px] font-bold text-emerald-600 hover:text-emerald-800 mt-2"
             >
               Upgrade WhatsApp →

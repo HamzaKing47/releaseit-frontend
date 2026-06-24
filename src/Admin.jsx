@@ -207,6 +207,11 @@ export default function Admin() {
               usage={waSummary.usage}
               currentPlan={waSummary.plan}
               setActive={setActive}
+              openWhatsappPlans={() =>
+                navigate(`/admin/whatsapp?shop=${shop || ""}&plans=1`, {
+                  replace: true,
+                })
+              }
             />
           )}
           {active === "cod" && (
@@ -250,7 +255,12 @@ export default function Admin() {
               savePixels={savePixels}
             />
           )}
-          {active === "whatsapp" && <WhatsappSettings shop={shop} />}
+          {active === "whatsapp" && (
+            <WhatsappSettings
+              shop={shop}
+              openPlans={searchParams.get("plans") === "1"}
+            />
+          )}
           {active === "thankyou" && (
             <ThankYouSettings
               settings={settings}

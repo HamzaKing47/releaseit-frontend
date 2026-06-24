@@ -16,7 +16,7 @@ Your order has been placed successfully.
 2️⃣ - Update Address
 3️⃣ - Cancel Order`;
 
-export default function WhatsappSettings({ shop }) {
+export default function WhatsappSettings({ shop, openPlans = false }) {
   const [settings, setSettings] = useState({
     whatsappNumber: "",
     enabled: true,
@@ -46,6 +46,12 @@ export default function WhatsappSettings({ shop }) {
       clearInterval(pollRef.current);
     };
   }, []);
+
+  /* Opened from the Dashboard "Upgrade WhatsApp" button → always show plans,
+     regardless of current plan (free auto-open is handled separately below). */
+  useEffect(() => {
+    if (openPlans) setShowWaPlans(true);
+  }, [openPlans]);
 
   /* ── LOAD ── */
   useEffect(() => {
@@ -247,7 +253,15 @@ export default function WhatsappSettings({ shop }) {
       {showWaPlans && (
         <WhatsappPlanModal
           shop={shop}
-          onClose={() => setShowWaPlans(false)}
+          onClose={() => {
+            setShowWaPlans(false);
+            // Strip ?plans=1 so re-clicking "Upgrade WhatsApp" reopens the modal.
+            if (typeof window !== "undefined" && /[?&]plans=1/.test(window.location.search)) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("plans");
+              window.history.replaceState({}, "", url.toString());
+            }
+          }}
         />
       )}
       {/* HEADER */}
@@ -276,7 +290,9 @@ export default function WhatsappSettings({ shop }) {
       <div className="border-t border-gray-100 mb-6" />
 
       {/* USAGE BAR */}
-      {usage && <UsageBar usage={usage} />}
+      {usage && (
+        <UsageBar usage={usage} onUpgrade={() => setShowWaPlans(true)} />
+      )}
 
       {/* MASTER TOGGLE */}
       <ToggleRow
@@ -587,7 +603,7 @@ function StepLabel({ n, title }) {
   );
 }
 
-function UsageBar({ usage }) {
+function UsageBar({ usage, onUpgrade }) {
   const {
     plan,
     sent,
@@ -645,9 +661,19 @@ function UsageBar({ usage }) {
             {planLabel} Plan
           </span>
         </div>
-        <span className="text-[12px] font-semibold text-gray-600">
-          {sent.toLocaleString()} / {limit.toLocaleString()}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[12px] font-semibold text-gray-600">
+            {sent.toLocaleString()} / {limit.toLocaleString()}
+          </span>
+          {onUpgrade && (
+            <button
+              onClick={onUpgrade}
+              className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+            >
+              {plan === "free" ? "Upgrade plan →" : "Change plan →"}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
@@ -674,9 +700,12 @@ function UsageBar({ usage }) {
           )}
         </p>
         {(isOver || isNear) && (
-          <span className="text-[11px] font-bold text-blue-600">
+          <button
+            onClick={onUpgrade}
+            className="text-[11px] font-bold text-blue-600 hover:text-blue-800"
+          >
             Upgrade plan →
-          </span>
+          </button>
         )}
       </div>
 
